@@ -20,7 +20,13 @@ public class DigitHandler {
             pointer.
         */
         //  Debug return
-        return new Token("x", Token.ID.INTEGER);
+        String str = c;
+        do {
+            c = dispatcher.nextChar();
+            str += c;
+        }
+        while (!c.matches("\\d"));
+        return new Token(str, Token.ID.INTEGER);
     }
     private Dispatcher dispatcher;
     public DigitHandler(Dispatcher dispatcher) {

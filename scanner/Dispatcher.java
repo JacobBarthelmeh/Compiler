@@ -24,7 +24,8 @@ public class Dispatcher {
     public String peekChar() {
         try {
             if (reader.ready()) {
-                String in = "" + reader.read();
+                char c = Character.toChars(reader.read())[0];
+                String in = "" + c;
                 reader.unread((int)in.charAt(0));
                 return in;
             }
@@ -43,7 +44,9 @@ public class Dispatcher {
     public String nextChar() {
         try {
             if (reader.ready()) {
-                return "" + reader.read();
+                char c = Character.toChars(reader.read())[0];
+                String in = "" + c;
+                return in;
             }
             else {
                 return "\u001a";
@@ -71,6 +74,18 @@ public class Dispatcher {
             //  Symbol handler:
             //  Switch on the character
             else switch (next.charAt(0)) {
+                case '{':
+                    String str = next;
+                    String nextc;
+                    do {
+                        nextc = nextChar();
+                        str += nextc;
+                        if (nextc.charAt(0) == '}') {
+                            return new Token(str, Token.ID.COMMENT);
+                        }
+                    }
+                    while (nextc.charAt(0) != '\u001a');
+                    return new Token("Run-on comment on line " + linenumber + ".", Token.ID.RUN_ON_COMMENT);
                 case ':':
                     next = nextChar();
                     //  Symbol := is special
@@ -144,16 +159,20 @@ public class Dispatcher {
                     next = peekChar();
                     //  Free to increment another symbol before incrementing
                     if (next.charAt(0) == '\r' || next.charAt(0) == '\n') {
-                        next = nextChar();
+                        nextChar();
                     }
                     next = nextChar();
                     linenumber++;
+                    System.out.println("Debug: Found new line.");
                     break;
                 case '\t':case ' ':
                     next = nextChar();
+                    System.out.println("Debug: Found space.");
                     break;
                 default:
-                    return new Token("Unknown symbol " + next + " at line " + linenumber, Token.ID.ERROR);
+                    char nextc2 = next.charAt(0);
+                    nextChar();
+                    return new Token("Unknown symbol " + nextc2 + " at line " + linenumber, Token.ID.ERROR);
             }
         }
         try {

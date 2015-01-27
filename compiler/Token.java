@@ -75,6 +75,7 @@ public class Token {
         SCOLON,
         TIMES,
         EOF,
+        COMMENT,
         RUN_ON_COMMENT,
         RUN_STRING,
         ERROR
