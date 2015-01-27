@@ -1,3 +1,5 @@
+package scanner;
+
 
 
 /* function to get next token */

@@ -1,3 +1,8 @@
+package scanner;
+
+
+import compiler.Token;
+
 public class DigitHandler {
     public Token getToken(String c) {
         /*
@@ -14,6 +19,8 @@ public class DigitHandler {
             or dispatcher.nextChar() to advance the file
             pointer.
         */
+        //  Debug return
+        return new Token("x", Token.ID.INTEGER);
     }
     private Dispatcher dispatcher;
     public DigitHandler(Dispatcher dispatcher) {
