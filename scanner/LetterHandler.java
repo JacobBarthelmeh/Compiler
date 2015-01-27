@@ -116,7 +116,7 @@ public class LetterHandler {
         //return new Token("{debug identifier} " + str, Token.ID.IDENTIFIER);
         return new Token(str, Token.ID.IDENTIFIER);
     }
-    private Dispatcher dispatcher;
+    private final Dispatcher dispatcher;
     public LetterHandler(Dispatcher dispatcher) {
         this.dispatcher = dispatcher;
     }

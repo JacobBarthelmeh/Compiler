@@ -87,7 +87,7 @@ public class SymbolHandler {
                 return null;
         }
     }
-    private Dispatcher dispatcher;
+    private final Dispatcher dispatcher;
     public SymbolHandler(Dispatcher dispatcher) {
         this.dispatcher = dispatcher;
     }

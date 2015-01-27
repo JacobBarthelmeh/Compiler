@@ -47,7 +47,7 @@ public class Dispatcher {
             }
             else {
                 return '\u001a';
-            } 
+            }
         }
         catch (IOException e) {
             System.out.println("Reading from file failed. Aborting.");
