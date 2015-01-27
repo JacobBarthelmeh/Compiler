@@ -8,12 +8,12 @@ public class Token {
     }
 
     //  contents - helpful for semantics
-    private String contents;
+    private final String contents;
     public String getContents() {
         return contents;
     }
     //  ID - helpful for grammar
-    private ID id;
+    private final ID id;
     public ID getID() {
         return id;
     }

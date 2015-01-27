@@ -70,16 +70,16 @@ public class Dispatcher {
                 }
                 c = nextChar();
                 linenumber++;
-                System.out.println("Debug: Found new line.");
+                //System.out.println("Debug: Found new line.");
             }
             //  Dispatcher handles spaces
             else if (c == '\t' || c == ' ') {
                 c = nextChar();
-                System.out.println("Debug: Found space.");
+                //System.out.println("Debug: Found space.");
             }
             
             //  Match alphabet characters
-            else if (("" + c).matches("(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)")) {
+            else if (("" + c).matches("(_|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)")) {
                 return l_handler.getToken(c);
             }
             //  Match digit characters
@@ -104,7 +104,7 @@ public class Dispatcher {
             reader.close();
         }
         catch (IOException e) {
-            System.out.println("Closing from file failed. Aborting.");
+            System.out.println("Closing file failed. Aborting.");
             System.exit(0);
             return null;
         }
@@ -116,9 +116,9 @@ public class Dispatcher {
 */
 
     //  Handlers for when symbols are found
-    private LetterHandler l_handler;
-    private DigitHandler d_handler;
-    private SymbolHandler s_handler;
+    private final LetterHandler l_handler;
+    private final DigitHandler d_handler;
+    private final SymbolHandler s_handler;
 
     //  File handling
     private PushbackReader reader;
