@@ -2,10 +2,11 @@
 
 program sample2;
   var testfloat: float;
-  testfloat := 112.3490e2093;
-  testfloat := 11234.90E2093;
+  testfloat := 112.3490e-2093;
+  testfloat := 11234.E2093;
   var testfixed: fixed;
   testfixed := 1232.6232;
+  testfixed := 1.;
   var i, sum: integer;
   procedure count( n: integer; var sum: integer );
     var i: integer; { local variable }
