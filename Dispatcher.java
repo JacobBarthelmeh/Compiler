@@ -15,16 +15,24 @@ public class Dispatcher {
     //  Prototype for peekChar()
     //  This should only read a char from the file without moving the file pointer
     public String peekChar() {
-        //  Pseudocode:
-        //  reader.read(filepointer);
+        if (reader.ready()) {
+            String in = "" + reader.read();
+            read.unread((int)in);
+            return in;
+        }
+        else { 
+            return "\u001a";
+        }
     }
     //  Prototype for nextChar
     //  This should read a char from the file and move the file pointer
     public String nextChar() {
-        String next = peekChar();
-        //  Pseudocode:
-        //  filepointer++;
-        return next;
+        if (reader.ready()) {
+            return "" + reader.read();
+        }
+        else {
+            return "\u001a";
+        } 
     }
     //  Get the next token.
     //  Should the Token class contain the String to be returned?
@@ -139,11 +147,21 @@ public class Dispatcher {
     private DigitHandler d_handler;
 
     //  File handling
-    private BufferedReader reader;
+    private PushbackReader reader;
     private int linenumber;
 
 
-    public Dispatcher() {
+    public Dispatcher(String filename) {
+        try {
+            PushbackReader reader =
+                new PushbackReader(
+                    new FileReader(
+                        new File(filename)));
+        }
+        catch (IOException e) {
+            System.out.println("Failed to read from " + filename + ". Either it doesn't exist or has priveledges set too high.");
+            System.exit(0);
+        }
         linenumber = 0;
         //  prepare the handlers
         l_handler = new LetterHandler(this);
