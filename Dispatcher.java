@@ -30,9 +30,9 @@ public class Dispatcher {
     //  Should the Token class contain the String to be returned?
     public Token nextToken() {
         String next = peekChar();
-        while (true) {
+        while (next.charAt(0) != "\u001a") {
             //  Match alphabet characters
-            if (next.match("\\w")) {
+            if (next.match("\\w") || next.charAt(0) == '\'') {
                 return l_handler.getToken(next);
             }
             //  Match digit characters
@@ -124,15 +124,10 @@ public class Dispatcher {
                     next = nextChar();
                     break;
                 default:
-                    throw new SyntaxError("Unknown symbol " + next + " at line " + linenumber);
+                    return new Token("Unknown symbol " + next + " at line " + linenumber, Token.ID.ERROR);
             }
         }
-        catch (SyntaxError e) {
-            //  Handle errors (better later, just print for now)
-            e.printStackTrace();
-            System.exit(0);
-        }
-    }
+        return Token.MP_ERROR;
     }
 
 /*
