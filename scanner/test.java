@@ -6,7 +6,7 @@ import compiler.Token;
 public class test {
     public static void main(String[] args) {
         System.out.println("Running test");
-        Dispatcher disp = new Dispatcher("src/testfile.mp");
+        Scanner disp = new Scanner("src/testfile.mp");
         Token t;
         String s = "";
         do {

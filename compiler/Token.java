@@ -1,24 +1,33 @@
 package compiler;
-
 public class Token {
-    //  Straightforward constructor
+    /**
+     * Constructs a token
+     * @param contents The semantic contents of the token
+     * @param id The classification of the token
+     */
     public Token(String contents, ID id) {
         this.contents = contents;
         this.id = id;
     }
-
     //  contents - helpful for semantics
     private final String contents;
+    /**
+     * Gets the semantic content of the token
+     * @return The content
+     */
     public String getContents() {
         return contents;
     }
     //  ID - helpful for grammar
     private final ID id;
+    /**
+     * Gets the classification for the token
+     * @return The classification
+     */
     public ID getID() {
         return id;
     }
     //  Enumeration of all possible types
-    //  TODO: Make static tokens for all of the static IDs
     public enum ID {
         AND,
         BEGIN,

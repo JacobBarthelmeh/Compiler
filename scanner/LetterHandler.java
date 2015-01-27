@@ -1,10 +1,17 @@
 package scanner;
 import compiler.Token;
 public class LetterHandler {
+    /**
+     * Gets a word token
+     * @param c The first character in the token
+     * @return The word token
+     */
     public Token getToken(char c) {
         String str = "" + c;
+        //  Accept all consecutive alphanumeric characters (with _ included)
         while (true) {
             c = dispatcher.peekChar();
+            //  Note- numbers are permitted after the first letter is read
             if (("" + c).matches("(_|0|1|2|3|4|5|6|7|8|9|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)")) {
             str += c;
                 dispatcher.nextChar();
@@ -13,6 +20,11 @@ public class LetterHandler {
                 break;
             }
         }
+        //  Enforce string rules (no double _ and no lonely _)
+        if (str.contains("__") || str.equals("_")) {
+            return new Token("Error " + str, Token.ID.ERROR);
+        }
+        //  Handle all reserved words
         if (str.equals("and")) {
             return new Token(str, Token.ID.AND);
         }
@@ -109,15 +121,11 @@ public class LetterHandler {
         if (str.equals("writeln")) {
             return new Token(str, Token.ID.WRITELN);
         }
-        if (str.contains("__") || str.equals("_")) {
-            return new Token("Error " + str, Token.ID.ERROR);
-        }
-        //  Debugging solution, adjust later to not say idenfitier
-        //return new Token("{debug identifier} " + str, Token.ID.IDENTIFIER);
+        //  It's not a reserved word so it's an identifier
         return new Token(str, Token.ID.IDENTIFIER);
     }
-    private final Dispatcher dispatcher;
-    public LetterHandler(Dispatcher dispatcher) {
+    private final Scanner dispatcher;
+    public LetterHandler(Scanner dispatcher) {
         this.dispatcher = dispatcher;
     }
 }

@@ -1,12 +1,16 @@
 package scanner;
-
-
 import compiler.Token;
-
 public class SymbolHandler {
+    /**
+     * Gets the symbol token
+     * @param c The first character in the token
+     * @return The token found
+     */
     public Token getToken(char c) {
+        //  Prepare these- they're used later
         String str;
         char next;
+        //  Check the character possibilities
         switch (c) {
             //  Handle comments
             case '{':
@@ -83,12 +87,12 @@ public class SymbolHandler {
             case '*':
                 return new Token("*", Token.ID.TIMES);
             default:
-                //  Dispatcher handles this as an unknown symbol
-                return null;
+                //  No other symbols can be recognized. last resort.
+                return new Token("{ Unknown symbol " + c + " at line " + dispatcher.linenumber() + " }", Token.ID.ERROR);
         }
     }
-    private final Dispatcher dispatcher;
-    public SymbolHandler(Dispatcher dispatcher) {
+    private final Scanner dispatcher;
+    public SymbolHandler(Scanner dispatcher) {
         this.dispatcher = dispatcher;
     }
 }
