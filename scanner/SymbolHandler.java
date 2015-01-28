@@ -1,6 +1,26 @@
 package scanner;
 import compiler.Token;
 public class SymbolHandler {
+    private static final Token.ID[] SYMBOL_TOKENS = {
+        Token.ID.ASSIGN,
+        Token.ID.COLON,
+        Token.ID.COMMA,
+        Token.ID.EQUAL,
+        Token.ID.FLOAT_DIVIDE,
+        Token.ID.GEQUAL,
+        Token.ID.GTHAN,
+        Token.ID.LEQUAL,
+        Token.ID.LTHAN,
+        Token.ID.LPAREN,
+        Token.ID.RPAREN,
+        Token.ID.MINUS,
+        Token.ID.NEQUAL,
+        Token.ID.PERIOD,
+        Token.ID.PLUS,
+        Token.ID.SCOLON,
+        Token.ID.TIMES,
+        Token.ID.EOF
+    };
     /**
      * Gets the symbol token
      * @param c The first character in the token
@@ -11,93 +31,50 @@ public class SymbolHandler {
         String str;
         char next;
         //  Check the character possibilities
-        switch (c) {
-            //  Handle comments
-            case '{':
-                str = "" + c;
-                do {
-                    next = dispatcher.nextChar();
-                    str += next;
-                    if (next == '}') {
-                        return new Token(str, Token.ID.COMMENT);
-                    }
+        if (c == '{') {
+            str = "" + c;
+            do {
+                next = scanner.nextChar();
+                str += next;
+                if (next == '}') {
+                    return new Token(str, Token.ID.COMMENT);
                 }
-                while (next != '\u001a');
-                return new Token("Run-on comment on line "
-                        + dispatcher.linenumber() + ".",
-                        Token.ID.RUN_ON_COMMENT);
-            //  Handle quotes
-            case '\'':
-                str = "" + c;
-                do {
-                    next = dispatcher.nextChar();
-                    str += next;
-                    if (next == '\'') {
-                        return new Token(str, Token.ID.STRING_LIT);
-                    }
-                }
-                while (next != '\u001a');
-                return new Token("Run-on string on line "
-                        + dispatcher.linenumber() + ".",
-                        Token.ID.RUN_STRING);
-            case ':':
-                next = dispatcher.peekChar();
-                //  Symbol := is special
-                if (next == '=') {
-                    dispatcher.nextChar();
-                    return new Token(":=", Token.ID.ASSIGN);
-                }
-                //  Otherwise accept :
-                return new Token(":", Token.ID.COLON);
-            case '>':
-                next = dispatcher.peekChar();
-                //  Symbol >= is special
-                if (next == '=') {
-                    dispatcher.nextChar();
-                    return new Token(">=", Token.ID.GTHAN);
-                }
-                //  Otherwise accept >
-                return new Token(">", Token.ID.GTHAN);
-            case '<':
-                next = dispatcher.peekChar();
-                //  Symbol <= is special
-                if (next == '=') {
-                    dispatcher.nextChar();
-                    return new Token("<=", Token.ID.LTHAN);
-                }
-                //  Symbol <> is also special
-                else if (next == '>') {
-                    dispatcher.nextChar();
-                    return new Token("<>", Token.ID.NEQUAL);
-                }
-                //  Otherwise accept <
-                return new Token("<=", Token.ID.LTHAN);
-            case ',':
-                return new Token(",", Token.ID.COMMA);
-            case '=':
-                return new Token("=", Token.ID.EQUAL);
-            case '-':
-                return new Token("-", Token.ID.MINUS);
-            case '(':
-                return new Token("(", Token.ID.LPAREN);
-            case '.':
-                return new Token(".", Token.ID.PERIOD);
-            case '+':
-                return new Token("+", Token.ID.PLUS);
-            case ')':
-                return new Token(")", Token.ID.RPAREN);
-            case ';':
-                return new Token(";", Token.ID.SCOLON);
-            case '*':
-                return new Token("*", Token.ID.TIMES);
-            default:
-                //  No other symbols can be recognized. last resort.
-                return new Token("{ Unknown symbol " + c + " at line "
-                        + dispatcher.linenumber() + " }", Token.ID.ERROR);
+            }
+            while (next != '\u001a');
+            return new Token("Run-on comment on line "
+                    + scanner.linenumber() + ".",
+                    Token.ID.RUN_COMMENT);
         }
+        else if (c ==  '\'') {
+            str = "" + c;
+            do {
+                next = scanner.nextChar();
+                str += next;
+                if (next == '\'') {
+                    return new Token(str, Token.ID.STRING_LIT);
+                }
+            }
+            while (next != '\u001a');
+            return new Token("Run-on string on line "
+                    + scanner.linenumber() + ".",
+                    Token.ID.RUN_STRING);
+        }
+        for (Token.ID i : SYMBOL_TOKENS){
+            //  Match 
+            //  The "" is somehow needed by NetBeans
+            String news = "" +  c + scanner.peekChar();
+            if (news.matches(i.regex())) {
+                scanner.nextChar();
+                return new Token(news, i);
+            }
+            if (("" + c).matches(i.regex())) {
+                return new Token("" + c, i);
+            }
+        }
+        return new Token("{ Unidentified token " + c + " }", Token.ID.ERROR);
     }
-    private final Scanner dispatcher;
+    private final Scanner scanner;
     public SymbolHandler(Scanner dispatcher) {
-        this.dispatcher = dispatcher;
+        this.scanner = dispatcher;
     }
 }

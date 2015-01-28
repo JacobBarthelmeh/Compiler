@@ -3,11 +3,11 @@ import compiler.Token;
 public class test {
     public static void main(String[] args) {
         System.out.println("Running test");
-        Scanner disp = new Scanner("src/testfile.mp");
+        Scanner scanner = new Scanner("src/testfile.mp");
         Token t;
         String s = "";
         do {
-            t = disp.nextToken();
+            t = scanner.nextToken();
             s += t.getContents() + " ";
         }
         while (t.getID() != Token.ID.EOF);

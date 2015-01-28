@@ -1,6 +1,44 @@
 package scanner;
 import compiler.Token;
 public class LetterHandler {
+    private static final Token.ID[] LETTER_TOKENS = {
+        Token.ID.AND,
+        Token.ID.BEGIN,
+        Token.ID.BOOLEAN,
+        Token.ID.DIV,
+        Token.ID.DO,
+        Token.ID.DOWNTO,
+        Token.ID.ELSE,
+        Token.ID.END,
+        Token.ID.FALSE,
+        Token.ID.FIXED,
+        Token.ID.FLOAT,
+        Token.ID.FOR,
+        Token.ID.FUNCTION,
+        Token.ID.IF,
+        Token.ID.INTEGER,
+        Token.ID.MOD,
+        Token.ID.NOT,
+        Token.ID.OR,
+        Token.ID.PROCEDURE,
+        Token.ID.PROGRAM,
+        Token.ID.READ,
+        Token.ID.REPEAT,
+        Token.ID.STRING,
+        Token.ID.THEN,
+        Token.ID.TRUE,
+        Token.ID.TO,
+        Token.ID.TYPE,
+        Token.ID.UNTIL,
+        Token.ID.VAR,
+        Token.ID.WHILE,
+        Token.ID.WRITE,
+        Token.ID.WRITELN,
+        Token.ID.IDENTIFIER
+    };
+    private static final String
+            allowed = "(_|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9)",
+            regex = "(\\w|_\\w)(\\w|\\d|_\\w|_\\d)*";
     /**
      * Gets a word token
      * @param c The first character in the token
@@ -10,123 +48,27 @@ public class LetterHandler {
         String str = "" + c;
         //  Accept all consecutive alphanumeric characters (with _ included)
         while (true) {
-            c = dispatcher.peekChar();
+            c = scanner.peekChar();
             //  Note- numbers are permitted after the first letter is read
-            if (("" + c).matches("(_|0|1|2|3|4|5|6|7|8|9|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)")) {
-            str += c;
-                dispatcher.nextChar();
+            if (("" + c).matches(allowed)) {
+                str += c;
+                scanner.nextChar();
             }
             else {
                 break;
             }
         }
-        //  Enforce string rules (no double _ and no lonely _)
-        if (str.contains("__") || str.equals("_")) {
-            return new Token("{ Word Format error " + str + " on line "
-                    + dispatcher.linenumber() + "}", Token.ID.ERROR);
+        for (Token.ID i : LETTER_TOKENS) {
+            if (str.matches(i.regex())) {
+                return new Token(str, i);
+            }
         }
-        //  Handle all reserved words
-        if (str.equals("and")) {
-            return new Token(str, Token.ID.AND);
-        }
-        if (str.equals("begin")) {
-            return new Token(str, Token.ID.BEGIN);
-        }
-        if (str.equals("Boolean")) {
-            return new Token(str, Token.ID.BOOLEAN);
-        }
-        if (str.equals("div")) {
-            return new Token(str, Token.ID.DIV);
-        }
-        if (str.equals("do")) {
-            return new Token(str, Token.ID.DO);
-        }
-        if (str.equals("downto")) {
-            return new Token(str, Token.ID.DOWNTO);
-        }
-        if (str.equals("else")) {
-            return new Token(str, Token.ID.ELSE);
-        }
-        if (str.equals("end")) {
-            return new Token(str, Token.ID.END);
-        }
-        if (str.equals("false")) {
-            return new Token(str, Token.ID.FALSE);
-        }
-        if (str.equals("fixed")) {
-            return new Token(str, Token.ID.FIXED);
-        }
-        if (str.equals("float")) {
-            return new Token(str, Token.ID.FLOAT);
-        }
-        if (str.equals("for")) {
-            return new Token(str, Token.ID.FOR);
-        }
-        if (str.equals("function")) {
-            return new Token(str, Token.ID.FUNCTION);
-        }
-        if (str.equals("if")) {
-            return new Token(str, Token.ID.IF);
-        }
-        if (str.equals("integer")) {
-            return new Token(str, Token.ID.INTEGER);
-        }
-        if (str.equals("mod")) {
-            return new Token(str, Token.ID.MOD);
-        }
-        if (str.equals("not")) {
-            return new Token(str, Token.ID.NOT);
-        }
-        if (str.equals("or")) {
-            return new Token(str, Token.ID.OR);
-        }
-        if (str.equals("procedure")) {
-            return new Token(str, Token.ID.PROCEDURE);
-        }
-        if (str.equals("program")) {
-            return new Token(str, Token.ID.PROGRAM);
-        }
-        if (str.equals("read")) {
-            return new Token(str, Token.ID.READ);
-        }
-        if (str.equals("repeat")) {
-            return new Token(str, Token.ID.REPEAT);
-        }
-        if (str.equals("string")) {
-            return new Token(str, Token.ID.STRING);
-        }
-        if (str.equals("then")) {
-            return new Token(str, Token.ID.THEN);
-        }
-        if (str.equals("true")) {
-            return new Token(str, Token.ID.TRUE);
-        }
-        if (str.equals("to")) {
-            return new Token(str, Token.ID.TO);
-        }
-        if (str.equals("type")) {
-            return new Token(str, Token.ID.TYPE);
-        }
-        if (str.equals("until")) {
-            return new Token(str, Token.ID.UNTIL);
-        }
-        if (str.equals("var")) {
-            return new Token(str, Token.ID.VAR);
-        }
-        if (str.equals("while")) {
-            return new Token(str, Token.ID.WHILE);
-        }
-        if (str.equals("write")) {
-            return new Token(str, Token.ID.WRITE);
-        }
-        if (str.equals("writeln")) {
-            return new Token(str, Token.ID.WRITELN);
-        }
-        //  It's not a reserved word so it's an identifier
-        return new Token(str, Token.ID.IDENTIFIER);
+        System.out.println(str);
+        System.exit(0);
+        return new Token("{ Unidentified token " + str + " }", Token.ID.ERROR);
     }
-    private final Scanner dispatcher;
+    private final Scanner scanner;
     public LetterHandler(Scanner dispatcher) {
-        this.dispatcher = dispatcher;
+        this.scanner = dispatcher;
     }
 }

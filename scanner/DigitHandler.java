@@ -1,6 +1,7 @@
 package scanner;
 import compiler.Token;
 public class DigitHandler {
+    private static final String digit = "(0|1|2|3|4|5|6|7|8|9)";
     /**
      * Gets the numeric token
      * @param c The first character of the token
@@ -10,9 +11,9 @@ public class DigitHandler {
         String str = "" + c;
         //  Find all consecutive numbers
         while (true) {
-            c = dispatcher.peekChar();
-            if (("" + c).matches("(0|1|2|3|4|5|6|7|8|9)")) {
-                dispatcher.nextChar();
+            c = scanner.peekChar();
+            if (("" + c).matches(digit)) {
+                scanner.nextChar();
                 str += c;
             }
             else {
@@ -23,15 +24,15 @@ public class DigitHandler {
         if (c == '.') {
             //  Accept the period
             str += c;
-            dispatcher.nextChar();
+            scanner.nextChar();
             //  track to make sure we find digits to force the correct format
             boolean accept = false;
             //  Then look for more numbers
             while (true) {
-                c = dispatcher.peekChar();
-                if (("" + c).matches("(0|1|2|3|4|5|6|7|8|9)")) {
+                c = scanner.peekChar();
+                if (("" + c).matches(digit)) {
                     accept = true;
-                    dispatcher.nextChar();
+                    scanner.nextChar();
                     str += c;
                 }
                 else {
@@ -49,7 +50,7 @@ public class DigitHandler {
             //  Decimal found but no digits after
             else {
                 return new Token("{ Number Format error " + str + " on line "
-                        + dispatcher.linenumber() + "}", Token.ID.ERROR);
+                        + scanner.linenumber() + "}", Token.ID.ERROR);
             }
         }
         //  Test for float again (the decimal was optional)
@@ -61,33 +62,40 @@ public class DigitHandler {
     private Token checkFloat(String str, char c) {
             //  Accept the exponent
             str += c;
-            dispatcher.nextChar();
-            c = dispatcher.nextChar();
+            scanner.nextChar();
+            c = scanner.nextChar();
             if (c == '+' || c == '-') {
                 str += c;
                 boolean accept = false;
                 //  Then look for more numbers
                 while (true) {
-                    c = dispatcher.peekChar();
-                    if (("" + c).matches("(0|1|2|3|4|5|6|7|8|9)")) {
+                    c = scanner.peekChar();
+                    if (("" + c).matches(digit)) {
                         accept = true;
-                        dispatcher.nextChar();
+                        scanner.nextChar();
                         str += c;
                     }
                     else {
                         break;
                     }
                 }
-                return new Token(str, Token.ID.FLOAT_LIT);
+                if (accept) {
+                    return new Token(str, Token.ID.FLOAT_LIT);
+                }
+                //  Exponent but no power
+                else {
+                    return new Token("{ Number Format error " + str + " on line "
+                            + scanner.linenumber() + "}", Token.ID.ERROR);
+                }
             }
-            //  Exponent but no power
+            //  Exponent but no +/-
             else {
                 return new Token("{ Number Format error " + str + " on line "
-                        + dispatcher.linenumber() + "}", Token.ID.ERROR);
+                        + scanner.linenumber() + "}", Token.ID.ERROR);
             }
     }
-    private final Scanner dispatcher;
+    private final Scanner scanner;
     public DigitHandler(Scanner dispatcher) {
-        this.dispatcher = dispatcher;
+        this.scanner = dispatcher;
     }
 }
