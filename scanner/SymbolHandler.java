@@ -23,7 +23,9 @@ public class SymbolHandler {
                     }
                 }
                 while (next != '\u001a');
-                return new Token("Run-on comment on line " + dispatcher.linenumber() + ".", Token.ID.RUN_ON_COMMENT);
+                return new Token("Run-on comment on line "
+                        + dispatcher.linenumber() + ".",
+                        Token.ID.RUN_ON_COMMENT);
             //  Handle quotes
             case '\'':
                 str = "" + c;
@@ -35,7 +37,9 @@ public class SymbolHandler {
                     }
                 }
                 while (next != '\u001a');
-                return new Token("Run-on string on line " + dispatcher.linenumber() + ".", Token.ID.RUN_STRING);
+                return new Token("Run-on string on line "
+                        + dispatcher.linenumber() + ".",
+                        Token.ID.RUN_STRING);
             case ':':
                 next = dispatcher.peekChar();
                 //  Symbol := is special
@@ -88,7 +92,8 @@ public class SymbolHandler {
                 return new Token("*", Token.ID.TIMES);
             default:
                 //  No other symbols can be recognized. last resort.
-                return new Token("{ Unknown symbol " + c + " at line " + dispatcher.linenumber() + " }", Token.ID.ERROR);
+                return new Token("{ Unknown symbol " + c + " at line "
+                        + dispatcher.linenumber() + " }", Token.ID.ERROR);
         }
     }
     private final Scanner dispatcher;

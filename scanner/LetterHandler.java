@@ -22,7 +22,8 @@ public class LetterHandler {
         }
         //  Enforce string rules (no double _ and no lonely _)
         if (str.contains("__") || str.equals("_")) {
-            return new Token("Error " + str, Token.ID.ERROR);
+            return new Token("{ Word Format error " + str + " on line "
+                    + dispatcher.linenumber() + "}", Token.ID.ERROR);
         }
         //  Handle all reserved words
         if (str.equals("and")) {

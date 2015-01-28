@@ -1,8 +1,5 @@
 package scanner;
-
-
 import compiler.Token;
-
 public class test {
     public static void main(String[] args) {
         System.out.println("Running test");

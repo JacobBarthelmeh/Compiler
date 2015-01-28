@@ -1,7 +1,4 @@
 package scanner;
-
-
-//   Messy import
 import compiler.Token;
 import java.io.*;
 public class Scanner {
@@ -131,7 +128,8 @@ public class Scanner {
         }
         //  Handle read error
         catch (IOException e) {
-            System.out.println("Failed to read from " + filename + ". Either it doesn't exist or has authority set too high.");
+            System.out.println("Failed to read from " + filename +
+                    ". Either it doesn't exist or has authority set too high.");
             System.exit(0);
         }
         //  prepare the handlers
