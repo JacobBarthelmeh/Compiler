@@ -1,44 +1,8 @@
 package scanner;
 import compiler.Token;
 public class LetterHandler {
-    private static final Token.ID[] LETTER_TOKENS = {
-        Token.ID.AND,
-        Token.ID.BEGIN,
-        Token.ID.BOOLEAN,
-        Token.ID.DIV,
-        Token.ID.DO,
-        Token.ID.DOWNTO,
-        Token.ID.ELSE,
-        Token.ID.END,
-        Token.ID.FALSE,
-        Token.ID.FIXED,
-        Token.ID.FLOAT,
-        Token.ID.FOR,
-        Token.ID.FUNCTION,
-        Token.ID.IF,
-        Token.ID.INTEGER,
-        Token.ID.MOD,
-        Token.ID.NOT,
-        Token.ID.OR,
-        Token.ID.PROCEDURE,
-        Token.ID.PROGRAM,
-        Token.ID.READ,
-        Token.ID.REPEAT,
-        Token.ID.STRING,
-        Token.ID.THEN,
-        Token.ID.TRUE,
-        Token.ID.TO,
-        Token.ID.TYPE,
-        Token.ID.UNTIL,
-        Token.ID.VAR,
-        Token.ID.WHILE,
-        Token.ID.WRITE,
-        Token.ID.WRITELN,
-        Token.ID.IDENTIFIER
-    };
     private static final String
-            allowed = "(_|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9)",
-            regex = "(\\w|_\\w)(\\w|\\d|_\\w|_\\d)*";
+            allowed = "(_|\\w|\\d)";
     /**
      * Gets a word token
      * @param c The first character in the token
@@ -58,14 +22,46 @@ public class LetterHandler {
                 break;
             }
         }
-        for (Token.ID i : LETTER_TOKENS) {
-            if (str.matches(i.regex())) {
-                return new Token(str, i);
-            }
+        //  FSA logic- Regular Expression = DFA
+        if (!str.matches(Token.ID.IDENTIFIER.regex())) {
+            return new Token("{ Unidentified token " + str + " }", Token.ID.ERROR);
         }
-        System.out.println(str);
-        System.exit(0);
-        return new Token("{ Unidentified token " + str + " }", Token.ID.ERROR);
+        //  Switch is a machine-level hashmap
+        switch (str) {
+            case "and": return new Token(str, Token.ID.AND);
+            case "begin": return new Token(str, Token.ID.BEGIN);
+            case "Boolean": return new Token(str, Token.ID.BOOLEAN);
+            case "div": return new Token(str, Token.ID.DIV);
+            case "do": return new Token(str, Token.ID.DO);
+            case "downto": return new Token(str, Token.ID.DOWNTO);
+            case "else": return new Token(str, Token.ID.ELSE);
+            case "end": return new Token(str, Token.ID.END);
+            case "flase": return new Token(str, Token.ID.FALSE);
+            case "fixed": return new Token(str, Token.ID.FIXED);
+            case "float": return new Token(str, Token.ID.FLOAT);
+            case "for": return new Token(str, Token.ID.FOR);
+            case "function": return new Token(str, Token.ID.FUNCTION);
+            case "if": return new Token(str, Token.ID.IF);
+            case "integer": return new Token(str, Token.ID.INTEGER);
+            case "mod": return new Token(str, Token.ID.MOD);
+            case "not": return new Token(str, Token.ID.NOT);
+            case "or": return new Token(str, Token.ID.OR);
+            case "procedure": return new Token(str, Token.ID.PROCEDURE);
+            case "program": return new Token(str, Token.ID.PROGRAM);
+            case "read": return new Token(str, Token.ID.READ);
+            case "repeat": return new Token(str, Token.ID.REPEAT);
+            case "string": return new Token(str, Token.ID.STRING);
+            case "then": return new Token(str, Token.ID.THEN);
+            case "true": return new Token(str, Token.ID.TRUE);
+            case "to": return new Token(str, Token.ID.TO);
+            case "type": return new Token(str, Token.ID.TYPE);
+            case "until": return new Token(str, Token.ID.UNTIL);
+            case "var": return new Token(str, Token.ID.VAR);
+            case "while": return new Token(str, Token.ID.WHILE);
+            case "write": return new Token(str, Token.ID.WRITE);
+            case "writeln": return new Token(str, Token.ID.WRITELN);
+            default: return new Token(str, Token.ID.IDENTIFIER);
+        }
     }
     private final Scanner scanner;
     public LetterHandler(Scanner dispatcher) {

@@ -50,6 +50,19 @@ public class Scanner {
         }
     }
     /**
+     * Unreads a character
+     * @param c 
+     */
+    public void ungetChar(char c) {
+        try {
+            reader.unread((int)c);
+        }
+        catch (IOException e) {
+            System.out.println("Unreading from file failed. Aborting.");
+            System.exit(0);
+        }
+    }
+    /**
      * Gets the next token from the file. Be sure to check for Error tokens.
      * @return The next token in the file
      */
@@ -57,37 +70,72 @@ public class Scanner {
         //  Always progress from the first character found
         char c = nextChar();
         while (c != '\u001a') {
+            switch (c){
             /* 
                 Dispatcher is in-line right now because there's no need
                 to make a separate class that has public access to all of the
                 variables.
             */
             //  Dispatcher handles new lines
-            if (c == '\r' || c == '\n') {
-                //  Problem arises for the \r\n and \n\r cases
-                c = peekChar();
-                //  Free to increment another symbol before incrementing
-                if (c == '\r' || c == '\n') {
-                    nextChar();
-                }
-                c = nextChar();
-                linenumber++;
-            }
-            //  Dispatcher handles spaces
-            else if (c == '\t' || c == ' ') {
-                c = nextChar();
-            }
-            //  Match alphabet characters
-            else if (("" + c).matches("(_|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)")) {
-                return l_handler.getToken(c);
-            }
-            //  Match digit characters
-            else if (("" + c).matches("(0|1|2|3|4|5|6|7|8|9)")) {
-                return d_handler.getToken(c);
-            }
-            //  Symbol handler:
-            else {
-                return s_handler.getToken(c);
+                    case '\r': case '\n':
+                        //  Problem arises for the \r\n and \n\r cases
+                        c = peekChar();
+                        //  Free to increment another symbol before incrementing
+                        if (c == '\r' || c == '\n') {
+                            nextChar();
+                        }
+                        c = nextChar();
+                        linenumber++;
+                        break;
+                    case '\t': case ' ':
+                        c = nextChar();
+                        break;
+                    //  Checks that require special attention
+                    case ':':
+                        c = peekChar();
+                        if (c == '=') {
+                            nextChar();
+                            return new Token(":=", Token.ID.ASSIGN);
+                        }
+                        return new Token(":", Token.ID.COLON);
+                    case '>':
+                        c = peekChar();
+                        if (c == '=') {
+                            nextChar();
+                            return new Token(">=", Token.ID.GEQUAL);
+                        }
+                        return new Token(">", Token.ID.GTHAN);
+                    case '<':
+                        c = peekChar();
+                        switch (c){
+                            case '=':
+                                nextChar();
+                                return new Token("<=", Token.ID.LEQUAL);
+                            case '>':
+                                nextChar();
+                                return new Token("<>", Token.ID.NEQUAL);
+                            default:
+                                return new Token("<", Token.ID.LTHAN);
+                        }
+                    //  Trivial checks
+                    case ',': return new Token(",", Token.ID.COMMA);
+                    case '=': return new Token("=", Token.ID.EQUAL);
+                    case '/': return new Token(",", Token.ID.FLOAT_DIVIDE);
+                    case '(': return new Token("(", Token.ID.LPAREN);
+                    case ')': return new Token(")", Token.ID.RPAREN);
+                    case '-': return new Token("-", Token.ID.MINUS);
+                    case '.': return new Token(".", Token.ID.PERIOD);
+                    case '+': return new Token("+", Token.ID.PLUS);
+                    case ';': return new Token(";", Token.ID.SCOLON);
+                    case '*': return new Token("*", Token.ID.TIMES);
+                    default:
+                        if (("" + c).matches("(_|\\w")) {
+                            return l_handler.getToken(c);
+                        }
+                        if (("" + c).matches("\\d")) {
+                            return d_handler.getToken(c);
+                        }
+                        return new Token("{ Unrecognized symbol " + c + " }", Token.ID.ERROR);
             }
         }
         //  Always close files
@@ -105,7 +153,6 @@ public class Scanner {
     //  Handlers for when characters are found
     private final LetterHandler l_handler;
     private final DigitHandler d_handler;
-    private final SymbolHandler s_handler;
     //  File handling
     private PushbackReader reader;
     private int linenumber;
@@ -135,6 +182,5 @@ public class Scanner {
         //  prepare the handlers
         l_handler = new LetterHandler(this);
         d_handler = new DigitHandler(this);
-        s_handler = new SymbolHandler(this);
     }
 }
