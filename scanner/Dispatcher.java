@@ -54,60 +54,47 @@ public class Dispatcher {
                 //  Begin FSAs!
                 case '\'': return FSA.TEST_STRING_LIT(s);
                 case ':': return FSA.TEST_COLON(s);
-                case '>': 
-                    c = s.peekChar();
-                    if (c == '=') {
-                        s.nextChar();
-                        return new Token(">=", Token.ID.GEQUAL);
-                    }
-                    return new Token(">", Token.ID.GTHAN);
-                case '<':
-                    c = s.peekChar();
-                    switch (c){
-                        case '=':
-                            s.nextChar();
-                            return new Token("<=", Token.ID.LEQUAL);
-                        case '>':
-                            s.nextChar();
-                            return new Token("<>", Token.ID.NEQUAL);
-                        default:
-                            return new Token("<", Token.ID.LTHAN);
-                    }
-                //  Trivial checks
-                case ',': return new Token(",", Token.ID.COMMA);
-                case '=': return new Token("=", Token.ID.EQUAL);
-                case '/': return new Token(",", Token.ID.FLOAT_DIVIDE);
-                case '(': return new Token("(", Token.ID.LPAREN);
-                case ')': return new Token(")", Token.ID.RPAREN);
-                case '-': return new Token("-", Token.ID.MINUS);
-                case '.': return new Token(".", Token.ID.PERIOD);
-                case '+': return new Token("+", Token.ID.PLUS);
-                case ';': return new Token(";", Token.ID.SCOLON);
-                case '*': return new Token("*", Token.ID.TIMES);
+                case '>': return FSA.TEST_GTHAN(s);
+                case '<': return FSA.TEST_LTHAN(s);
+                case ',': return FSA.TEST_COMMA(s);
+                case '=': return FSA.TEST_EQUAL(s);
+                case '/': return FSA.TEST_FLOAT_DIVIDE(s);
+                case '(': return FSA.TEST_LPAREN(s);
+                case ')': return FSA.TEST_RPAREN(s);
+                case '-': return FSA.TEST_MINUS(s);
+                case '.': return FSA.TEST_PERIOD(s);
+                case '+': return FSA.TEST_PLUS(s);
+                case ';': return FSA.TEST_SCOLON(s);
+                case '*': return FSA.TEST_TIMES(s);
+                case '0': case '1': case '2': case '3': case '4':
+                case '5': case '6': case '7': case '8': case '9':
+                    return FSA.TEST_DIGIT(s);
+                case 'a': case 'b': case 'c': case 'd': case 'e':
+                case 'f': case 'g': case 'h': case 'i': case 'j':
+                case 'k': case 'l': case 'm': case 'n': case 'o':
+                case 'p': case 'q': case 'r': case 's': case 't':
+                case 'u': case 'v': case 'w': case 'x': case 'y':
+                case 'z': case 'A': case 'B': case 'C': case 'D':
+                case 'E': case 'F': case 'G': case 'H': case 'I':
+                case 'J': case 'K': case 'L': case 'M': case 'N':
+                case 'O': case 'P': case 'Q': case 'R': case 'S':
+                case 'T': case 'U': case 'V': case 'W': case 'X':
+                case 'Y': case 'Z': case '_':
+                    return FSA.TEST_LETTER(s);
                 default:
-                    if (("" + c).matches("\\d")) {
-                        return d_handler.getToken(c);
-                    }
-                    //  Though \w matches numbers, numbers are already checked previously
-                    if (("" + c).matches("(\\_|\\w)")) {
-                        return l_handler.getToken(c);
-                    }
-                    System.out.println("Syntax Error at line " + s.linenumber + " col " + s.col + ": " +
+                    System.out.println("Syntax Error at line "+
+                            s.linenumber + " col " + s.col + ": " +
                             "Unrecognized symbol " + c);
                     return null;
             }
             //  Whitespace/newline/comment code has us proceed to the next symbol
             c = s.nextChar();
         }
+        return null;
     }
     //  Handlers for when characters are found
-    private final LetterHandler l_handler;
-    private final DigitHandler d_handler;
     private Scanner s;
     public Dispatcher(Scanner scanner) {
         this.s = scanner;
-        //  prepare the handlers
-        l_handler = new LetterHandler(scanner);
-        d_handler = new DigitHandler(scanner);
     }
 }
