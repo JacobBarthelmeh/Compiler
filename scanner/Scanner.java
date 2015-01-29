@@ -36,6 +36,7 @@ public class Scanner {
     public char nextChar() {
         //  Readable code needs no comments
         try {
+            col++;
             if (reader.ready()) {
                 return Character.toChars(reader.read())[0];
             }
@@ -76,7 +77,7 @@ public class Scanner {
                 to make a separate class that has public access to all of the
                 variables.
             */
-            //  Dispatcher handles new lines
+                    //  Dispatcher handles new lines
                     case '\r': case '\n':
                         //  Problem arises for the \r\n and \n\r cases
                         c = peekChar();
@@ -84,13 +85,49 @@ public class Scanner {
                         if (c == '\r' || c == '\n') {
                             nextChar();
                         }
-                        c = nextChar();
                         linenumber++;
+                        col = 1;
                         break;
+                    //  Ignore whitespace
                     case '\t': case ' ':
-                        c = nextChar();
                         break;
                     //  Checks that require special attention
+                    case '{':
+                        while (c != '}' && c != '\u001a') {
+                            c = nextChar();
+                            if (c == '\r' || c == '\n') {
+                                c = peekChar();
+                                //  Free to increment another symbol before incrementing
+                                if (c == '\r' || c == '\n') {
+                                    nextChar();
+                                }
+                                linenumber++;
+                                col = 0;
+                            }
+                        }
+                        if (c == '\u001a') {
+                            System.out.println("Syntax Error: " +
+                                    "Comment opened but not closed.");
+                            return null;
+                        }
+                        break;
+                    case '}':
+                        System.out.println("Syntax Error at line " + linenumber + " col " + col + ": " +
+                                "Comment closed but not opened.");
+                        return null;
+                    case '\'':
+                        String str = "" + c;
+                        do {
+                            c = nextChar();
+                            str += c;
+                        }
+                        while (c != '\'' && c != '\u001a');
+                        if (c == '\u001a') {
+                            System.out.println("Syntax Error: " +
+                                    "Quotation mark opened but not closed.");
+                            return null;
+                        }
+                        return new Token(str, Token.ID.STRING_LIT);
                     case ':':
                         c = peekChar();
                         if (c == '=') {
@@ -129,14 +166,18 @@ public class Scanner {
                     case ';': return new Token(";", Token.ID.SCOLON);
                     case '*': return new Token("*", Token.ID.TIMES);
                     default:
-                        if (("" + c).matches("(_|\\w")) {
+                        if (("" + c).matches("(_|\\w)")) {
                             return l_handler.getToken(c);
                         }
                         if (("" + c).matches("\\d")) {
                             return d_handler.getToken(c);
                         }
-                        return new Token("{ Unrecognized symbol " + c + " }", Token.ID.ERROR);
+                        System.out.println("Syntax Error at line " + linenumber + " col " + col + ": " +
+                                "Unrecognized symbol " + c);
+                        return null;
             }
+            //  Whitespace/newline/comment code has us proceed to the next symbol
+            c = nextChar();
         }
         //  Always close files
         try {
@@ -155,7 +196,7 @@ public class Scanner {
     private final DigitHandler d_handler;
     //  File handling
     private PushbackReader reader;
-    private int linenumber;
+    private int linenumber, col;
     /**
      * Get the line number that the scanner is currently on
      * @return The line number
@@ -163,12 +204,15 @@ public class Scanner {
     public int linenumber() {
         return linenumber;
     }
+    public int col() {
+        return col;
+    }
     /**
      * Constructs a dispatcher to read from a file
      * @param filename The name of the file to search for
      */
     public Scanner(String filename) {
-        linenumber = 0;
+        linenumber = col = 1;
         //  Prepare the reader
         try {
             reader = new PushbackReader(new FileReader(new File(filename)));

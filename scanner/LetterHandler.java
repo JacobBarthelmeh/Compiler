@@ -24,7 +24,9 @@ public class LetterHandler {
         }
         //  FSA logic- Regular Expression = DFA
         if (!str.matches(Token.ID.IDENTIFIER.regex())) {
-            return new Token("{ Unidentified token " + str + " }", Token.ID.ERROR);
+            System.out.println("Syntax Error at line " + scanner.linenumber() + " col " + scanner.col() + ": " +
+                    "Identifier format error " + str + " illegally formated.");
+            return null;
         }
         //  Switch is a machine-level hashmap
         switch (str) {

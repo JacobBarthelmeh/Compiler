@@ -49,8 +49,9 @@ public class DigitHandler {
             }
             //  Decimal found but no digits after
             else {
-                return new Token("{ Number Format error " + str + " on line "
-                        + scanner.linenumber() + "}", Token.ID.ERROR);
+                System.out.println("Syntax Error at line " + scanner.linenumber() + " col " + scanner.col() + ": " +
+                        "Number format error " + str + " missing value after decimal.");
+                return null;
             }
         }
         //  Test for float again (the decimal was optional)
@@ -84,14 +85,16 @@ public class DigitHandler {
                 }
                 //  Exponent but no power
                 else {
-                    return new Token("{ Number Format error " + str + " on line "
-                            + scanner.linenumber() + "}", Token.ID.ERROR);
+                    System.out.println("Syntax Error at line " + scanner.linenumber() + " col " + scanner.col() + ": " +
+                            "Number format error " + str + " missing exponent.");
+                    return null;
                 }
             }
             //  Exponent but no +/-
             else {
-                return new Token("{ Number Format error " + str + " on line "
-                        + scanner.linenumber() + "}", Token.ID.ERROR);
+                System.out.println("Syntax Error at line " + scanner.linenumber() + " col " + scanner.col() + ": " +
+                        "Number format error " + str + " needs +/- in exponent.");
+                return null;
             }
     }
     private final Scanner scanner;

@@ -64,7 +64,7 @@ public class Token {
         IDENTIFIER  ("(\\w|_\\w)(\\w|\\d|_\\w|_\\d)*"),
         INTEGER_LIT ("\\d+"),
         FIXED_LIT   ("\\d+\\.\\d+"),
-        FLOAT_LIT   ("(\\d+\\.\\d+|\\d+)(e|E)(+|-)\\d+"),
+        FLOAT_LIT   ("(\\d+\\.\\d+|\\d+)(e|E)(\\+|\\-)\\d+"),
         STRING_LIT  ("\\'.*\\'"),
         ASSIGN      (":="),
         COLON       (":"),
@@ -84,7 +84,6 @@ public class Token {
         SCOLON      (";"),
         TIMES       ("\\*"),
         EOF         ("\u001a"),
-        COMMENT     ("\\{.*\\}"),
         RUN_COMMENT ("\\{.*"),
         RUN_STRING  ("\\'.*"),
         ERROR       ("");
