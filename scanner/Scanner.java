@@ -166,11 +166,12 @@ public class Scanner {
                     case ';': return new Token(";", Token.ID.SCOLON);
                     case '*': return new Token("*", Token.ID.TIMES);
                     default:
-                        if (("" + c).matches("(_|\\w)")) {
-                            return l_handler.getToken(c);
-                        }
                         if (("" + c).matches("\\d")) {
                             return d_handler.getToken(c);
+                        }
+                        //  Though \w matches numbers, numbers are already checked previously
+                        if (("" + c).matches("(\\_|\\w)")) {
+                            return l_handler.getToken(c);
                         }
                         System.out.println("Syntax Error at line " + linenumber + " col " + col + ": " +
                                 "Unrecognized symbol " + c);
