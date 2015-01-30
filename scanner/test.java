@@ -9,6 +9,7 @@ public class test {
         boolean cancel = false;
         do {
             t = scanner.nextToken();
+            System.out.println("" + t.getID());
             try {
                 s += t.getContents() + " ";
             }

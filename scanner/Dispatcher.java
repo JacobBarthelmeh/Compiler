@@ -125,16 +125,28 @@ public class Dispatcher {
         try {
             col++;
             if (reader.ready()) {
-                char c = Character.toChars(reader.read())[0];
+                int b = reader.read();
+                if(b == -1) {
+                    return '\u001a';
+                }
+                char c = Character.toChars(b)[0];
                 if (c == '\r' || c == '\n') {
                     //  Found new line
                     col = 0;
                     linenumber++;
                     //  We only want to remove \r, \n, \r\n, or \n\r
                     //  Any more might cause empty lines to be ignored
-                    char c2 = Character.toChars(reader.read())[0];
-                    if (c2 == '\r' || c == '\n') {
-                        c2 = Character.toChars(reader.read())[0];
+                    b = reader.read();
+                    if(b == -1) {
+                        return '\u001a';
+                    }
+                    char c2 = Character.toChars(b)[0];
+                    if (c2 == '\r' || c2 == '\n') {
+                        b = reader.read();
+                        if(b == -1) {
+                            return '\u001a';
+                        }
+                        c2 = Character.toChars(b)[0];
                     }
                     c = c2;
                 }
