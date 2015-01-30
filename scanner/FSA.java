@@ -153,79 +153,116 @@ public class FSA {
         //      Found identifier! However, it still must be
         //      run through the reserved words list which 
         //      can be foudn in the README
-
-        String str = "";
-
-        //  Build this up
-        //  Switch is a machine-level hashmap
-        switch (str) {
-            case "and":
-                return new Token(str, Token.ID.AND);
-            case "begin":
-                return new Token(str, Token.ID.BEGIN);
-            case "Boolean":
-                return new Token(str, Token.ID.BOOLEAN);
-            case "div":
-                return new Token(str, Token.ID.DIV);
-            case "do":
-                return new Token(str, Token.ID.DO);
-            case "downto":
-                return new Token(str, Token.ID.DOWNTO);
-            case "else":
-                return new Token(str, Token.ID.ELSE);
-            case "end":
-                return new Token(str, Token.ID.END);
-            case "flase":
-                return new Token(str, Token.ID.FALSE);
-            case "fixed":
-                return new Token(str, Token.ID.FIXED);
-            case "float":
-                return new Token(str, Token.ID.FLOAT);
-            case "for":
-                return new Token(str, Token.ID.FOR);
-            case "function":
-                return new Token(str, Token.ID.FUNCTION);
-            case "if":
-                return new Token(str, Token.ID.IF);
-            case "integer":
-                return new Token(str, Token.ID.INTEGER);
-            case "mod":
-                return new Token(str, Token.ID.MOD);
-            case "not":
-                return new Token(str, Token.ID.NOT);
-            case "or":
-                return new Token(str, Token.ID.OR);
-            case "procedure":
-                return new Token(str, Token.ID.PROCEDURE);
-            case "program":
-                return new Token(str, Token.ID.PROGRAM);
-            case "read":
-                return new Token(str, Token.ID.READ);
-            case "repeat":
-                return new Token(str, Token.ID.REPEAT);
-            case "string":
-                return new Token(str, Token.ID.STRING);
-            case "then":
-                return new Token(str, Token.ID.THEN);
-            case "true":
-                return new Token(str, Token.ID.TRUE);
-            case "to":
-                return new Token(str, Token.ID.TO);
-            case "type":
-                return new Token(str, Token.ID.TYPE);
-            case "until":
-                return new Token(str, Token.ID.UNTIL);
-            case "var":
-                return new Token(str, Token.ID.VAR);
-            case "while":
-                return new Token(str, Token.ID.WHILE);
-            case "write":
-                return new Token(str, Token.ID.WRITE);
-            case "writeln":
-                return new Token(str, Token.ID.WRITELN);
-            default:
-                return new Token(str, Token.ID.IDENTIFIER);
+        
+        int state = 0;
+        char c = d.nextChar();
+        String str = "" + c;
+        //  Accept all consecutive alphanumeric characters (with _ included)
+        while (c != '\u001a') {
+            c = d.peekChar();
+            //  Note- numbers are permitted after the first letter is read
+            if (("" + c).matches("(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9|\\_)")) {
+                str += c;
+                switch(state) {
+					//  State 0: Accept either _ or letter
+					//      If _ is accepted, move to state 1
+					//      If letter is accepted, move to state 2
+					case 0:
+						if (c == '_') {
+							state = 1;
+						}
+						else { // alphabetic character received
+							state = 2;
+						}
+						break;
+						
+					//      If letter is accepted move to state 2
+					//      If anything else is found, reject
+               		case 1:
+               			// if the character read in is alphanumeric....
+               			if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+               				state = 2;
+               				break;
+               			}
+               			// if it isn't alphanumeric return null
+               			else {
+               				return null;
+               			}
+             
+               			
+					//  State 2:
+					//      If a letter is found, loop on 2
+					//      If _ is found, go to state 3
+					//      Otherwise go to state 4
+               		case 2:
+               			// Letter found
+               			if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+               				state = 2;
+               			}
+               			// '_' found
+               			else if (c == '_') {
+               				state = 3;
+               			}
+               			else {
+               				state = 4;
+               			}
+               			break;
+               			
+					//  State 3:
+					//      If a letter is found, go to state 2
+					//      Otherwise reject
+               		case 3:
+               			// Alphanumeric found, go to state 2
+               			if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+               				state = 2;
+               			}
+               			// No alphanumeric found, reject
+               			else {
+               				return null;
+               			}
+               	}
+            }
+            d.nextChar();
         }
+        if (state == 4) {
+        //  Switch is a machine-level hashmap
+			switch (str) {
+				case "and": return new Token(str, Token.ID.AND);
+				case "begin": return new Token(str, Token.ID.BEGIN);
+				case "Boolean": return new Token(str, Token.ID.BOOLEAN);
+				case "div": return new Token(str, Token.ID.DIV);
+				case "do": return new Token(str, Token.ID.DO);
+				case "downto": return new Token(str, Token.ID.DOWNTO);
+				case "else": return new Token(str, Token.ID.ELSE);
+				case "end": return new Token(str, Token.ID.END);
+				case "flase": return new Token(str, Token.ID.FALSE);
+				case "fixed": return new Token(str, Token.ID.FIXED);
+				case "float": return new Token(str, Token.ID.FLOAT);
+				case "for": return new Token(str, Token.ID.FOR);
+				case "function": return new Token(str, Token.ID.FUNCTION);
+				case "if": return new Token(str, Token.ID.IF);
+				case "integer": return new Token(str, Token.ID.INTEGER);
+				case "mod": return new Token(str, Token.ID.MOD);
+				case "not": return new Token(str, Token.ID.NOT);
+				case "or": return new Token(str, Token.ID.OR);
+				case "procedure": return new Token(str, Token.ID.PROCEDURE);
+				case "program": return new Token(str, Token.ID.PROGRAM);
+				case "read": return new Token(str, Token.ID.READ);
+				case "repeat": return new Token(str, Token.ID.REPEAT);
+				case "string": return new Token(str, Token.ID.STRING);
+				case "then": return new Token(str, Token.ID.THEN);
+				case "true": return new Token(str, Token.ID.TRUE);
+				case "to": return new Token(str, Token.ID.TO);
+				case "type": return new Token(str, Token.ID.TYPE);
+				case "until": return new Token(str, Token.ID.UNTIL);
+				case "var": return new Token(str, Token.ID.VAR);
+				case "while": return new Token(str, Token.ID.WHILE);
+				case "write": return new Token(str, Token.ID.WRITE);
+				case "writeln": return new Token(str, Token.ID.WRITELN);
+				default: return new Token("identifer:" + str, Token.ID.IDENTIFIER);
+			}
+        }
+        return null;
     }
 
     public static Token TEST_STRING_LIT(Dispatcher d) {
