@@ -3,9 +3,45 @@ import compiler.Token;
 public class FSA {
     public static Token TEST_DIGIT(Scanner s) {
         //  TODO
+        //  State 0: Accept the first digit and proceed to state 1
+        //  State 1: Accept an arbitrary number of digits
+        //      If a period is found, move to state 2
+        //      If e or E is found, move to state 3
+        //      If anything else is found, return an integer (preserve CP!)
+        //  State 2: Accept an arbitrary number of digits
+        //      If e or E is found, move to state 3
+        //      If anything else is found, return a fixed point (preserve CP!)
+        //  State 3: Accept e or E and look for + or -
+        //      If + or - is found, move to state 4
+        //      If anything else is found, return syntax error message
+        //  State 4: Accept an arbitrary number of digits
+        //      If anything else is found, return a fixed point (preserve CP!)
+        
+        //  This should never happen
+        return null;
     }
     public static Token TEST_LETTER(Scanner s) {
         //  TODO
+        //  State 0: Accept either _ or letter
+        //      If _ is accepted, move to state 1
+        //      If letter is accepted, move to state 2
+        //  State 1: Accept a letter
+        //      If letter is accepted move to state 2
+        //      If anything else is found, reject
+        //  State 2:
+        //      If a letter is found, loop on 2
+        //      If _ is found, go to state 3
+        //      Otherwise go to state 4
+        //  State 3:
+        //      If a letter is found, go to state 2
+        //      Otherwise reject
+        //  State 4:
+        //      Found identifier! However, it still must be
+        //      run through the reserved words list which 
+        //      can be foudn in the README
+        
+        //  This should never happen
+        return null;
     }
     public static Token TEST_STRING_LIT(Scanner s) {
         String str = "";
@@ -65,7 +101,7 @@ public class FSA {
                     if (c == ':') {
                         str += c;
                         state = 1;
-                        c = s.peekChar();
+                        c = s.nextChar();
                         break;
                     }
                     return null;
