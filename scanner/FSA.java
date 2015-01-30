@@ -17,9 +17,58 @@ public class FSA {
         //  State 4: Accept an arbitrary number of digits
         //      If anything else is found, return a fixed point (preserve CP!)
         
-        //  This should never happen
-        return null;
+        char c = s.nextChar();
+        String str = "" + c + collectDigits(s);
+        c = s.peekChar();
+        if (c == '.') {
+            s.nextChar();
+            String decimal = collectDigits(s);
+            if (decimal.length() == 0) {
+                System.out.println("Syntax Error at line " +
+                        s.linenumber + " col " + s.col + ": " +
+                        "Number format error " + str + " missing value after decimal.");
+                return null;
+            }
+            else {
+                str += c + decimal;
+            }
+            c = s.peekChar();
+        }
+        if (c == 'e' || c == 'E') {
+            str += c;
+            s.nextChar();
+            c = s.peekChar();
+            if (c == '+' || c == '-') {
+                s.nextChar();
+                str += c + collectDigits(s);
+                return new Token(str, Token.ID.FLOAT_LIT);
+            }
+            else {
+                System.out.println("Syntax Error at line " +
+                        s.linenumber + " col " + s.col + ": " +
+                        "Number format error " + str + " needs +/- in exponent.");
+                return null;
+            }
+        }
+        else {
+            return new Token(str, Token.ID.FIXED_LIT);
+        }
     }
+    private static String collectDigits(Scanner s) {
+        String str = "";
+        while (true) {
+            char c = s.peekChar();
+            if (("" + c).matches("\\d")) {
+                s.nextChar();
+                str += c;
+            }
+            else {
+                break;
+            }
+        }
+        return str;
+    }
+
     public static Token TEST_LETTER(Scanner s) {
         //  TODO
         //  State 0: Accept either _ or letter
@@ -40,13 +89,68 @@ public class FSA {
         //      run through the reserved words list which 
         //      can be foudn in the README
         
-        //  This should never happen
-        return null;
+        char c = s.nextChar();
+        String str = "" + c;
+        //  Accept all consecutive alphanumeric characters (with _ included)
+        while (true) {
+            c = s.peekChar();
+            //  Note- numbers are permitted after the first letter is read
+            if (("" + c).matches("(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9|\\_)")) {
+                str += c;
+                s.nextChar();
+            }
+            else {
+                break;
+            }
+        }
+        //  FSA logic- Regular Expression = DFA
+        if (!str.matches(Token.ID.IDENTIFIER.regex())) {
+            System.out.println("Syntax Error at line " +
+                    s.linenumber + " col " + s.col + ": " +
+                    "Identifier format error " + str + " illegally formated.");
+            return null;
+        }
+        //  Switch is a machine-level hashmap
+        switch (str) {
+            case "and": return new Token(str, Token.ID.AND);
+            case "begin": return new Token(str, Token.ID.BEGIN);
+            case "Boolean": return new Token(str, Token.ID.BOOLEAN);
+            case "div": return new Token(str, Token.ID.DIV);
+            case "do": return new Token(str, Token.ID.DO);
+            case "downto": return new Token(str, Token.ID.DOWNTO);
+            case "else": return new Token(str, Token.ID.ELSE);
+            case "end": return new Token(str, Token.ID.END);
+            case "flase": return new Token(str, Token.ID.FALSE);
+            case "fixed": return new Token(str, Token.ID.FIXED);
+            case "float": return new Token(str, Token.ID.FLOAT);
+            case "for": return new Token(str, Token.ID.FOR);
+            case "function": return new Token(str, Token.ID.FUNCTION);
+            case "if": return new Token(str, Token.ID.IF);
+            case "integer": return new Token(str, Token.ID.INTEGER);
+            case "mod": return new Token(str, Token.ID.MOD);
+            case "not": return new Token(str, Token.ID.NOT);
+            case "or": return new Token(str, Token.ID.OR);
+            case "procedure": return new Token(str, Token.ID.PROCEDURE);
+            case "program": return new Token(str, Token.ID.PROGRAM);
+            case "read": return new Token(str, Token.ID.READ);
+            case "repeat": return new Token(str, Token.ID.REPEAT);
+            case "string": return new Token(str, Token.ID.STRING);
+            case "then": return new Token(str, Token.ID.THEN);
+            case "true": return new Token(str, Token.ID.TRUE);
+            case "to": return new Token(str, Token.ID.TO);
+            case "type": return new Token(str, Token.ID.TYPE);
+            case "until": return new Token(str, Token.ID.UNTIL);
+            case "var": return new Token(str, Token.ID.VAR);
+            case "while": return new Token(str, Token.ID.WHILE);
+            case "write": return new Token(str, Token.ID.WRITE);
+            case "writeln": return new Token(str, Token.ID.WRITELN);
+            default: return new Token(str, Token.ID.IDENTIFIER);
+        }
     }
     public static Token TEST_STRING_LIT(Scanner s) {
         String str = "";
         int state = 0;
-        char c = s.nextChar();
+        char c = s.nextChar();  //  1 char accepted
         
         //  Precondition: first character is the first character in the token
         while (c != '\u001a') {
@@ -60,7 +164,6 @@ public class FSA {
                     if (c == '\'') {
                         str += c;
                         state = 1;
-                        c = s.nextChar();
                         break;
                     }
                     return null;
@@ -70,14 +173,19 @@ public class FSA {
                     Stay in the state otherwise
                 */
                 case 1:
+                    //  Okay to accept every character until the end is reached
+                    //   (as opposed to having to peek and undo)
+                    c = s.nextChar();     //  2 + n characters accepted
                     str += c;
                     if (c == '\'') {
-                        s.nextChar();
-                        //  c is now the character after this token (pc met!)
-                        return new Token(str, Token.ID.STRING_LIT);
+                        state = 2;
+                        break;
                     }
-                    c = s.nextChar();
                     break;
+                case 2:
+                    //  Already accepted 2 + n characters so the next is
+                    //  the first one after the token has ended (pc met!)
+                    return new Token(str, Token.ID.STRING_LIT);
             }
         }
         System.out.println("Syntax Error: " +
@@ -101,7 +209,6 @@ public class FSA {
                     if (c == ':') {
                         str += c;
                         state = 1;
-                        c = s.nextChar();
                         break;
                     }
                     return null;
@@ -111,20 +218,19 @@ public class FSA {
                     Accept : otherwise
                 */
                 case 1:
-                    str += c;
+                    c = s.peekChar();   //  Don't want to accept always
                     if (c == '=') {
-                        str += c;
-                        state = 2;
-                        c = s.nextChar(); //    now points after = (pc met!)
+                        str += c;       //  save the := symbol
+                        state = 2;      //  Move to accept assign
                         break;
                     }
-                    //  c is the character after this token (pc met!)
+                    //  One character accepted; pc has been met
                     return new Token(str, Token.ID.COLON);
                 /*  State 2:
-                    c is the character after this token (pc met!)
                     Accept :=
                 */
                 case 2:
+                    s.nextChar();   //  keep the found token (pc met!)
                     return new Token(str, Token.ID.ASSIGN);
                     //  Postcondition: c points to the character after this token
             }
@@ -148,7 +254,6 @@ public class FSA {
                     if (c == '<') {
                         str += c;
                         state = 1;
-                        c = s.peekChar();
                         break;
                     }
                     return null;
@@ -159,17 +264,16 @@ public class FSA {
                     Accept < otherwise
                 */
                 case 1:
-                    str += c;
+                    //  Don't always accept the next character
+                    c = s.peekChar();
                     if (c == '=') {
                         str += c;
                         state = 2;
-                        c = s.nextChar();   //  now points after = (pc met!)
                         break;
                     }
                     if (c == '>') {
                         str += c;
                         state = 3;
-                        c = s.nextChar();   //  now points after > (pc met!)
                         break;
                     }
                     //  Postcondition: now c is the character after < (pc met!)
@@ -178,8 +282,13 @@ public class FSA {
                     Accept <=
                 */
                 case 2:
+                    s.nextChar();   //  now points after = (pc met!)
                     return new Token(str, Token.ID.LEQUAL);
+                /*  State 3:
+                    Accept <>
+                */
                 case 3:
+                    s.nextChar();   //  now points after = (pc met!)
                     return new Token(str, Token.ID.NEQUAL);
             }
         }
@@ -201,7 +310,6 @@ public class FSA {
                     if (c == '>') {
                         state = 1;
                         str += c;
-                        c = s.nextChar();
                         break;
                     }
                     return null;
@@ -211,18 +319,20 @@ public class FSA {
                     Accept > otherwise
                 */
                 case 1:
+                    c = s.peekChar();
                     if (c == '=') {
                         str += c;
-                        c = s.nextChar();   //  now points after = (pc met!)
                         state = 2;
                         break;
                     }
+                    //  Only accepted one character (pc met!)
                     return new Token(str, Token.ID.GTHAN);
                 /*  State 2
                     c is character after = (pc met!)
 
                 */
                 case 2:
+                    s.nextChar();   //  accept the = so the pc is met
                     return new Token(str, Token.ID.GEQUAL);
             }
         }

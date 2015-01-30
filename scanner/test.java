@@ -10,7 +10,7 @@ public class test {
         do {
             t = scanner.nextToken();
             try {
-                s += t.getContents() + " ";
+                s += " { " + t.getID().regex() + " " +  t.getContents() + " } ";
             }
             catch (NullPointerException e) {
                 cancel = true;

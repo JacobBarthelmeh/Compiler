@@ -3,6 +3,25 @@ import compiler.Token;
 import java.io.*;
 public class Scanner {
     /**
+     * Gets the next token from the file. Be sure to check for Error tokens.
+     * @return The next token in the file
+     */
+    public Token nextToken() {
+        Token t = d.nextToken();
+        if (t != null && t.getID() == Token.ID.EOF) {
+            //  Always close files
+            try {
+                reader.close();
+            }
+            catch (IOException e) {
+                System.out.println("Closing file failed. Aborting.");
+                System.exit(0);
+                return null;
+            }
+        }
+        return t;
+    }
+    /**
      * Reads the next character without progressing the file pointer
      * @return The character found
      */
@@ -37,9 +56,23 @@ public class Scanner {
         try {
             col++;
             if (reader.ready()) {
-                return Character.toChars(reader.read())[0];
+                char c = Character.toChars(reader.read())[0];
+                if (c == '\r' || c == '\n') {
+                    //  Found new line
+                    col = 0;
+                    linenumber++;
+                    //  We only want to remove \r, \n, \r\n, or \n\r
+                    //  Any more might cause empty lines to be ignored
+                    char c2 = Character.toChars(reader.read())[0];
+                    if (c2 == '\r' || c == '\n') {
+                        c2 = Character.toChars(reader.read())[0];
+                    }
+                    c = c2;
+                }
+                return c;
             }
             else {
+                System.out.println("Found end of file.");
                 return '\u001a';
             }
         }
@@ -62,26 +95,9 @@ public class Scanner {
             System.exit(0);
         }
     }
-    /**
-     * Gets the next token from the file. Be sure to check for Error tokens.
-     * @return The next token in the file
-     */
-    public Token nextToken() {
-        
-        //  Always close files
-        try {
-            reader.close();
-        }
-        catch (IOException e) {
-            System.out.println("Closing file failed. Aborting.");
-            System.exit(0);
-            return null;
-        }
-        //  End of file token returns when nothing else is found
-        return new Token("\u001a", Token.ID.EOF);
-    }
     //  File handling
     private PushbackReader reader;
+    private Dispatcher d;
     public int linenumber, col;
     /**
      * Constructs a dispatcher to read from a file
@@ -99,5 +115,6 @@ public class Scanner {
                     ". Either it doesn't exist or has authority set too high.");
             System.exit(0);
         }
+        d = new Dispatcher(this);
     }
 }
