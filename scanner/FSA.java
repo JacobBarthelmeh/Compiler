@@ -1,7 +1,7 @@
 package scanner;
 import compiler.Token;
 public class FSA {
-    public static Token TEST_DIGIT(Scanner s) {
+    public static Token TEST_DIGIT(Dispatcher d) {
         //  TODO
         //  State 0: Accept the first digit and proceed to state 1
         //  State 1: Accept an arbitrary number of digits
@@ -16,60 +16,9 @@ public class FSA {
         //      If anything else is found, return syntax error message
         //  State 4: Accept an arbitrary number of digits
         //      If anything else is found, return a fixed point (preserve CP!)
-        
-        char c = s.nextChar();
-        String str = "" + c + collectDigits(s);
-        c = s.peekChar();
-        if (c == '.') {
-            s.nextChar();
-            String decimal = collectDigits(s);
-            if (decimal.length() == 0) {
-                System.out.println("Syntax Error at line " +
-                        s.linenumber + " col " + s.col + ": " +
-                        "Number format error " + str + " missing value after decimal.");
-                return null;
-            }
-            else {
-                str += c + decimal;
-            }
-            c = s.peekChar();
-        }
-        if (c == 'e' || c == 'E') {
-            str += c;
-            s.nextChar();
-            c = s.peekChar();
-            if (c == '+' || c == '-') {
-                s.nextChar();
-                str += c + collectDigits(s);
-                return new Token(str, Token.ID.FLOAT_LIT);
-            }
-            else {
-                System.out.println("Syntax Error at line " +
-                        s.linenumber + " col " + s.col + ": " +
-                        "Number format error " + str + " needs +/- in exponent.");
-                return null;
-            }
-        }
-        else {
-            return new Token(str, Token.ID.FIXED_LIT);
-        }
+        return null;
     }
-    private static String collectDigits(Scanner s) {
-        String str = "";
-        while (true) {
-            char c = s.peekChar();
-            if (("" + c).matches("\\d")) {
-                s.nextChar();
-                str += c;
-            }
-            else {
-                break;
-            }
-        }
-        return str;
-    }
-
-    public static Token TEST_LETTER(Scanner s) {
+    public static Token TEST_LETTER(Dispatcher d) {
         //  TODO
         //  State 0: Accept either _ or letter
         //      If _ is accepted, move to state 1
@@ -89,27 +38,10 @@ public class FSA {
         //      run through the reserved words list which 
         //      can be foudn in the README
         
-        char c = s.nextChar();
-        String str = "" + c;
-        //  Accept all consecutive alphanumeric characters (with _ included)
-        while (true) {
-            c = s.peekChar();
-            //  Note- numbers are permitted after the first letter is read
-            if (("" + c).matches("(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9|\\_)")) {
-                str += c;
-                s.nextChar();
-            }
-            else {
-                break;
-            }
-        }
-        //  FSA logic- Regular Expression = DFA
-        if (!str.matches(Token.ID.IDENTIFIER.regex())) {
-            System.out.println("Syntax Error at line " +
-                    s.linenumber + " col " + s.col + ": " +
-                    "Identifier format error " + str + " illegally formated.");
-            return null;
-        }
+        String str = "";
+        
+        //  Build this up
+        
         //  Switch is a machine-level hashmap
         switch (str) {
             case "and": return new Token(str, Token.ID.AND);
@@ -147,10 +79,10 @@ public class FSA {
             default: return new Token(str, Token.ID.IDENTIFIER);
         }
     }
-    public static Token TEST_STRING_LIT(Scanner s) {
+    public static Token TEST_STRING_LIT(Dispatcher d) {
         String str = "";
         int state = 0;
-        char c = s.nextChar();  //  1 char accepted
+        char c = d.nextChar();  //  1 char accepted
         
         //  Precondition: first character is the first character in the token
         while (c != '\u001a') {
@@ -175,7 +107,7 @@ public class FSA {
                 case 1:
                     //  Okay to accept every character until the end is reached
                     //   (as opposed to having to peek and undo)
-                    c = s.nextChar();     //  2 + n characters accepted
+                    c = d.nextChar();     //  2 + n characters accepted
                     str += c;
                     if (c == '\'') {
                         state = 2;
@@ -193,10 +125,10 @@ public class FSA {
         System.exit(0);
         return null;
     }
-    public static Token TEST_COLON(Scanner s) {
+    public static Token TEST_COLON(Dispatcher d) {
         String str = "";
         int state = 0;
-        char c = s.nextChar();
+        char c = d.nextChar();
         //  Precondition: first character is the first character in the machine
         while (c != '\u001a') {
             switch (state) {
@@ -218,7 +150,7 @@ public class FSA {
                     Accept : otherwise
                 */
                 case 1:
-                    c = s.peekChar();   //  Don't want to accept always
+                    c = d.peekChar();   //  Don't want to accept always
                     if (c == '=') {
                         str += c;       //  save the := symbol
                         state = 2;      //  Move to accept assign
@@ -230,7 +162,7 @@ public class FSA {
                     Accept :=
                 */
                 case 2:
-                    s.nextChar();   //  keep the found token (pc met!)
+                    d.nextChar();   //  keep the found token (pc met!)
                     return new Token(str, Token.ID.ASSIGN);
                     //  Postcondition: c points to the character after this token
             }
@@ -238,10 +170,10 @@ public class FSA {
         //  This should never happen
         return null;
     }
-    public static Token TEST_LTHAN(Scanner s) {
+    public static Token TEST_LTHAN(Dispatcher d) {
         String str = "";
         int state = 0;
-        char c = s.nextChar();
+        char c = d.nextChar();
         //  Precondition: first character is the first character in the machine
         while (c != '\u001a') {
             switch (state) {
@@ -265,7 +197,7 @@ public class FSA {
                 */
                 case 1:
                     //  Don't always accept the next character
-                    c = s.peekChar();
+                    c = d.peekChar();
                     if (c == '=') {
                         str += c;
                         state = 2;
@@ -282,22 +214,22 @@ public class FSA {
                     Accept <=
                 */
                 case 2:
-                    s.nextChar();   //  now points after = (pc met!)
+                    d.nextChar();   //  now points after = (pc met!)
                     return new Token(str, Token.ID.LEQUAL);
                 /*  State 3:
                     Accept <>
                 */
                 case 3:
-                    s.nextChar();   //  now points after = (pc met!)
+                    d.nextChar();   //  now points after = (pc met!)
                     return new Token(str, Token.ID.NEQUAL);
             }
         }
         //  This should never happen
         return null;
     }
-    public static Token TEST_GTHAN(Scanner s) {
+    public static Token TEST_GTHAN(Dispatcher d) {
         String str = "";
-        char c = s.nextChar();
+        char c = d.nextChar();
         int state = 0;
         while (c != '\u001a') {
             switch (state) {
@@ -319,7 +251,7 @@ public class FSA {
                     Accept > otherwise
                 */
                 case 1:
-                    c = s.peekChar();
+                    c = d.peekChar();
                     if (c == '=') {
                         str += c;
                         state = 2;
@@ -332,87 +264,87 @@ public class FSA {
 
                 */
                 case 2:
-                    s.nextChar();   //  accept the = so the pc is met
+                    d.nextChar();   //  accept the = so the pc is met
                     return new Token(str, Token.ID.GEQUAL);
             }
         }
         //  This should never happen;
         return null;
     }
-    public static Token TEST_COMMA(Scanner s) {
-        char c = s.nextChar();
+    public static Token TEST_COMMA(Dispatcher d) {
+        char c = d.nextChar();
         if (c == ',') {
             return new Token(",", Token.ID.COMMA);
         }
         //  This should never happen
         return null;
     }
-    public static Token TEST_EQUAL(Scanner s) {
-        char c = s.nextChar();
+    public static Token TEST_EQUAL(Dispatcher d) {
+        char c = d.nextChar();
         if (c == '=') {
             return new Token("=", Token.ID.EQUAL);
         }
         //  This should never happen
         return null;
     }
-    public static Token TEST_FLOAT_DIVIDE(Scanner s) {
-        char c = s.nextChar();
+    public static Token TEST_FLOAT_DIVIDE(Dispatcher d) {
+        char c = d.nextChar();
         if (c == '/') {
             return new Token("/", Token.ID.FLOAT_DIVIDE);
         }
         //  This should never happen
         return null;
     }
-    public static Token TEST_LPAREN(Scanner s) {
-        char c = s.nextChar();
+    public static Token TEST_LPAREN(Dispatcher d) {
+        char c = d.nextChar();
         if (c == '(') {
             return new Token("(", Token.ID.LPAREN);
         }
         //  This should never happen
         return null;
     }
-    public static Token TEST_RPAREN(Scanner s) {
-        char c = s.nextChar();
+    public static Token TEST_RPAREN(Dispatcher d) {
+        char c = d.nextChar();
         if (c == ')') {
             return new Token(")", Token.ID.RPAREN);
         }
         //  This should never happen
         return null;
     }
-    public static Token TEST_MINUS(Scanner s) {
-        char c = s.nextChar();
+    public static Token TEST_MINUS(Dispatcher d) {
+        char c = d.nextChar();
         if (c == '-') {
             return new Token("-", Token.ID.MINUS);
         }
         //  This should never happen
         return null;
     }
-    public static Token TEST_PERIOD(Scanner s) {
-        char c = s.nextChar();
+    public static Token TEST_PERIOD(Dispatcher d) {
+        char c = d.nextChar();
         if (c == '.') {
             return new Token(".", Token.ID.PERIOD);
         }
         //  This should never happen
         return null;
     }
-    public static Token TEST_PLUS(Scanner s) {
-        char c = s.nextChar();
+    public static Token TEST_PLUS(Dispatcher d) {
+        char c = d.nextChar();
         if (c == '+') {
             return new Token("+", Token.ID.PLUS);
         }
         //  This should never happen
         return null;
     }
-    public static Token TEST_SCOLON(Scanner s) {
-        char c = s.nextChar();
+    public static Token TEST_SCOLON(Dispatcher d) {
+        char c = d.nextChar();
         if (c == ';') {
             return new Token(";", Token.ID.SCOLON);
         }
         //  This should never happen
         return null;
     }
-    public static Token TEST_TIMES(Scanner s) {
-        char c = s.nextChar();
+    public static Token TEST_TIMES(Dispatcher d) {
+        char c = d.nextChar();
         if (c == '*') {
             return new Token("*", Token.ID.TIMES);
         }
