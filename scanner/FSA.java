@@ -14,8 +14,8 @@ public class FSA {
     public static Token TEST_DIGIT(Reader r) {
         String str = "";
         int state = 0;
-        Token.ID id = Token.ID.INTEGER;
         char c = r.nextChar();  //  1 char accepted
+        Token.ID id = Token.ID.INTEGER;
         while (c != '\u001a') {
             switch (state) {
                 case 0:
@@ -101,7 +101,6 @@ public class FSA {
             }
             c = r.nextChar();
         }
-
         /* Accept state
          state 0
          all and only digits
@@ -131,6 +130,7 @@ public class FSA {
         //      If anything else is found, return syntax error message
         //  State 4: Accept an arbitrary number of digits
         //      If anything else is found, return a fixed point (preserve CP!)
+        System.out.println("ERROR: Reached endline for DIGIT FSA");
         return null;
     }
 
@@ -153,7 +153,6 @@ public class FSA {
         //      Found identifier! However, it still must be
         //      run through the reserved words list which 
         //      can be foudn in the README
-        
         int state = 0;
         char c = r.nextChar();
         String str = "" + c;
@@ -161,23 +160,25 @@ public class FSA {
         while (c != '\u001a') {
             c = r.peekChar();
             //  Note- numbers are permitted after the first letter is read
+            
+            //  Also note: Use of Regex (which means all .matches) is not allowed in this project
             if (("" + c).matches("(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9|\\_)")) {
                 str += c;
                 switch(state) {
-					//  State 0: Accept either _ or letter
-					//      If _ is accepted, move to state 1
-					//      If letter is accepted, move to state 2
-					case 0:
-						if (c == '_') {
-							state = 1;
-						}
-						else { // alphabetic character received
-							state = 2;
-						}
-						break;
-						
-					//      If letter is accepted move to state 2
-					//      If anything else is found, reject
+                        //  State 0: Accept either _ or letter
+                        //      If _ is accepted, move to state 1
+                        //      If letter is accepted, move to state 2
+                        case 0:
+                                if (c == '_') {
+                                        state = 1;
+                                }
+                                else { // alphabetic character received
+                                        state = 2;
+                                }
+                                break;
+
+                        //      If letter is accepted move to state 2
+                        //      If anything else is found, reject
                		case 1:
                			// if the character read in is alphanumeric....
                			if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
@@ -226,42 +227,45 @@ public class FSA {
         }
         if (state == 4) {
         //  Switch is a machine-level hashmap
-			switch (str) {
-				case "and": return new Token(str, Token.ID.AND);
-				case "begin": return new Token(str, Token.ID.BEGIN);
-				case "Boolean": return new Token(str, Token.ID.BOOLEAN);
-				case "div": return new Token(str, Token.ID.DIV);
-				case "do": return new Token(str, Token.ID.DO);
-				case "downto": return new Token(str, Token.ID.DOWNTO);
-				case "else": return new Token(str, Token.ID.ELSE);
-				case "end": return new Token(str, Token.ID.END);
-				case "flase": return new Token(str, Token.ID.FALSE);
-				case "fixed": return new Token(str, Token.ID.FIXED);
-				case "float": return new Token(str, Token.ID.FLOAT);
-				case "for": return new Token(str, Token.ID.FOR);
-				case "function": return new Token(str, Token.ID.FUNCTION);
-				case "if": return new Token(str, Token.ID.IF);
-				case "integer": return new Token(str, Token.ID.INTEGER);
-				case "mod": return new Token(str, Token.ID.MOD);
-				case "not": return new Token(str, Token.ID.NOT);
-				case "or": return new Token(str, Token.ID.OR);
-				case "procedure": return new Token(str, Token.ID.PROCEDURE);
-				case "program": return new Token(str, Token.ID.PROGRAM);
-				case "read": return new Token(str, Token.ID.READ);
-				case "repeat": return new Token(str, Token.ID.REPEAT);
-				case "string": return new Token(str, Token.ID.STRING);
-				case "then": return new Token(str, Token.ID.THEN);
-				case "true": return new Token(str, Token.ID.TRUE);
-				case "to": return new Token(str, Token.ID.TO);
-				case "type": return new Token(str, Token.ID.TYPE);
-				case "until": return new Token(str, Token.ID.UNTIL);
-				case "var": return new Token(str, Token.ID.VAR);
-				case "while": return new Token(str, Token.ID.WHILE);
-				case "write": return new Token(str, Token.ID.WRITE);
-				case "writeln": return new Token(str, Token.ID.WRITELN);
-				default: return new Token("identifer:" + str, Token.ID.IDENTIFIER);
-			}
+            switch (str) {
+                    case "and": return new Token(str, Token.ID.AND);
+                    case "begin": return new Token(str, Token.ID.BEGIN);
+                    case "Boolean": return new Token(str, Token.ID.BOOLEAN);
+                    case "div": return new Token(str, Token.ID.DIV);
+                    case "do": return new Token(str, Token.ID.DO);
+                    case "downto": return new Token(str, Token.ID.DOWNTO);
+                    case "else": return new Token(str, Token.ID.ELSE);
+                    case "end": return new Token(str, Token.ID.END);
+                    case "flase": return new Token(str, Token.ID.FALSE);
+                    case "fixed": return new Token(str, Token.ID.FIXED);
+                    case "float": return new Token(str, Token.ID.FLOAT);
+                    case "for": return new Token(str, Token.ID.FOR);
+                    case "function": return new Token(str, Token.ID.FUNCTION);
+                    case "if": return new Token(str, Token.ID.IF);
+                    case "integer": return new Token(str, Token.ID.INTEGER);
+                    case "mod": return new Token(str, Token.ID.MOD);
+                    case "not": return new Token(str, Token.ID.NOT);
+                    case "or": return new Token(str, Token.ID.OR);
+                    case "procedure": return new Token(str, Token.ID.PROCEDURE);
+                    case "program": return new Token(str, Token.ID.PROGRAM);
+                    case "read": return new Token(str, Token.ID.READ);
+                    case "repeat": return new Token(str, Token.ID.REPEAT);
+                    case "string": return new Token(str, Token.ID.STRING);
+                    case "then": return new Token(str, Token.ID.THEN);
+                    case "true": return new Token(str, Token.ID.TRUE);
+                    case "to": return new Token(str, Token.ID.TO);
+                    case "type": return new Token(str, Token.ID.TYPE);
+                    case "until": return new Token(str, Token.ID.UNTIL);
+                    case "var": return new Token(str, Token.ID.VAR);
+                    case "while": return new Token(str, Token.ID.WHILE);
+                    case "write": return new Token(str, Token.ID.WRITE);
+                    case "writeln": return new Token(str, Token.ID.WRITELN);
+                    default: return new Token("identifer:" + str, Token.ID.IDENTIFIER);
+            }
         }
+        r.nextChar();
+        
+        System.out.println("ERROR: Reached endline for LETTER FSA");
         return null;
     }
 
@@ -284,6 +288,7 @@ public class FSA {
                         state = 1;
                         break;
                     }
+                    System.out.println("ERROR: Failed precondition for STRING_LIT FSA");
                     return null;
                 /*  State 1:
                  c is ' or ?
@@ -330,6 +335,7 @@ public class FSA {
                         state = 1;
                         break;
                     }
+                    System.out.println("ERROR: Failed precondition for COLON FSA");
                     return null;
                 /*  State 1:
                  c is either = or ?
@@ -355,6 +361,7 @@ public class FSA {
             }
         }
         //  This should never happen
+        System.out.println("ERROR: Reached endline for COLON FSA");
         return null;
     }
 
@@ -376,6 +383,7 @@ public class FSA {
                         state = 1;
                         break;
                     }
+                    System.out.println("ERROR: Failed precondition for LTHAN FSA");
                     return null;
                 /*  State 1:
                  c is = or > or ?
@@ -397,7 +405,7 @@ public class FSA {
                         break;
                     }
                     //  Postcondition: now c is the character after < (pc met!)
-                    return new Token(str, Token.ID.COLON);
+                    return new Token(str, Token.ID.LTHAN);
                 /*  State 2:
                  Accept <=
                  */
@@ -413,6 +421,7 @@ public class FSA {
             }
         }
         //  This should never happen
+        System.out.println("ERROR: Reached endline for LTHANFSA");
         return null;
     }
 
@@ -458,6 +467,7 @@ public class FSA {
             }
         }
         //  This should never happen;
+        System.out.println("ERROR: Reached endline for GTHAN FSA");
         return null;
     }
 
@@ -467,6 +477,7 @@ public class FSA {
             return new Token(",", Token.ID.COMMA);
         }
         //  This should never happen
+        System.out.println("ERROR: Reached endline for COMMA FSA");
         return null;
     }
 
@@ -476,6 +487,7 @@ public class FSA {
             return new Token("=", Token.ID.EQUAL);
         }
         //  This should never happen
+        System.out.println("ERROR: Reached endline for EQUAL FSA");
         return null;
     }
 
@@ -485,6 +497,7 @@ public class FSA {
             return new Token("/", Token.ID.FLOAT_DIVIDE);
         }
         //  This should never happen
+        System.out.println("ERROR: Reached endline for FLOAT_DIVIDE FSA");
         return null;
     }
 
@@ -494,6 +507,7 @@ public class FSA {
             return new Token("(", Token.ID.LPAREN);
         }
         //  This should never happen
+        System.out.println("ERROR: Reached endline for LPAREN FSA");
         return null;
     }
 
@@ -503,6 +517,7 @@ public class FSA {
             return new Token(")", Token.ID.RPAREN);
         }
         //  This should never happen
+        System.out.println("ERROR: Reached endline for RPAREN FSA");
         return null;
     }
 
@@ -512,6 +527,7 @@ public class FSA {
             return new Token("-", Token.ID.MINUS);
         }
         //  This should never happen
+        System.out.println("ERROR: Reached endline for MINUS FSA");
         return null;
     }
 
@@ -521,6 +537,7 @@ public class FSA {
             return new Token(".", Token.ID.PERIOD);
         }
         //  This should never happen
+        System.out.println("ERROR: Reached endline for PERIOD FSA");
         return null;
     }
 
@@ -530,6 +547,7 @@ public class FSA {
             return new Token("+", Token.ID.PLUS);
         }
         //  This should never happen
+        System.out.println("ERROR: Reached endline for PLUS FSA");
         return null;
     }
 
@@ -539,6 +557,7 @@ public class FSA {
             return new Token(";", Token.ID.SCOLON);
         }
         //  This should never happen
+        System.out.println("ERROR: Reached endline for SCOLON FSA");
         return null;
     }
 
@@ -548,6 +567,7 @@ public class FSA {
             return new Token("*", Token.ID.TIMES);
         }
         //  This should never happen
+        System.out.println("ERROR: Reached endline for TIMES FSA");
         return null;
     }
 }

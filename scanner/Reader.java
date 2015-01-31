@@ -37,7 +37,7 @@ public class Reader {
                 return c;
             }
             //  Treat not ready as end of file
-            else { 
+            else {
                 return '\u001a';
             }
         }
@@ -69,15 +69,9 @@ public class Reader {
                     //  We only want to remove \r, \n, \r\n, or \n\r
                     //  Any more might cause empty lines to be ignored
                     b = reader.read();
-                    if(b == -1) {
-                        return '\u001a';
-                    }
                     char c2 = Character.toChars(b)[0];
                     if (c2 == '\r' || c2 == '\n') {
                         b = reader.read();
-                        if(b == -1) {
-                            return '\u001a';
-                        }
                         c2 = Character.toChars(b)[0];
                     }
                     c = c2;
@@ -85,6 +79,7 @@ public class Reader {
                 return c;
             }
             else {
+                reader.close();
                 System.out.println("Found end of file.");
                 return '\u001a';
             }
@@ -95,18 +90,4 @@ public class Reader {
             return '\u001a';
         }
     }
-    /**
-     * Unreads a character
-     * @param c 
-     */
-    public void ungetChar(char c) {
-        try {
-            reader.unread((int)c);
-        }
-        catch (IOException e) {
-            System.out.println("Unreading from file failed. Aborting.");
-            System.exit(0);
-        }
-    }
-    
 }

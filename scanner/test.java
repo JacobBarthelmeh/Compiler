@@ -9,11 +9,12 @@ public class test {
         boolean cancel = false;
         do {
             t = scanner.nextToken();
-            System.out.println("" + t.getID());
             try {
+                System.out.println("{" + t.getID() + ":" + t.getContents() + "}");
                 s += t.getContents() + " ";
             }
             catch (NullPointerException e) {
+                System.out.println("Null return");
                 cancel = true;
             }
         }

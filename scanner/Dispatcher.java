@@ -8,7 +8,7 @@ public class Dispatcher {
         char c = r.peekChar();
         //  Note- scanner handles new lines
         switch (c) {
-            //  However, excess ones should be ignoreed
+            //  Excess newlines have been causing lissues (temp fix)
             case '\r': case '\n':
             //  Dispatcher ignores whitespace
             case '\t': case ' ':

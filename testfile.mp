@@ -1,6 +1,11 @@
 { taken from http://cobweb.cs.uga.edu/~kochut/Teaching/x570/micro-pascal/example2.html }
 
 program sample2;
+  var testfloat: float;
+  vat testfixed: fixed;
+  testfloat := 11e+4;
+  testfloat := 32.22E-121;
+  testfixed := 1.2
   var i, sum: integer;
   procedure count( n: integer; var sum: integer );
     var i: integer; { local variable }
