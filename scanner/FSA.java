@@ -8,63 +8,101 @@ public class FSA {
     /**
      * Test a digit and return the token
      *
-     * @param d
+     * @param r
      * @return
      */
     public static Token TEST_DIGIT(Reader r) {
         String str = "";
         int state = 0;
-        char c = r.nextChar();  //  1 char accepted
         Token.ID id = Token.ID.INTEGER;
-        while (c != '\u001a') {
+        char c;
+        do {
+            c = r.nextChar();
             switch (state) {
                 case 0:
-                    if (c == '1' || (c >= '0' && c <= '9')) {
-                        //stay in state 0
-                        str += c;
-                        state = 0;
-                    } else if (c == '.') {
+                    if (c >= '0' && c <= '9') {
                         str += c;
                         state = 1;
-                    } else if (c == 'E' || c == 'e') {
-                        str += c;
-                        state = 3;
                     } else {
                         //other character found
                         r.ungetChar(c);
-                        if (str.length() > 0) {
-                            return new Token(str, id);
-                        } else {
-                            //no digit
-                            return null;
-                        }
+                        return null;
                     }
                     break;
-
                 case 1:
                     if (c >= '0' && c <= '9') {
-                        //transition to state 2
+                        //stay in state 0
                         str += c;
-                        id = Token.ID.FIXED;
+                        state = 1;
+                    } else if (c == '.') {
+                        str += c;
                         state = 2;
+                    } else if (c == 'E') {
+                        str += c;
+                        state = 3;
+                    } else if (c == 'e') {
+                        str += c;
+                        state = 4;
                     } else {
                         //other character found
-                        r.ungetChar('.');
                         r.ungetChar(c);
-                        return new Token(str.subSequence(0, str.length() - 2).toString(), id);
+                        return new Token(str, id);
                     }
                     break;
                 case 2:
                     if (c >= '0' && c <= '9') {
-                        //stay in state 2
+                        //transition to state 2
                         str += c;
-                        state = 2;
-                    } else if (c == 'E' || c == 'e') {
-                        char peek = r.peekChar();
-                        if (peek != '+' || peek != '-') {
+                        id = Token.ID.FIXED;
+                        state = 5;
+                    } else {
+                        //other character found
+                        r.ungetChar('.');
+                        r.ungetChar(c);
+                        return new Token(str.subSequence(0, str.length() - 1).toString(), id);
+                    }
+                    break;
+                case 3:
+                    switch (c) {
+                        case '+':
+                            str += c;
+                            state = 8;
+                            break;
+                        case '-':
+                            str += c;
+                            state = 6;
+                            break;
+                        default:
+                            r.ungetChar('E');
                             r.ungetChar(c);
-                            return new Token(str, id);
-                        }
+                            return new Token(str.subSequence(0, str.length() - 1).toString(), id);
+                    }
+                    break;
+                case 4:
+                    switch (c) {
+                        case '+':
+                            str += c;
+                            state = 12;
+                            break;
+                        case '-':
+                            str += c;
+                            state = 10;
+                            break;
+                        default:
+                            r.ungetChar('e');
+                            r.ungetChar(c);
+                            return new Token(str.subSequence(0, str.length() - 1).toString(), id);
+                    }
+                    break;
+                case 5:
+                    if (c >= '0' && c <= '9') {
+                        //transition to state 2
+                        str += c;
+                        state = 5;
+                    } else if (c == 'e') {
+                        str += c;
+                        state = 4;
+                    } else if (c == 'E') {
                         str += c;
                         state = 3;
                     } else {
@@ -73,65 +111,96 @@ public class FSA {
                         return new Token(str, id);
                     }
                     break;
-                case 3:
-                    if (c == '+' || c == '-') {
-                        //transition to state 4
+                case 6:
+                    if (c >= '0' && c <= '9') {
+                        //transition to state 2
                         str += c;
                         if (id == Token.ID.FIXED) {
                             id = Token.ID.FIXED_LIT;
                         } else {
                             id = Token.ID.INTEGER_LIT;
                         }
-                        state = 4;
+                        state = 7;
+                    } else {
+                        //other character found
+                        r.ungetChar('E');
+                        r.ungetChar('-');
+                        r.ungetChar(c);
+                        return new Token(str.subSequence(0, str.length() - 2).toString(), id);
                     }
                     break;
-                case 4:
+                case 7:
                     if (c >= '0' && c <= '9') {
-                        //stay in state 4
                         str += c;
-                        state = 4;
+                        state = 1;
                     } else {
-                        state = -1;
+                        //other character found
+                        r.ungetChar(c);
+                        return new Token(str, id);
+                    }
+                    break;
+                case 8:
+                    if (c >= '0' && c <= '9') {
+                        //transition to state 2
+                        str += c;
+                        if (id == Token.ID.FIXED) {
+                            id = Token.ID.FIXED_LIT;
+                        } else {
+                            id = Token.ID.INTEGER_LIT;
+                        }
+                        state = 7;
+                    } else {
+                        //other character found
+                        r.ungetChar('E');
+                        r.ungetChar('+');
+                        r.ungetChar(c);
+                        return new Token(str.subSequence(0, str.length() - 2).toString(), id);
+                    }
+                    break;
+                case 10:
+                    if (c >= '0' && c <= '9') {
+                        //transition to state 2
+                        str += c;
+                        if (id == Token.ID.FIXED) {
+                            id = Token.ID.FIXED_LIT;
+                        } else {
+                            id = Token.ID.INTEGER_LIT;
+                        }
+                        state = 7;
+                    } else {
+                        //other character found
+                        r.ungetChar('e');
+                        r.ungetChar('-');
+                        r.ungetChar(c);
+                        return new Token(str.subSequence(0, str.length() - 2).toString(), id);
+                    }
+                    break;
+                case 12:
+                    if (c >= '0' && c <= '9') {
+                        //transition to state 2
+                        str += c;
+                        if (id == Token.ID.FIXED) {
+                            id = Token.ID.FIXED_LIT;
+                        } else {
+                            id = Token.ID.INTEGER_LIT;
+                        }
+                        state = 7;
+                    } else {
+                        //other character found
+                        r.ungetChar('e');
+                        r.ungetChar('+');
+                        r.ungetChar(c);
+                        return new Token(str.subSequence(0, str.length() - 2).toString(), id);
                     }
                     break;
                 default:
                     //you lose
-                    JOptionPane.showMessageDialog(null, "you lose");
+                    JOptionPane.showMessageDialog(null, "you lose : state = " + state);
 
             }
-            c = r.nextChar();
-        }
-        /* Accept state
-         state 0
-         all and only digits
-        
-         state 2
-         digits . digits
-        
-         state 5
-         digits (. digits) Ee +- digits
-         */
-        if (state == 0) {
-            if (str.length() > 0) {
-                return new Token(str, Token.ID.INTEGER);
-            }
-        }
-        //  TODO
-        //  State 0: Accept the first digit and proceed to state 1
-        //  State 1: Accept an arbitrary number of digits
-        //      If a period is found, move to state 2
-        //      If e or E is found, move to state 3
-        //      If anything else is found, return an integer (preserve CP!)
-        //  State 2: Accept an arbitrary number of digits
-        //      If e or E is found, move to state 3
-        //      If anything else is found, return a fixed point (preserve CP!)
-        //  State 3: Accept e or E and look for + or -
-        //      If + or - is found, move to state 4
-        //      If anything else is found, return syntax error message
-        //  State 4: Accept an arbitrary number of digits
-        //      If anything else is found, return a fixed point (preserve CP!)
-        System.out.println("ERROR: Reached endline for DIGIT FSA");
-        return null;
+        } while (c != '\u001a');
+        //End of file fall through
+        return new Token(str, id);
     }
 
     public static Token TEST_LETTER(Reader r) {

@@ -9,8 +9,8 @@ public class test {
         boolean cancel = false;
         do {
             t = scanner.nextToken();
+            System.out.println(t.getContents() + " " + t.getID());
             try {
-                System.out.println("{" + t.getID() + ":" + t.getContents() + "}");
                 s += t.getContents() + " ";
             }
             catch (NullPointerException e) {
