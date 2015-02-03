@@ -117,7 +117,8 @@ public class Reader {
     public void ungetChar(char c) {
         try {
             col--;
-            reader.unread((int) c);
+            reader.unread((int)c);
+//            reader.unread(Character.getNumericValue(c));
         } catch (IOException e) {
             System.out.println("Unreading from file failed. Aborting. " + e + " char was " + c);
             System.exit(0);

@@ -1,6 +1,5 @@
 package scanner;
 import compiler.Token;
-import java.io.*;
 public class Scanner {
     /**
      * Gets the next token from the file. Be sure to check for Error tokens.

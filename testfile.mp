@@ -5,7 +5,7 @@ program sample2;
   vat testfixed: fixed;
   testfloat := 11e+4;
   testfloat := 32.22E-121;
-  testfixed := 1.2
+  testfixed := 1.2;
   var i, sum: integer;
   procedure count( n: integer; var sum: integer );
     var i: integer; { local variable }
@@ -16,7 +16,7 @@ program sample2;
       begin
         sum := sum + i;
         i := i + 1;
-       end
+        end
   end;
 begin
   readln(i);     { get i }

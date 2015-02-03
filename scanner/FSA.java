@@ -225,6 +225,10 @@ public class FSA {
         int state = 0;
         char c = r.nextChar();
         String str = "" + c;
+        
+        //  Temporarily force this return to test other features
+        return new Token(str, Token.ID.IDENTIFIER);
+        
         //  Accept all consecutive alphanumeric characters (with _ included)
         while (c != '\u001a') {
             c = r.peekChar();

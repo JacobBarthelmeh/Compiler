@@ -9,13 +9,13 @@ public class test {
         boolean cancel = false;
         do {
             t = scanner.nextToken();
-            System.out.println(t.getContents() + " " + t.getID());
-            try {
-                s += t.getContents() + " ";
-            }
-            catch (NullPointerException e) {
+            if (t == null ) {
                 System.out.println("Null return");
                 cancel = true;
+            }
+            else {
+                System.out.println(t.getContents() + " " + t.getID());
+                s += t.getContents() + " ";
             }
         }
         while (t == null || t.getID() != Token.ID.EOF);
