@@ -14,7 +14,7 @@ public class FSA {
     public static Token TEST_DIGIT(Reader r) {
         String str = "";
         int state = 0;
-        Token.ID id = Token.ID.INTEGER;
+        Token.ID id = Token.ID.INTEGER_LIT;
         char c;
         do {
             c = r.nextChar();
@@ -53,12 +53,12 @@ public class FSA {
                     if (c >= '0' && c <= '9') {
                         //transition to state 2
                         str += c;
-                        id = Token.ID.FIXED;
+                        id = Token.ID.FIXED_LIT;
                         state = 5;
                     } else {
                         //other character found
-                        r.ungetChar('.');
                         r.ungetChar(c);
+                        r.ungetChar('.');
                         return new Token(str.subSequence(0, str.length() - 1).toString(), id);
                     }
                     break;
@@ -73,8 +73,8 @@ public class FSA {
                             state = 6;
                             break;
                         default:
-                            r.ungetChar('E');
                             r.ungetChar(c);
+                            r.ungetChar('E');
                             return new Token(str.subSequence(0, str.length() - 1).toString(), id);
                     }
                     break;
@@ -89,8 +89,8 @@ public class FSA {
                             state = 10;
                             break;
                         default:
-                            r.ungetChar('e');
                             r.ungetChar(c);
+                            r.ungetChar('e');
                             return new Token(str.subSequence(0, str.length() - 1).toString(), id);
                     }
                     break;
@@ -115,17 +115,13 @@ public class FSA {
                     if (c >= '0' && c <= '9') {
                         //transition to state 2
                         str += c;
-                        if (id == Token.ID.FIXED) {
-                            id = Token.ID.FIXED_LIT;
-                        } else {
-                            id = Token.ID.INTEGER_LIT;
-                        }
+                        id = Token.ID.FLOAT_LIT;
                         state = 7;
                     } else {
                         //other character found
-                        r.ungetChar('E');
-                        r.ungetChar('-');
                         r.ungetChar(c);
+                        r.ungetChar('-');
+                        r.ungetChar('E');
                         return new Token(str.subSequence(0, str.length() - 2).toString(), id);
                     }
                     break;
@@ -143,53 +139,39 @@ public class FSA {
                     if (c >= '0' && c <= '9') {
                         //transition to state 2
                         str += c;
-                        if (id == Token.ID.FIXED) {
-                            id = Token.ID.FIXED_LIT;
-                        } else {
-                            id = Token.ID.INTEGER_LIT;
-                        }
+                        id = Token.ID.FLOAT_LIT;
                         state = 7;
                     } else {
                         //other character found
-                        r.ungetChar('E');
-                        r.ungetChar('+');
                         r.ungetChar(c);
+                        r.ungetChar('+');
+                        r.ungetChar('E');
                         return new Token(str.subSequence(0, str.length() - 2).toString(), id);
                     }
                     break;
                 case 10:
                     if (c >= '0' && c <= '9') {
-                        //transition to state 2
                         str += c;
-                        if (id == Token.ID.FIXED) {
-                            id = Token.ID.FIXED_LIT;
-                        } else {
-                            id = Token.ID.INTEGER_LIT;
-                        }
+                        id = Token.ID.FLOAT_LIT;
                         state = 7;
                     } else {
                         //other character found
-                        r.ungetChar('e');
-                        r.ungetChar('-');
                         r.ungetChar(c);
+                        r.ungetChar('-');
+                        r.ungetChar('e');
                         return new Token(str.subSequence(0, str.length() - 2).toString(), id);
                     }
                     break;
                 case 12:
                     if (c >= '0' && c <= '9') {
-                        //transition to state 2
                         str += c;
-                        if (id == Token.ID.FIXED) {
-                            id = Token.ID.FIXED_LIT;
-                        } else {
-                            id = Token.ID.INTEGER_LIT;
-                        }
+                        id = Token.ID.FLOAT_LIT;
                         state = 7;
                     } else {
                         //other character found
-                        r.ungetChar('e');
-                        r.ungetChar('+');
                         r.ungetChar(c);
+                        r.ungetChar('+');
+                        r.ungetChar('e');
                         return new Token(str.subSequence(0, str.length() - 2).toString(), id);
                     }
                     break;
@@ -225,119 +207,146 @@ public class FSA {
         int state = 0;
         char c = r.nextChar();
         String str = "" + c;
-        
+
         //  Temporarily force this return to test other features
         return new Token(str, Token.ID.IDENTIFIER);
-        
+
         //  Accept all consecutive alphanumeric characters (with _ included)
         while (c != '\u001a') {
             c = r.peekChar();
             //  Note- numbers are permitted after the first letter is read
-            
+
             //  Also note: Use of Regex (which means all .matches) is not allowed in this project
             if (("" + c).matches("(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9|\\_)")) {
                 str += c;
-                switch(state) {
-                        //  State 0: Accept either _ or letter
-                        //      If _ is accepted, move to state 1
-                        //      If letter is accepted, move to state 2
-                        case 0:
-                                if (c == '_') {
-                                        state = 1;
-                                }
-                                else { // alphabetic character received
-                                        state = 2;
-                                }
-                                break;
+                switch (state) {
+                    //  State 0: Accept either _ or letter
+                    //      If _ is accepted, move to state 1
+                    //      If letter is accepted, move to state 2
+                    case 0:
+                        if (c == '_') {
+                            state = 1;
+                        } else { // alphabetic character received
+                            state = 2;
+                        }
+                        break;
 
-                        //      If letter is accepted move to state 2
-                        //      If anything else is found, reject
-               		case 1:
-               			// if the character read in is alphanumeric....
-               			if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
-               				state = 2;
-               				break;
-               			}
-               			// if it isn't alphanumeric return null
-               			else {
-               				return null;
-               			}
-             
-               			
-					//  State 2:
-					//      If a letter is found, loop on 2
-					//      If _ is found, go to state 3
-					//      Otherwise go to state 4
-               		case 2:
-               			// Letter found
-               			if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
-               				state = 2;
-               			}
-               			// '_' found
-               			else if (c == '_') {
-               				state = 3;
-               			}
-               			else {
-               				state = 4;
-               			}
-               			break;
-               			
-					//  State 3:
-					//      If a letter is found, go to state 2
-					//      Otherwise reject
-               		case 3:
-               			// Alphanumeric found, go to state 2
-               			if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
-               				state = 2;
-               			}
-               			// No alphanumeric found, reject
-               			else {
-               				return null;
-               			}
-               	}
+                    //      If letter is accepted move to state 2
+                    //      If anything else is found, reject
+                    case 1:
+                        // if the character read in is alphanumeric....
+                        if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+                            state = 2;
+                            break;
+                        } // if it isn't alphanumeric return null
+                        else {
+                            return null;
+                        }
+
+                    //  State 2:
+                    //      If a letter is found, loop on 2
+                    //      If _ is found, go to state 3
+                    //      Otherwise go to state 4
+                    case 2:
+                        // Letter found
+                        if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+                            state = 2;
+                        } // '_' found
+                        else if (c == '_') {
+                            state = 3;
+                        } else {
+                            state = 4;
+                        }
+                        break;
+
+                    //  State 3:
+                    //      If a letter is found, go to state 2
+                    //      Otherwise reject
+                    case 3:
+                        // Alphanumeric found, go to state 2
+                        if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+                            state = 2;
+                        } // No alphanumeric found, reject
+                        else {
+                            return null;
+                        }
+                }
             }
             r.nextChar();
         }
         if (state == 4) {
-        //  Switch is a machine-level hashmap
+            //  Switch is a machine-level hashmap
             switch (str) {
-                    case "and": return new Token(str, Token.ID.AND);
-                    case "begin": return new Token(str, Token.ID.BEGIN);
-                    case "Boolean": return new Token(str, Token.ID.BOOLEAN);
-                    case "div": return new Token(str, Token.ID.DIV);
-                    case "do": return new Token(str, Token.ID.DO);
-                    case "downto": return new Token(str, Token.ID.DOWNTO);
-                    case "else": return new Token(str, Token.ID.ELSE);
-                    case "end": return new Token(str, Token.ID.END);
-                    case "flase": return new Token(str, Token.ID.FALSE);
-                    case "fixed": return new Token(str, Token.ID.FIXED);
-                    case "float": return new Token(str, Token.ID.FLOAT);
-                    case "for": return new Token(str, Token.ID.FOR);
-                    case "function": return new Token(str, Token.ID.FUNCTION);
-                    case "if": return new Token(str, Token.ID.IF);
-                    case "integer": return new Token(str, Token.ID.INTEGER);
-                    case "mod": return new Token(str, Token.ID.MOD);
-                    case "not": return new Token(str, Token.ID.NOT);
-                    case "or": return new Token(str, Token.ID.OR);
-                    case "procedure": return new Token(str, Token.ID.PROCEDURE);
-                    case "program": return new Token(str, Token.ID.PROGRAM);
-                    case "read": return new Token(str, Token.ID.READ);
-                    case "repeat": return new Token(str, Token.ID.REPEAT);
-                    case "string": return new Token(str, Token.ID.STRING);
-                    case "then": return new Token(str, Token.ID.THEN);
-                    case "true": return new Token(str, Token.ID.TRUE);
-                    case "to": return new Token(str, Token.ID.TO);
-                    case "type": return new Token(str, Token.ID.TYPE);
-                    case "until": return new Token(str, Token.ID.UNTIL);
-                    case "var": return new Token(str, Token.ID.VAR);
-                    case "while": return new Token(str, Token.ID.WHILE);
-                    case "write": return new Token(str, Token.ID.WRITE);
-                    case "writeln": return new Token(str, Token.ID.WRITELN);
-                    default: return new Token("identifer:" + str, Token.ID.IDENTIFIER);
+                case "and":
+                    return new Token(str, Token.ID.AND);
+                case "begin":
+                    return new Token(str, Token.ID.BEGIN);
+                case "Boolean":
+                    return new Token(str, Token.ID.BOOLEAN);
+                case "div":
+                    return new Token(str, Token.ID.DIV);
+                case "do":
+                    return new Token(str, Token.ID.DO);
+                case "downto":
+                    return new Token(str, Token.ID.DOWNTO);
+                case "else":
+                    return new Token(str, Token.ID.ELSE);
+                case "end":
+                    return new Token(str, Token.ID.END);
+                case "flase":
+                    return new Token(str, Token.ID.FALSE);
+                case "fixed":
+                    return new Token(str, Token.ID.FIXED);
+                case "float":
+                    return new Token(str, Token.ID.FLOAT);
+                case "for":
+                    return new Token(str, Token.ID.FOR);
+                case "function":
+                    return new Token(str, Token.ID.FUNCTION);
+                case "if":
+                    return new Token(str, Token.ID.IF);
+                case "integer":
+                    return new Token(str, Token.ID.INTEGER);
+                case "mod":
+                    return new Token(str, Token.ID.MOD);
+                case "not":
+                    return new Token(str, Token.ID.NOT);
+                case "or":
+                    return new Token(str, Token.ID.OR);
+                case "procedure":
+                    return new Token(str, Token.ID.PROCEDURE);
+                case "program":
+                    return new Token(str, Token.ID.PROGRAM);
+                case "read":
+                    return new Token(str, Token.ID.READ);
+                case "repeat":
+                    return new Token(str, Token.ID.REPEAT);
+                case "string":
+                    return new Token(str, Token.ID.STRING);
+                case "then":
+                    return new Token(str, Token.ID.THEN);
+                case "true":
+                    return new Token(str, Token.ID.TRUE);
+                case "to":
+                    return new Token(str, Token.ID.TO);
+                case "type":
+                    return new Token(str, Token.ID.TYPE);
+                case "until":
+                    return new Token(str, Token.ID.UNTIL);
+                case "var":
+                    return new Token(str, Token.ID.VAR);
+                case "while":
+                    return new Token(str, Token.ID.WHILE);
+                case "write":
+                    return new Token(str, Token.ID.WRITE);
+                case "writeln":
+                    return new Token(str, Token.ID.WRITELN);
+                default:
+                    return new Token("identifer:" + str, Token.ID.IDENTIFIER);
             }
         }
         r.nextChar();
-        
+
         System.out.println("ERROR: Reached endline for LETTER FSA");
         return null;
     }
