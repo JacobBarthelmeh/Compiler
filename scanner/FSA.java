@@ -378,12 +378,14 @@ public class FSA {
                  Stay in the state otherwise
                  */
                 case 1:
-                    //  Okay to accept every character until the end is reached
-                    //   (as opposed to having to peek and undo)
-                    c = r.nextChar();     //  2 + n characters accepted
+                    c = r.nextChar();
                     str += c;
                     if (c == '\'') {
                         state = 2;
+                        break;
+                    }
+                    if (c == '\n' || c == '\r') {
+                        state = 3;
                         break;
                     }
                     break;
@@ -391,11 +393,12 @@ public class FSA {
                     //  Already accepted 2 + n characters so the next is
                     //  the first one after the token has ended (pc met!)
                     return new Token(str, Token.ID.STRING_LIT);
+                case 3:
+                    System.out.println("Error: String not closed at " +
+                            r.linenumber + ":" + r.col);
+                    return new Token(str, Token.ID.RUN_STRING);
             }
         }
-        System.out.println("Syntax Error: "
-                + "Quotation mark opened but not closer.");
-        System.exit(0);
         return null;
     }
 
