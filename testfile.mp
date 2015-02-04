@@ -22,6 +22,6 @@ begin
   readln(i);     { get i }
   count(i, sum); { call count }
   write(sum);    { write result }
-  write('inserted excused for *@(*&#$(*&^>\n string');
+  write('inserted excused for *@(*&#$(*&^>\n string);
   writeln;
 end.

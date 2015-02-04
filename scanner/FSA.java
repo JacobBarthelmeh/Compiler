@@ -394,9 +394,9 @@ public class FSA {
                     //  the first one after the token has ended (pc met!)
                     return new Token(str, Token.ID.STRING_LIT);
                 case 3:
-                    System.out.println("Error: String not closed at " +
-                            r.linenumber + ":" + r.col);
-                    return new Token(str, Token.ID.RUN_STRING);
+                    return new Token("String not closed at " +
+                            r.linenumber + ":" + r.col + ": " + str,
+                            Token.ID.RUN_STRING);
             }
         }
         return null;

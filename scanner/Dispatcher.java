@@ -21,19 +21,15 @@ public class Dispatcher {
                     c = r.nextChar();   //  Accept next character always
                 }
                 if (c == '\u001a') {
-                    System.out.println("Syntax Error: " +
-                            "Comment opened but not closed.");
-                    return null;
+                    return new Token("Comment not closed", Token.ID.RUN_COMMENT);
                 }
                 r.nextChar();
                 return nextToken();
             //  Dispatcher identifiers unclosed comments
             case '}':
-                System.out.println("Syntax Error at line " +
-                        r.linenumber + " col " + r.col + ": " +
-                        "Comment closed but not opened.");
                 r.nextChar();
-                return null;
+                return new Token("Comment not closed at " +
+                        r.linenumber + " col " + r.col, Token.ID.ERROR);
             //  Begin FSAs!
             case '\'': return FSA.TEST_STRING_LIT(r);
             case ':': return FSA.TEST_COLON(r);
@@ -68,8 +64,7 @@ public class Dispatcher {
                 return new Token("\u001a", Token.ID.EOF);
         }
         r.nextChar();
-        System.out.println("Unidenfied symbol " + c + " could not be read.");
-        return null;
+        return new Token("Unidentified symbol " + c, Token.ID.ERROR);
     }
     public Dispatcher(String filename) {
         r = new Reader(filename);
