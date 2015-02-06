@@ -25,7 +25,8 @@ public class test {
         } else {
             System.out.println(s);
         }
-        numberTest();
+        //  Since we know this passes and the FSA wasn't edited we can comment this out
+        //numberTest();
     }
 
     public static void numberTest() {

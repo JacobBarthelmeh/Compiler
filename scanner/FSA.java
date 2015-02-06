@@ -206,11 +206,98 @@ public class FSA {
         //      can be foudn in the README
         int state = 0;
         char c = r.nextChar();
-        String str = "" + c;
-
-        //  Temporarily force this return to test other features
-        return new Token(str, Token.ID.IDENTIFIER);
-
+        String str = "";
+        
+        //  Todd's insertion (because testing was due in the lab)
+        //  Feel free to replace this code with your own. I just didn't
+        //  want to have unfinished code going into the lab since it is
+        //  not actually the focus of the lab
+        while (c!= '\u001a') {
+            switch (state) {
+                case 0:
+                    if (c == '_') {
+                        state = 1;
+                        str += c;
+                        break;
+                    }
+                    if (c <= 'z' && c >= 'a' || c <= 'Z' && c >= 'A') {
+                        state = 2;
+                        str += c;
+                        break;
+                    }
+                    System.out.println("ERROR: Failed precondition for TEST_LETTER FSA");
+                    return null;
+                    //  This state can only be reached by underscore and it requires
+                    //  that there be an alphanumeric directly after all underscores
+                case 1:
+                    c = r.peekChar();
+                    if (c <= 'z' && c >= 'a' || c <= 'Z' && c >= 'A' || c <= '9' && c >= '0') {
+                        state = 2;
+                        str += c;
+                        r.nextChar();
+                        break;
+                    }
+                    return new Token("Identifier ending in _", Token.ID.ERROR);
+                case 2:
+                    c = r.peekChar();
+                    if (c == '_') {
+                        state = 1;
+                        str += c;
+                        r.nextChar();
+                        break;
+                    }
+                    if (c <= 'z' && c >= 'a' || c <= 'Z' && c >= 'A' || c <= '9' && c >= '0') {
+                        state = 2;
+                        str += c;
+                        r.nextChar();
+                        break;
+                    }
+                    //  No underscore or character- c is peeking at the first char
+                    //  that is not in this token, so postcondition is met.
+                    //  Force the exit condition; doesn't get added to string
+                    //  so it doesn't really matter
+                    c = '\u001a';
+                    break;
+            }
+        }
+        switch (str) {
+            case "and": return new Token(str, Token.ID.AND);
+            case "begin": return new Token(str, Token.ID.BEGIN);
+            case "Boolean": return new Token(str, Token.ID.BOOLEAN);
+            case "div": return new Token(str, Token.ID.DIV);
+            case "do": return new Token(str, Token.ID.DO);
+            case "downto": return new Token(str, Token.ID.DOWNTO);
+            case "else": return new Token(str, Token.ID.ELSE);
+            case "end": return new Token(str, Token.ID.END);
+            case "flase": return new Token(str, Token.ID.FALSE);
+            case "fixed": return new Token(str, Token.ID.FIXED);
+            case "float": return new Token(str, Token.ID.FLOAT);
+            case "for": return new Token(str, Token.ID.FOR);
+            case "function": return new Token(str, Token.ID.FUNCTION);
+            case "if": return new Token(str, Token.ID.IF);
+            case "integer": return new Token(str, Token.ID.INTEGER);
+            case "mod": return new Token(str, Token.ID.MOD);
+            case "not": return new Token(str, Token.ID.NOT);
+            case "or": return new Token(str, Token.ID.OR);
+            case "procedure": return new Token(str, Token.ID.PROCEDURE);
+            case "program": return new Token(str, Token.ID.PROGRAM);
+            case "read": return new Token(str, Token.ID.READ);
+            case "repeat": return new Token(str, Token.ID.REPEAT);
+            case "string": return new Token(str, Token.ID.STRING);
+            case "then": return new Token(str, Token.ID.THEN);
+            case "true": return new Token(str, Token.ID.TRUE);
+            case "to": return new Token(str, Token.ID.TO);
+            case "type": return new Token(str, Token.ID.TYPE);
+            case "until": return new Token(str, Token.ID.UNTIL);
+            case "var": return new Token(str, Token.ID.VAR);
+            case "while": return new Token(str, Token.ID.WHILE);
+            case "write": return new Token(str, Token.ID.WRITE);
+            case "writeln": return new Token(str, Token.ID.WRITELN);
+            default: return new Token(str, Token.ID.IDENTIFIER);
+        }
+        
+        /*
+        Robert's Code
         //  Accept all consecutive alphanumeric characters (with _ included)
         while (c != '\u001a') {
             c = r.peekChar();
@@ -349,6 +436,7 @@ public class FSA {
 
         System.out.println("ERROR: Reached endline for LETTER FSA");
         return null;
+        */
     }
 
     public static Token TEST_STRING_LIT(Reader r) {
