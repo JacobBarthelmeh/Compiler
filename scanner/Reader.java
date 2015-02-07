@@ -7,11 +7,11 @@ import java.io.PushbackReader;
 
 public class Reader {
 
-    public int linenumber, col;
+    public int linenumber, col, lastlinescolumns;
     private PushbackReader reader;
 
     public Reader(String filename) {
-        linenumber = col = 0;
+        linenumber = col = lastlinescolumns = 1;
         //  Prepare the reader
         try {
             reader = new PushbackReader(new FileReader(new File(filename)), 3);
@@ -73,29 +73,14 @@ public class Reader {
                     return '\u001a';
                 }
                 char c = Character.toChars(b)[0];
-                if (c == '\r' || c == '\n') {
+                if (c == '\n') {
                     //  Found new line
-                    col = 0;
+                    lastlinescolumns = c;
+                    col = 1;
                     linenumber++;
                     //newline character is needed for state machines
                     return c;
                 }
-                //  We only want to remove \r, \n, \r\n, or \n\r
-                //  Any more might cause empty lines to be ignored
-//                    b = reader.read();
-//                    if(b == -1) {
-//                        return '\u001a';
-//                    }
-//                    char c2 = Character.toChars(b)[0];
-//                    if (c2 == '\r' || c2 == '\n') {
-//                        b = reader.read();
-//                        if(b == -1) {
-//                            return '\u001a';
-//                        }
-//                        c2 = Character.toChars(b)[0];
-//                    }
-//                    c = c2;
-//                }
                 return c;
             } else {
                 //reader.close(); close symbol is needed and could still push char back
@@ -116,7 +101,13 @@ public class Reader {
      */
     public void ungetChar(char c) {
         try {
-            col--;
+            if (c == '\n') {
+                col = lastlinescolumns;
+                linenumber--;
+            }
+            else {
+                col--;
+            }
             reader.unread((int)c);
 //            reader.unread(Character.getNumericValue(c));
         } catch (IOException e) {

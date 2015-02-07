@@ -16,7 +16,7 @@ public class test {
                 System.out.println("Null return");
                 cancel = true;
             } else {
-                System.out.println(t.getContents() + " " + t.getID());
+                System.out.println(t.toString());
                 s += t.getContents() + " ";
             }
         } while (t == null || t.getID() != Token.ID.EOF);

@@ -2,10 +2,10 @@
 
 program sample2;
   var testfloat: float;
-  vat testfixed: fixed;
+  var _test_3fi_xed: fixed;
   testfloat := 11e+4;
   testfloat := 32.22E-121;
-  testfixed := 1.2;
+  _test_3fi_xed := 1.2;
   var i, sum: integer;
   procedure count( n: integer; var sum: integer );
     var i: integer; { local variable }
@@ -19,9 +19,8 @@ program sample2;
         end
   end;
 begin
-  readln(i);     { get i }
-  count(i, sum); { call count }
-  write(sum);    { write result }
-  write('inserted excused for *@(*&#$(*&^>\n string);
-  writeln;
+  readln(i);
+  count(i, sum);
+  write(sum);
+  write('inserted excused for *@(*&#$(*&^>\n string');
 end.

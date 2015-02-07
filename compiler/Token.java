@@ -5,9 +5,11 @@ public class Token {
      * @param contents The semantic contents of the token
      * @param id The classification of the token
      */
-    public Token(String contents, ID id) {
+    public Token(String contents, ID id, int line, int col) {
         this.contents = contents;
         this.id = id;
+        this.line = line;
+        this.col = col;
     }
     //  contents - helpful for semantics
     private final String contents;
@@ -26,6 +28,17 @@ public class Token {
      */
     public ID getID() {
         return id;
+    }
+    private final int line, col;
+    public int getLine() {
+        return line;
+    }
+    public int getCol() {
+        return col;
+    }
+    @Override
+    public String toString() {
+        return id + " " + contents + " at line " + line + " col " + col;
     }
     //  Enumeration of all possible types
     public enum ID {

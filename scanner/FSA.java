@@ -11,7 +11,7 @@ public class FSA {
      * @param r
      * @return
      */
-    public static Token TEST_DIGIT(Reader r) {
+    public static Token TEST_DIGIT(Reader r, int row, int col) {
         String str = "";
         int state = 0;
         Token.ID id = Token.ID.INTEGER_LIT;
@@ -46,7 +46,7 @@ public class FSA {
                     } else {
                         //other character found
                         r.ungetChar(c);
-                        return new Token(str, id);
+                        return new Token(str, id, row, col);
                     }
                     break;
                 case 2:
@@ -59,7 +59,7 @@ public class FSA {
                         //other character found
                         r.ungetChar(c);
                         r.ungetChar('.');
-                        return new Token(str.subSequence(0, str.length() - 1).toString(), id);
+                        return new Token(str.subSequence(0, str.length() - 1).toString(), id, row, col);
                     }
                     break;
                 case 3:
@@ -75,7 +75,7 @@ public class FSA {
                         default:
                             r.ungetChar(c);
                             r.ungetChar('E');
-                            return new Token(str.subSequence(0, str.length() - 1).toString(), id);
+                            return new Token(str.subSequence(0, str.length() - 1).toString(), id, row, col);
                     }
                     break;
                 case 4:
@@ -91,7 +91,7 @@ public class FSA {
                         default:
                             r.ungetChar(c);
                             r.ungetChar('e');
-                            return new Token(str.subSequence(0, str.length() - 1).toString(), id);
+                            return new Token(str.subSequence(0, str.length() - 1).toString(), id, row, col);
                     }
                     break;
                 case 5:
@@ -108,7 +108,7 @@ public class FSA {
                     } else {
                         //other character found
                         r.ungetChar(c);
-                        return new Token(str, id);
+                        return new Token(str, id, row, col);
                     }
                     break;
                 case 6:
@@ -122,7 +122,7 @@ public class FSA {
                         r.ungetChar(c);
                         r.ungetChar('-');
                         r.ungetChar('E');
-                        return new Token(str.subSequence(0, str.length() - 2).toString(), id);
+                        return new Token(str.subSequence(0, str.length() - 2).toString(), id, row, col);
                     }
                     break;
                 case 7:
@@ -132,7 +132,7 @@ public class FSA {
                     } else {
                         //other character found
                         r.ungetChar(c);
-                        return new Token(str, id);
+                        return new Token(str, id, row, col);
                     }
                     break;
                 case 8:
@@ -146,7 +146,7 @@ public class FSA {
                         r.ungetChar(c);
                         r.ungetChar('+');
                         r.ungetChar('E');
-                        return new Token(str.subSequence(0, str.length() - 2).toString(), id);
+                        return new Token(str.subSequence(0, str.length() - 2).toString(), id, row, col);
                     }
                     break;
                 case 10:
@@ -159,7 +159,7 @@ public class FSA {
                         r.ungetChar(c);
                         r.ungetChar('-');
                         r.ungetChar('e');
-                        return new Token(str.subSequence(0, str.length() - 2).toString(), id);
+                        return new Token(str.subSequence(0, str.length() - 2).toString(), id, row, col);
                     }
                     break;
                 case 12:
@@ -172,7 +172,7 @@ public class FSA {
                         r.ungetChar(c);
                         r.ungetChar('+');
                         r.ungetChar('e');
-                        return new Token(str.subSequence(0, str.length() - 2).toString(), id);
+                        return new Token(str.subSequence(0, str.length() - 2).toString(), id, row, col);
                     }
                     break;
                 default:
@@ -182,10 +182,10 @@ public class FSA {
             }
         } while (c != '\u001a');
         //End of file fall through
-        return new Token(str, id);
+        return new Token(str, id, row, col);
     }
 
-    public static Token TEST_LETTER(Reader r) {
+    public static Token TEST_LETTER(Reader r, int row, int col) {
         //  TODO
         //  State 0: Accept either _ or letter
         //      If _ is accepted, move to state 1
@@ -237,7 +237,7 @@ public class FSA {
                         r.nextChar();
                         break;
                     }
-                    return new Token("Identifier ending in _", Token.ID.ERROR);
+                    return new Token("Identifier ending in _", Token.ID.ERROR, row, col);
                 case 2:
                     c = r.peekChar();
                     if (c == '_') {
@@ -261,39 +261,39 @@ public class FSA {
             }
         }
         switch (str) {
-            case "and": return new Token(str, Token.ID.AND);
-            case "begin": return new Token(str, Token.ID.BEGIN);
-            case "Boolean": return new Token(str, Token.ID.BOOLEAN);
-            case "div": return new Token(str, Token.ID.DIV);
-            case "do": return new Token(str, Token.ID.DO);
-            case "downto": return new Token(str, Token.ID.DOWNTO);
-            case "else": return new Token(str, Token.ID.ELSE);
-            case "end": return new Token(str, Token.ID.END);
-            case "flase": return new Token(str, Token.ID.FALSE);
-            case "fixed": return new Token(str, Token.ID.FIXED);
-            case "float": return new Token(str, Token.ID.FLOAT);
-            case "for": return new Token(str, Token.ID.FOR);
-            case "function": return new Token(str, Token.ID.FUNCTION);
-            case "if": return new Token(str, Token.ID.IF);
-            case "integer": return new Token(str, Token.ID.INTEGER);
-            case "mod": return new Token(str, Token.ID.MOD);
-            case "not": return new Token(str, Token.ID.NOT);
-            case "or": return new Token(str, Token.ID.OR);
-            case "procedure": return new Token(str, Token.ID.PROCEDURE);
-            case "program": return new Token(str, Token.ID.PROGRAM);
-            case "read": return new Token(str, Token.ID.READ);
-            case "repeat": return new Token(str, Token.ID.REPEAT);
-            case "string": return new Token(str, Token.ID.STRING);
-            case "then": return new Token(str, Token.ID.THEN);
-            case "true": return new Token(str, Token.ID.TRUE);
-            case "to": return new Token(str, Token.ID.TO);
-            case "type": return new Token(str, Token.ID.TYPE);
-            case "until": return new Token(str, Token.ID.UNTIL);
-            case "var": return new Token(str, Token.ID.VAR);
-            case "while": return new Token(str, Token.ID.WHILE);
-            case "write": return new Token(str, Token.ID.WRITE);
-            case "writeln": return new Token(str, Token.ID.WRITELN);
-            default: return new Token(str, Token.ID.IDENTIFIER);
+            case "and": return new Token(str, Token.ID.AND, row, col);
+            case "begin": return new Token(str, Token.ID.BEGIN, row, col);
+            case "Boolean": return new Token(str, Token.ID.BOOLEAN, row, col);
+            case "div": return new Token(str, Token.ID.DIV, row, col);
+            case "do": return new Token(str, Token.ID.DO, row, col);
+            case "downto": return new Token(str, Token.ID.DOWNTO, row, col);
+            case "else": return new Token(str, Token.ID.ELSE, row, col);
+            case "end": return new Token(str, Token.ID.END, row, col);
+            case "flase": return new Token(str, Token.ID.FALSE, row, col);
+            case "fixed": return new Token(str, Token.ID.FIXED, row, col);
+            case "float": return new Token(str, Token.ID.FLOAT, row, col);
+            case "for": return new Token(str, Token.ID.FOR, row, col);
+            case "function": return new Token(str, Token.ID.FUNCTION, row, col);
+            case "if": return new Token(str, Token.ID.IF, row, col);
+            case "integer": return new Token(str, Token.ID.INTEGER, row, col);
+            case "mod": return new Token(str, Token.ID.MOD, row, col);
+            case "not": return new Token(str, Token.ID.NOT, row, col);
+            case "or": return new Token(str, Token.ID.OR, row, col);
+            case "procedure": return new Token(str, Token.ID.PROCEDURE, row, col);
+            case "program": return new Token(str, Token.ID.PROGRAM, row, col);
+            case "read": return new Token(str, Token.ID.READ, row, col);
+            case "repeat": return new Token(str, Token.ID.REPEAT, row, col);
+            case "string": return new Token(str, Token.ID.STRING, row, col);
+            case "then": return new Token(str, Token.ID.THEN, row, col);
+            case "true": return new Token(str, Token.ID.TRUE, row, col);
+            case "to": return new Token(str, Token.ID.TO, row, col);
+            case "type": return new Token(str, Token.ID.TYPE, row, col);
+            case "until": return new Token(str, Token.ID.UNTIL, row, col);
+            case "var": return new Token(str, Token.ID.VAR, row, col);
+            case "while": return new Token(str, Token.ID.WHILE, row, col);
+            case "write": return new Token(str, Token.ID.WRITE, row, col);
+            case "writeln": return new Token(str, Token.ID.WRITELN, row, col);
+            default: return new Token(str, Token.ID.IDENTIFIER, row, col);
         }
         
         /*
@@ -439,7 +439,7 @@ public class FSA {
         */
     }
 
-    public static Token TEST_STRING_LIT(Reader r) {
+    public static Token TEST_STRING_LIT(Reader r, int row, int col) {
         String str = "";
         int state = 0;
         char c = r.nextChar();  //  1 char accepted
@@ -480,17 +480,16 @@ public class FSA {
                 case 2:
                     //  Already accepted 2 + n characters so the next is
                     //  the first one after the token has ended (pc met!)
-                    return new Token(str, Token.ID.STRING_LIT);
+                    return new Token(str, Token.ID.STRING_LIT, row, col);
                 case 3:
-                    return new Token("String not closed at " +
-                            r.linenumber + ":" + r.col + ": " + str,
-                            Token.ID.RUN_STRING);
+                    return new Token("String not closed",
+                            Token.ID.RUN_STRING, row, col);
             }
         }
         return null;
     }
 
-    public static Token TEST_COLON(Reader r) {
+    public static Token TEST_COLON(Reader r, int row, int col) {
         String str = "";
         int state = 0;
         char c = r.nextChar();
@@ -523,13 +522,13 @@ public class FSA {
                         break;
                     }
                     //  One character accepted; pc has been met
-                    return new Token(str, Token.ID.COLON);
+                    return new Token(str, Token.ID.COLON, row, col);
                 /*  State 2:
                  Accept :=
                  */
                 case 2:
                     r.nextChar();   //  keep the found token (pc met!)
-                    return new Token(str, Token.ID.ASSIGN);
+                    return new Token(str, Token.ID.ASSIGN, row, col);
                 //  Postcondition: c points to the character after this token
             }
         }
@@ -538,7 +537,7 @@ public class FSA {
         return null;
     }
 
-    public static Token TEST_LTHAN(Reader r) {
+    public static Token TEST_LTHAN(Reader r, int row, int col) {
         String str = "";
         int state = 0;
         char c = r.nextChar();
@@ -578,19 +577,19 @@ public class FSA {
                         break;
                     }
                     //  Postcondition: now c is the character after < (pc met!)
-                    return new Token(str, Token.ID.LTHAN);
+                    return new Token(str, Token.ID.LTHAN, row, col);
                 /*  State 2:
                  Accept <=
                  */
                 case 2:
                     r.nextChar();   //  now points after = (pc met!)
-                    return new Token(str, Token.ID.LEQUAL);
+                    return new Token(str, Token.ID.LEQUAL, row, col);
                 /*  State 3:
                  Accept <>
                  */
                 case 3:
                     r.nextChar();   //  now points after = (pc met!)
-                    return new Token(str, Token.ID.NEQUAL);
+                    return new Token(str, Token.ID.NEQUAL, row, col);
             }
         }
         //  This should never happen
@@ -598,7 +597,7 @@ public class FSA {
         return null;
     }
 
-    public static Token TEST_GTHAN(Reader r) {
+    public static Token TEST_GTHAN(Reader r, int row, int col) {
         String str = "";
         char c = r.nextChar();
         int state = 0;
@@ -629,14 +628,14 @@ public class FSA {
                         break;
                     }
                     //  Only accepted one character (pc met!)
-                    return new Token(str, Token.ID.GTHAN);
+                    return new Token(str, Token.ID.GTHAN, row, col);
                 /*  State 2
                  c is character after = (pc met!)
 
                  */
                 case 2:
                     r.nextChar();   //  accept the = so the pc is met
-                    return new Token(str, Token.ID.GEQUAL);
+                    return new Token(str, Token.ID.GEQUAL, row, col);
             }
         }
         //  This should never happen;
@@ -644,100 +643,100 @@ public class FSA {
         return null;
     }
 
-    public static Token TEST_COMMA(Reader r) {
+    public static Token TEST_COMMA(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == ',') {
-            return new Token(",", Token.ID.COMMA);
+            return new Token(",", Token.ID.COMMA, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for COMMA FSA");
         return null;
     }
 
-    public static Token TEST_EQUAL(Reader r) {
+    public static Token TEST_EQUAL(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == '=') {
-            return new Token("=", Token.ID.EQUAL);
+            return new Token("=", Token.ID.EQUAL, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for EQUAL FSA");
         return null;
     }
 
-    public static Token TEST_FLOAT_DIVIDE(Reader r) {
+    public static Token TEST_FLOAT_DIVIDE(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == '/') {
-            return new Token("/", Token.ID.FLOAT_DIVIDE);
+            return new Token("/", Token.ID.FLOAT_DIVIDE, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for FLOAT_DIVIDE FSA");
         return null;
     }
 
-    public static Token TEST_LPAREN(Reader r) {
+    public static Token TEST_LPAREN(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == '(') {
-            return new Token("(", Token.ID.LPAREN);
+            return new Token("(", Token.ID.LPAREN, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for LPAREN FSA");
         return null;
     }
 
-    public static Token TEST_RPAREN(Reader r) {
+    public static Token TEST_RPAREN(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == ')') {
-            return new Token(")", Token.ID.RPAREN);
+            return new Token(")", Token.ID.RPAREN, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for RPAREN FSA");
         return null;
     }
 
-    public static Token TEST_MINUS(Reader r) {
+    public static Token TEST_MINUS(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == '-') {
-            return new Token("-", Token.ID.MINUS);
+            return new Token("-", Token.ID.MINUS, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for MINUS FSA");
         return null;
     }
 
-    public static Token TEST_PERIOD(Reader r) {
+    public static Token TEST_PERIOD(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == '.') {
-            return new Token(".", Token.ID.PERIOD);
+            return new Token(".", Token.ID.PERIOD, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for PERIOD FSA");
         return null;
     }
 
-    public static Token TEST_PLUS(Reader r) {
+    public static Token TEST_PLUS(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == '+') {
-            return new Token("+", Token.ID.PLUS);
+            return new Token("+", Token.ID.PLUS, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for PLUS FSA");
         return null;
     }
 
-    public static Token TEST_SCOLON(Reader r) {
+    public static Token TEST_SCOLON(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == ';') {
-            return new Token(";", Token.ID.SCOLON);
+            return new Token(";", Token.ID.SCOLON, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for SCOLON FSA");
         return null;
     }
 
-    public static Token TEST_TIMES(Reader r) {
+    public static Token TEST_TIMES(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == '*') {
-            return new Token("*", Token.ID.TIMES);
+            return new Token("*", Token.ID.TIMES, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for TIMES FSA");
