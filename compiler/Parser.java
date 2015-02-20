@@ -40,7 +40,7 @@ public class Parser {
      */
     private void match(Token in) {
         if (in == null) {
-            System.err.println("Invalid input to parser match function");
+            System.err.println("Invalid input to parser match function.");
             System.exit(1);
         }
         l1 = scanner.nextToken();
@@ -54,7 +54,7 @@ public class Parser {
      */
     private void error(Token err, String[] expected) {
         if (err == null || expected == null) {
-            System.err.println("Improper input to parser error function");
+            System.err.println("Improper input to parser error function.");
         }
         System.err.println("Error found " + err.getContents() + " "
                 + err.getID() + " at line " + err.getLine() + " col " + err.getCol());
@@ -63,11 +63,80 @@ public class Parser {
             System.err.print(", " + expected[i]);
         }
     }
-
+    //*************************************************************************
+    //  Stubs for rules 1-39
+    private void SystemGoal() {
+        Program();  //  rule 2
+        if (l1.getID() == Token.ID.EOF) {
+            match(l1);
+        }
+        else {
+            String[] err = {"end of file"};
+            error(l1, err);
+        }
+    }
+    private void Program() {
+        ProgramHeading();
+        if (l1.getID() == Token.ID.SCOLON) {
+            match(l1);
+        }
+        else {
+            String[] err = {";"};
+            error(l1, err);
+        }
+        Block();
+        if (l1.getID() == Token.ID.PERIOD) {
+            match(l1);
+        }
+        else {
+            String[] err = {"."};
+            error(l1, err);
+        }
+    }
+    private void ProgramHeading() {
+    }
+    private void Block(){
+    }
+    private void VariableDeclarationPart() {
+    }
+    private void VariableDeclarationTail() {
+    }
+    private void Type() {
+    }
+    private void ProcedureAndFunctionDeclarationPart() {
+    }
+    private void ProcedureDeclaration() {
+    }
+    private void FunctionDeclaration() {
+    }
+    private void ProcedureHeading() {
+    }
+    private void FunctionHeading() {
+    }
+    private void OptionalFormalParameterList() {
+    }
+    private void FormalParameterSectionTail() {
+    }
+    private void FormalParameterSection() {
+    }
+    private void ValueParameterSection() {
+    }
+    private void VariableParameterSection() {
+    }
+    private void StatementPart() {
+    }
+    private void CompoundStatement() {
+    }
+    private void StatementSequence() {
+    }
+    private void StatementTail() {
+    }
+    private void Statement() {
+    }
     //**************************************************************************
     //stubs for rules 40-47 
     private void EmptyStatement() {
-
+        
     }
 
     private void ReadStatement() {
