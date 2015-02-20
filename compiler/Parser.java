@@ -64,10 +64,6 @@ public class Parser {
         }
     }
 
-    
-    
-    
-    
     //**************************************************************************
     //stubs for rules 40-47 
     private void EmptyStatement() {
@@ -126,39 +122,114 @@ public class Parser {
     }
 
     private void OptionalElsePart() {
+        switch (l1.getID()) {
+            case ELSE: //rule 57
+                match(l1);
+                Statement();
+                break;
 
+            //@TODO case of e rule 58
+            default:
+                String[] err = {"else", "e"};
+                error(l1, err);
+
+        }
     }
 
     private void RepeatStatement() {
-
+        //rule 59
+        if (l1.getID() == Token.ID.REPEAT) {
+            match(l1);
+            StatementSequence();
+            if (l1.getID() == Token.ID.UNTIL) {
+                match(l1);
+                BooleanExpression();
+            } else {
+                String[] err = {"until"};
+                error(l1, err);
+            }
+        } else {
+            String[] err = {"repeat"};
+            error(l1, err);
+        }
     }
 
     private void WhileStatement() {
-
+        //rule 60
+        if (l1.getID() == Token.ID.WHILE) {
+            match(l1);
+            BooleanExpression();
+            if (l1.getID() == Token.ID.DO) {
+                match(l1);
+                Statement();
+            } else {
+                String[] err = {"do"};
+                error(l1, err);
+            }
+        } else {
+            String[] err = {"while"};
+            error(l1, err);
+        }
     }
 
     private void ForStatement() {
-
+        //rule 61
+        if (l1.getID() == Token.ID.FOR) {
+            match(l1);
+            ControlVariable();
+            if (l1.getID() == Token.ID.ASSIGN) {
+                match(l1);
+                InitialValue();
+                StepValue();
+                FinalValue();
+                if (l1.getID() == Token.ID.DO) {
+                    match(l1);
+                    Statement();
+                } else {
+                    String[] err = {"do"};
+                    error(l1, err);
+                }
+            } else {
+                String[] err = {":="};
+                error(l1, err);
+            }
+        } else {
+            String[] err = {"for"};
+            error(l1, err);
+        }
     }
 
     private void ControlVariable() {
-
+        VariableIdentifier(); //rule 62
     }
 
     private void InitialValue() {
-
+        OrdinalExpression(); //rule 63
     }
 
     private void StepValue() {
-
+        switch (l1.getID()) {
+            case TO: //rule 64
+                match(l1);
+                break;
+            case DOWNTO: //rule 65
+                match(l1);
+                break;
+            default:
+                String[] err = {"to", "downto"};
+                error(l1, err);
+        }
     }
 
     private void FinalValue() {
-
+        //rule 66
+        OrdinalExpression();
     }
 
     private void ProcedureStatement() {
-
+        //rule 67
+        ProcedureIdentifier();
+        OptionalActualParameterList();
     }
 
     private void OptionalActualParameterList() {
