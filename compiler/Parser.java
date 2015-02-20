@@ -5,7 +5,6 @@
  */
 package compiler;
 
-import java.io.File;
 import scanner.Scanner;
 
 /**
@@ -65,13 +64,37 @@ public class Parser {
         }
     }
 
+    
+    
+    
+    
+    //**************************************************************************
     //stubs for rules 40-47 
     private void EmptyStatement() {
 
     }
 
     private void ReadStatement() {
-
+        if (l1.getID() == Token.ID.READ) { //rule 45
+            match(l1);
+            if (l1.getID() == Token.ID.LPAREN) {
+                match(l1);
+                ReadParameter();
+                ReadParameterTail();
+                if (l1.getID() == Token.ID.RPAREN) {
+                    match(l1);
+                } else {
+                    String[] err = {")"};
+                    error(l1, err);
+                }
+            } else {
+                String[] err = {"("};
+                error(l1, err);
+            }
+        } else {
+            String[] err = {"read"};
+            error(l1, err);
+        }
     }
 
     private void ReadParameterTail() {
