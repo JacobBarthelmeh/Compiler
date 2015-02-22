@@ -6,7 +6,7 @@ public class test {
 
     public static void main(String[] args) {
         System.out.println("Running test");
-        Scanner scanner = new Scanner("src/testfile.mp");
+        Scanner scanner = new Scanner("testfile.mp");
         Token t;
         String s = "";
         boolean cancel = false;
@@ -26,14 +26,14 @@ public class test {
             System.out.println(s);
         }
         //  Since we know this passes and the FSA wasn't edited we can comment this out
-        //numberTest();
+        numberTest();
     }
 
     public static void numberTest() {
         System.out.println("Running Number Test");
         Scanner scanner = null;
         try {
-            scanner = new Scanner("src/numberTest.mp");
+            scanner = new Scanner("numberTest.mp");
         } catch (Exception e) {
             System.out.println("Error reading src/numberTest.mp");
             return;

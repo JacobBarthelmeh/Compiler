@@ -356,11 +356,6 @@ public class Parser {
     //**************************************************************************
     //stubs for rules 40-47 
     private void EmptyStatement() {
-<<<<<<< HEAD
-        
-=======
-        //@TODO case to handle e rule 44
->>>>>>> 1d234f7bcd684f6d297441c4ee46cec2c77e938e
     }
 
     private void ReadStatement() {
