@@ -67,7 +67,7 @@ public class Parser {
     //**************************************************************************
     //stubs for rules 40-47 
     private void EmptyStatement() {
-
+        //@TODO case to handle e rule 44
     }
 
     private void ReadStatement() {
@@ -94,31 +94,102 @@ public class Parser {
     }
 
     private void ReadParameterTail() {
+        switch (l1.getID()) {
+            case COMMA: //rule 46
+                match(l1);
+                ReadParameter();
+                ReadParameterTail();
+                break;
 
+            //@TODO handle case of e rule 47
+            default:
+                String[] err = {"comma", "e"};
+                error(l1, err);
+        }
     }
 
     private void ReadParameter() {
-
+        VariableIdentifier(); //rule 48
     }
 
     private void WriteStatment() {
+        switch (l1.getID()) {
+            case WRITE: //rule 49
+                match(l1);
+                break;
 
+            case WRITELN: //rule 50
+                match(l1);
+                break;
+
+            default:
+                String[] err = {"write", "writeln"};
+                error(l1, err);
+        }
+        if (l1.getID() == Token.ID.LPAREN) {
+            match(l1);
+            WriteParameter();
+            WriteParameterTail();
+            if (l1.getID() == Token.ID.RPAREN) {
+                match(l1);
+            } else {
+                String[] err = {")"};
+                error(l1, err);
+            }
+        } else {
+            String[] err = {"("};
+            error(l1, err);
+        }
     }
 
     private void WriteParameterTail() {
+        switch (l1.getID()) {
+            case COMMA: //rule 51
+                match(l1);
+                WriteParameter();
+                WriteParameterTail();
+                break;
 
+            //@TODO cas of e rule 52
+            default:
+                String[] err = {",", "e"};
+                error(l1, err);
+        }
     }
 
     private void WriteParameter() {
-
+        OrdinalExpression(); //rule 53
     }
 
     private void AssignmentStatement() {
-
+        VariableIdentifier(); //rule 54
+        FunctionIdentifier(); //rule 55
+        if (l1.getID() == Token.ID.ASSIGN) {
+            match(l1);
+            Expression();
+        } else {
+            String[] err = {"assign"};
+            error(l1, err);
+        }
     }
 
     private void IfStatement() {
-
+        //rule 56
+        if (l1.getID() == Token.ID.IF) {
+            match(l1);
+            BooleanExpression();
+            if (l1.getID() == Token.ID.THEN) {
+                match(l1);
+                Statement();
+                OptionalElsePart();
+            } else {
+                String[] err = {"then"};
+                error(l1, err);
+            }
+        } else {
+            String[] err = {"if"};
+            error(l1, err);
+        }
     }
 
     private void OptionalElsePart() {
@@ -319,16 +390,16 @@ public class Parser {
         Term();
         TermTail();
     }
-    
+
     private void TermTail() {
         AddingOperator(); // Rule 83
         Term();           // Rule 83
         TermTail();       // Rule 83
         switch (l1.getID()) {
-                          // Rule 84
+            // Rule 84
         }
     }
-    
+
     private void OptionalSign() {
         switch (l1.getID()) {
             case PLUS: // Rule 85
@@ -339,11 +410,11 @@ public class Parser {
                 break;
             // Rule 87 @TODO switch on e
             default:
-               String exp[] = {"PLUS", "MINUS"};
-               error(l1, exp);
+                String exp[] = {"PLUS", "MINUS"};
+                error(l1, exp);
         }
     }
-    
+
     private void AddingOperator() {
         switch (l1.getID()) {
             case PLUS: // Rule 88
@@ -356,25 +427,25 @@ public class Parser {
                 match(l1);
                 break;
             default:
-               String exp[] = {"PLUS", "MINUS", "OR"};
-               error(l1, exp);
+                String exp[] = {"PLUS", "MINUS", "OR"};
+                error(l1, exp);
         }
     }
-      
+
     private void Term() {
         Factor();      // RULE 91
         FactorTail();  // RULE 91
     }
-    
+
     private void FactorTail() {
         MultiplyingOperator();  // RULE 92
         Factor();               // RULE 92
         FactorTail();           // RULE 92
-        switch(l1.getID()) {
-                                // RULE 93
+        switch (l1.getID()) {
+            // RULE 93
         }
     }
-    
+
     private void MultiplyingOperator() {
         switch (l1.getID()) {
             case TIMES:         // RULE 94
@@ -392,11 +463,11 @@ public class Parser {
             case AND:           // RULE 98
                 match(l1);
                 break;
-         }
+        }
     }
-    
+
     private void Factor() {
-        switch(l1.getID()) {
+        switch (l1.getID()) {
             case INTEGER:
                 match(l1);      // RULE 99
                 break;
@@ -419,7 +490,7 @@ public class Parser {
             case LPAREN:        // RULE 105
                 match(l1);
                 Expression();
-                switch(l1.getID()) {
+                switch (l1.getID()) {
                     case RPAREN:
                         match(l1);
                         break;
@@ -434,11 +505,11 @@ public class Parser {
             default:
                 String[] exp = {"INTEGER", "FLOAT", "STRING_LIT", "TRUE", "FALSE", "NOT", "LPAREN EXPRESSION RPAREN", "FunctionIdentifier OptionalActualParameterList"};
                 error(l1, exp);
-        }   
+        }
     }
-    
+
     private void ProgramIdentifier() {
-        switch(l1.getID()) {
+        switch (l1.getID()) {
             case IDENTIFIER:    // RULE 107
                 match(l1);
                 break;
@@ -447,9 +518,9 @@ public class Parser {
                 error(l1, exp);
         }
     }
-        
+
     private void VariableIdentifier() {
-        switch(l1.getID()) {
+        switch (l1.getID()) {
             case IDENTIFIER:    // RULE 108
                 match(l1);
                 break;
@@ -458,9 +529,9 @@ public class Parser {
                 error(l1, exp);
         }
     }
-    
+
     private void ProcedureIdentifier() {
-        switch(l1.getID()) {
+        switch (l1.getID()) {
             case IDENTIFIER:     // RULE 109
                 match(l1);
                 break;
@@ -469,9 +540,9 @@ public class Parser {
                 error(l1, exp);
         }
     }
-        
+
     private void FunctionIdentifier() {
-        switch(l1.getID()) {
+        switch (l1.getID()) {
             case IDENTIFIER:    // RULE 110
                 match(l1);
                 break;
@@ -480,29 +551,29 @@ public class Parser {
                 error(l1, exp);
         }
     }
-    
+
     private void BooleanExpression() {
         Expression();           // RULE 111
     }
-    
+
     private void OrdinalExpression() {
         Expression();           // RULE 112
     }
-    
+
     private void IdentifierList() {
-        switch(l1.getID()) {
+        switch (l1.getID()) {
             case IDENTIFIER:    // RULE 113
                 match(l1);
                 IdentifierTail();
                 break;
             default:
                 String[] exp = {"IDENTIFIER"};
-                error(l1, exp);   
+                error(l1, exp);
         }
     }
-    
+
     private void IdentifierTail() {
-        switch(l1.getID()) {
+        switch (l1.getID()) {
             case COMMA:
                 match(l1); // RULE 114
                 if (l1.getID() == Token.ID.IDENTIFIER) {
