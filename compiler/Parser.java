@@ -63,6 +63,15 @@ public class Parser {
             System.err.print(", " + expected[i]);
         }
     }
+    /**
+     * Get the rule to execute
+     * @param rule The current rule
+     * @return The rule to execute
+     */
+    private int getRule(int rule) {
+        //  TODO: Lookahead
+        return 0;
+    }
     //*************************************************************************
     //  Stubs for rules 1-39
     private void SystemGoal() {
@@ -109,33 +118,53 @@ public class Parser {
         StatementPart();
     }
     private void VariableDeclarationPart() {
-        if (l1.getID() == Token.ID.VAR) {
-            match(l1);
+        switch (getRule(5)) {
+            case 5:
+                if (l1.getID() == Token.ID.VAR) {
+                    match(l1);
+                }
+                else {
+                    String[] err = {"var"};
+                    error(l1, err);
+                }
+                VariableDeclaration();
+                if (l1.getID() == Token.ID.SCOLON) {
+                    match(l1);
+                }
+                else {
+                    String[] err = {";"};
+                    error(l1, err);
+                }
+                VariableDeclarationTail();
+                break;
+            case 6:
+                break;
+            case -1:
+                //  No rule found!
+                String[] err = {"var", "procedure", "function", "begin"};
+                error(l1, err);
+                break;
         }
-        else {
-            String[] err = {"var"};
-            error(l1, err);
-        }
-        VariableDeclaration();
-        if (l1.getID() == Token.ID.SCOLON) {
-            match(l1);
-        }
-        else {
-            String[] err = {";"};
-            error(l1, err);
-        }
-        VariableDeclarationTail();
     }
     private void VariableDeclarationTail() {
-        VariableDeclaration();
-        if (l1.getID() == Token.ID.SCOLON) {
-            match(l1);
+        switch (getRule(7)) {
+            case 7:
+                VariableDeclaration();
+                if (l1.getID() == Token.ID.SCOLON) {
+                    match(l1);
+                }
+                else {
+                    String[] err = {";"};
+                    error(l1, err);
+                }
+                VariableDeclarationTail();
+            case 8:
+                break;
+            case -1:
+                String[] err = {"Integer", "Float", "String", "Boolean"};
+                error(l1, err);
+                break;
         }
-        else {
-            String[] err = {";"};
-            error(l1, err);
-        }
-        VariableDeclarationTail();
     }
     private void VariableDeclaration(){
         IdentifierList();
@@ -149,27 +178,35 @@ public class Parser {
         Type();
     }
     private void Type() {
-        switch(l1.getID()) {
-            case INTEGER:
-            case FLOAT:
-            case BOOLEAN:
-            case STRING:
+        switch(getRule(10)) {
+            case 10:
+            case 11:
+            case 12:
+            case 13:
                 match(l1);
+                break;
             default:
                 String err[] = {"Integer", "Float", "String", "Boolean"};
                 error(l1, err);
+                break;
         }
     }
     private void ProcedureAndFunctionDeclarationPart() {
-        //  Get lookup
-        int branch = 0;
-        if (branch == 0) {
-            ProcedureDeclaration();
-            ProcedureAndFunctionDeclarationPart();
-        }
-        else {
-            FunctionDeclaration();
-            ProcedureAndFunctionDeclarationPart();
+        switch (getRule(14)) {
+            case 14:
+                ProcedureDeclaration();
+                ProcedureAndFunctionDeclarationPart();
+                break;
+            case 15:
+                FunctionDeclaration();
+                ProcedureAndFunctionDeclarationPart();
+                break;
+            case 16:
+                break;
+            case -1:
+                String err[] = {"procedure", "function", "begin"};
+                error(l1, err);
+                break;
         }
     }
     private void ProcedureDeclaration() {
@@ -231,15 +268,20 @@ public class Parser {
         OptionalFormalParameterList();
     }
     private void OptionalFormalParameterList() {
-        if (l1.getID() == Token.ID.LPAREN) {
-            match(l1);
-        }
-        else {
-            String[] err = {"("};
-            error(l1, err);
-        }
-        FormalParameterSection();
-        FormalParameterSectionTail();
+        switch (getRule(21)) {
+            case 21:
+                if (l1.getID() == Token.ID.LPAREN) {
+                    match(l1);
+                }
+                else {
+                    String[] err = {"("};
+                    error(l1, err);
+                }
+                FormalParameterSection();
+                FormalParameterSectionTail();
+                break;
+            case 22:
+                break;
     }
     private void FormalParameterSectionTail() {
         if (l1.getID() == Token.ID.SCOLON) {
