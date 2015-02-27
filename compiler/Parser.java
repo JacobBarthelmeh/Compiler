@@ -9,12 +9,202 @@ import scanner.Scanner;
 
 /**
  *
- * @author sweetness
+ * @author team 4
  */
 public class Parser {
 
     private volatile Token l1; // look ahead token
     private volatile Scanner scanner;
+
+    private int Table[][] = {
+        /*SystemGoal*/{},
+        /*Program*/ {},
+        /*ProgramHeading*/ {},
+        /*Block*/ {},
+        /*VariableDeclarationPart*/ {},
+        /*VariableDeclaration*/ {},
+        /*Type*/ {},
+        /*ProcedureAndFunctionDeclarationPart*/ {},
+        /*ProcedureDeclaration*/ {},
+        /*FunctionDeclaration*/ {},
+        /*ProcedureHeading*/ {},
+        /*FunctionHeading*/ {},
+        /*OptionalFormalParameterList*/ {},
+        /*FormalParameterSectionTail*/ {},
+        /*FormalParameterSection*/ {},
+        /*ValueParameterSection*/ {},
+        /*VariableParameterSection*/ {},
+        /*StatementPart*/ {},
+        /*CompoundStatement*/ {},
+        /*StatementTail*/ {},
+        /*CompoundStatement*/ {},
+        /*StatementSequence*/ {},
+        /*StatementTail*/ {},
+        /*Statement*/ {},
+        /*EmptyStatement*/ {},
+        /*ReadStatment*/ {},
+        /*ReadParameterTail*/ {},
+        /*ReadParameter*/ {},
+        /*WriteStatement*/ {},
+        /*WriteParameterTail*/ {},
+        /*WriteParameter*/ {},
+        /*AssignmentStatement*/ {},
+        /*IfStatement*/ {},
+        /*OptionalElsePart*/ {},
+        /*RepeatStatement*/ {},
+        /*WhileStatement*/ {},
+        /*ForStatement*/ {},
+        /*ControlVariable*/ {},
+        /*InitialValue*/ {},
+        /*StepValue*/ {},
+        /*FinalValue*/ {},
+        /*ProcedureStatement*/ {},
+        /*OptionalActualParameterList*/ {},
+        /*ActualParameterTail*/ {},
+        /*ActualParameter*/ {},
+        /*Expression*/ {},
+        /*OptionalRelationalPart*/ {},
+        /*RelationalOperator*/ {},
+        /*SimpleExpression*/ {},
+        /*TermTail*/ {},
+        /*OptionalSign*/ {},
+        /*AddingOperator*/ {},
+        /*Term*/ {},
+        /*FactorTail*/ {},
+        /*MultiplyingOperator*/ {},
+        /*Factor*/ {},
+        /*ProgramIdentifier*/ {},
+        /*VariableIdentifier*/ {},
+        /*ProcedureIdentifier*/ {},
+        /*FunctionIdentifier*/ {},
+        /*BooleanExpression*/ {},
+        /*OrdinalExpression*/ {},
+        /*IdentifierList*/ {},
+        /*IdentifierTail*/ {}
+    };
+
+    //get the tokens index in the look ahead table
+    private int tokenIndex(Token.ID in) {
+        switch (in) {
+            case AND:
+                return 0;
+            case BEGIN:
+                return 1;
+            case BOOLEAN:
+                return 2;
+            case DIV:
+                return 3;
+            case DO:
+                return 4;
+            case DOWNTO:
+                return 5;
+            case ELSE:
+                return 6;
+            case END:
+                return 7;
+            case FALSE:
+                return 8;
+            case FIXED:
+                return 9;
+            case FLOAT:
+                return 10;
+            case FOR:
+                return 11;
+            case FUNCTION:
+                return 12;
+            case IF:
+                return 13;
+            case INTEGER:
+                return 14;
+            case MOD:
+                return 15;
+            case NOT:
+                return 16;
+            case OR:
+                return 17;
+            case PROCEDURE:
+                return 18;
+            case PROGRAM:
+                return 19;
+            case READ:
+                return 20;
+            case REPEAT:
+                return 21;
+            case STRING:
+                return 22;
+            case THEN:
+                return 23;
+            case TRUE:
+                return 24;
+            case TO:
+                return 25;
+            case TYPE:
+                return 26;
+            case UNTIL:
+                return 27;
+            case VAR:
+                return 28;
+            case WHILE:
+                return 29;
+            case WRITE:
+                return 30;
+            case WRITELN:
+                return 31;
+            case IDENTIFIER:
+                return 32;
+            case INTEGER_LIT:
+                return 33;
+            case FIXED_LIT:
+                return 34;
+            case FLOAT_LIT:
+                return 35;
+            case STRING_LIT:
+                return 36;
+            case ASSIGN:
+                return 37;
+            case COLON:
+                return 38;
+            case COMMA:
+                return 39;
+            case EQUAL:
+                return 40;
+            case FLOAT_DIVIDE:
+                return 41;
+            case GEQUAL:
+                return 42;
+            case GTHAN:
+                return 43;
+            case LEQUAL:
+                return 44;
+            case LTHAN:
+                return 45;
+            case LPAREN:
+                return 46;
+            case RPAREN:
+                return 47;
+            case MINUS:
+                return 48;
+            case NEQUAL:
+                return 49;
+            case PERIOD:
+                return 50;
+            case PLUS:
+                return 51;
+            case SCOLON:
+                return 52;
+            case TIMES:
+                return 53;
+            case EOF:
+                return 54;
+            case RUN_COMMENT:
+                return 55;
+            case RUN_STRING:
+                return 56;
+            case ERROR:
+                return 57;
+        }
+        return -1;
+    }
 
     /**
      * Set a file to parse
@@ -63,8 +253,10 @@ public class Parser {
             System.err.print(", " + expected[i]);
         }
     }
+
     /**
      * Get the rule to execute
+     *
      * @param rule The current rule
      * @return The rule to execute
      */
@@ -72,66 +264,65 @@ public class Parser {
         //  TODO: Lookahead
         return 0;
     }
+
     //*************************************************************************
     //  Stubs for rules 1-39
     private void SystemGoal() {
         Program();  //  rule 2
         if (l1.getID() == Token.ID.EOF) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {"end of file"};
             error(l1, err);
         }
     }
+
     private void Program() {
         ProgramHeading();
         if (l1.getID() == Token.ID.SCOLON) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {";"};
             error(l1, err);
         }
         Block();
         if (l1.getID() == Token.ID.PERIOD) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {"."};
             error(l1, err);
         }
     }
+
     private void ProgramHeading() {
         if (l1.getID() == Token.ID.PROGRAM) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {"program"};
             error(l1, err);
         }
         ProgramIdentifier();
     }
-    private void Block(){
+
+    private void Block() {
         VariableDeclarationPart();
         ProcedureAndFunctionDeclarationPart();
         StatementPart();
     }
+
     private void VariableDeclarationPart() {
         switch (getRule(5)) {
             case 5:
                 if (l1.getID() == Token.ID.VAR) {
                     match(l1);
-                }
-                else {
+                } else {
                     String[] err = {"var"};
                     error(l1, err);
                 }
                 VariableDeclaration();
                 if (l1.getID() == Token.ID.SCOLON) {
                     match(l1);
-                }
-                else {
+                } else {
                     String[] err = {";"};
                     error(l1, err);
                 }
@@ -146,14 +337,14 @@ public class Parser {
                 break;
         }
     }
+
     private void VariableDeclarationTail() {
         switch (getRule(7)) {
             case 7:
                 VariableDeclaration();
                 if (l1.getID() == Token.ID.SCOLON) {
                     match(l1);
-                }
-                else {
+                } else {
                     String[] err = {";"};
                     error(l1, err);
                 }
@@ -166,19 +357,20 @@ public class Parser {
                 break;
         }
     }
-    private void VariableDeclaration(){
+
+    private void VariableDeclaration() {
         IdentifierList();
         if (l1.getID() == Token.ID.COLON) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {":"};
             error(l1, err);
         }
         Type();
     }
+
     private void Type() {
-        switch(getRule(10)) {
+        switch (getRule(10)) {
             case 10:
             case 11:
             case 12:
@@ -191,6 +383,7 @@ public class Parser {
                 break;
         }
     }
+
     private void ProcedureAndFunctionDeclarationPart() {
         switch (getRule(14)) {
             case 14:
@@ -209,71 +402,69 @@ public class Parser {
                 break;
         }
     }
+
     private void ProcedureDeclaration() {
         ProcedureHeading();
         if (l1.getID() == Token.ID.SCOLON) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {";"};
             error(l1, err);
         }
         Block();
         if (l1.getID() == Token.ID.SCOLON) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {";"};
             error(l1, err);
         }
     }
+
     private void FunctionDeclaration() {
         FunctionHeading();
         if (l1.getID() == Token.ID.SCOLON) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {";"};
             error(l1, err);
         }
         Block();
         if (l1.getID() == Token.ID.SCOLON) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {";"};
             error(l1, err);
         }
     }
-    private void ProcedureHeading() {        
+
+    private void ProcedureHeading() {
         if (l1.getID() == Token.ID.PROCEDURE) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {"procedure"};
             error(l1, err);
         }
         procedureIdentifier();
         OptionalFormalParameterList();
     }
+
     private void FunctionHeading() {
         if (l1.getID() == Token.ID.FUNCTION) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {"function"};
             error(l1, err);
         }
         functionIdentifier();
         OptionalFormalParameterList();
     }
+
     private void OptionalFormalParameterList() {
         switch (getRule(21)) {
             case 21:
                 if (l1.getID() == Token.ID.LPAREN) {
                     match(l1);
-                }
-                else {
+                } else {
                     String[] err = {"("};
                     error(l1, err);
                 }
@@ -282,82 +473,89 @@ public class Parser {
                 break;
             case 22:
                 break;
-    }
+        }
+    
+
+    
+
+    
+
     private void FormalParameterSectionTail() {
         if (l1.getID() == Token.ID.SCOLON) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {";"};
             error(l1, err);
         }
         FormalParameterSection();
         FormalParameterSectionTail();
     }
+
     private void FormalParameterSection() {
         int branch = 0;
         if (branch == 0) {
             ValueParameterSection();
-        }
-        else {
+        } else {
             VariableParameterSection();
         }
     }
+
     private void ValueParameterSection() {
         IdentifierList();
         if (l1.getID() == Token.ID.COLON) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {":"};
             error(l1, err);
         }
         Type();
     }
+
     private void VariableParameterSection() {
         if (l1.getID() == Token.ID.VAR) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {"var"};
             error(l1, err);
         }
         IdentifierList();
         if (l1.getID() == Token.ID.COLON) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {":"};
             error(l1, err);
         }
         Type();
     }
+
     private void StatementPart() {
         CompoundStatement();
     }
+
     private void CompoundStatement() {
         if (l1.getID() == Token.ID.BEGIN) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {"begin"};
             error(l1, err);
         }
         StatementSequence();
         if (l1.getID() == Token.ID.END) {
             match(l1);
-        }
-        else {
+        } else {
             String[] err = {"end"};
             error(l1, err);
         }
     }
+
     private void StatementSequence() {
         Statement();
         StatementTail();
     }
+
     private void StatementTail() {
     }
+
     private void Statement() {
         int branch = 0;
         switch (branch) {
@@ -392,11 +590,13 @@ public class Parser {
                 ProcedureStatement();
                 break;
             default:
-                
+
         }
     }
+
     //**************************************************************************
     //stubs for rules 40-47 
+    // Jacob Barthelmeh
     private void EmptyStatement() {
     }
 
