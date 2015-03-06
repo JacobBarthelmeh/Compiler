@@ -5,6 +5,7 @@
  */
 package compiler;
 
+import java.io.PrintWriter;
 import scanner.Scanner;
 
 /**
@@ -15,72 +16,73 @@ public class Parser {
 
     private volatile Token l1; // look ahead token
     private volatile Scanner scanner;
+    private volatile PrintWriter rFile;
 
     private int Table[][] = {
-        /*SystemGoal*/{},
-        /*Program*/ {},
-        /*ProgramHeading*/ {},
-        /*Block*/ {},
-        /*VariableDeclarationPart*/ {},
-        /*VariableDeclaration*/ {},
-        /*Type*/ {},
-        /*ProcedureAndFunctionDeclarationPart*/ {},
-        /*ProcedureDeclaration*/ {},
-        /*FunctionDeclaration*/ {},
-        /*ProcedureHeading*/ {},
-        /*FunctionHeading*/ {},
-        /*OptionalFormalParameterList*/ {},
-        /*FormalParameterSectionTail*/ {},
-        /*FormalParameterSection*/ {},
-        /*ValueParameterSection*/ {},
-        /*VariableParameterSection*/ {},
-        /*StatementPart*/ {},
-        /*CompoundStatement*/ {},
-        /*StatementTail*/ {},
-        /*CompoundStatement*/ {},
-        /*StatementSequence*/ {},
-        /*StatementTail*/ {},
-        /*Statement*/ {},
-        /*EmptyStatement*/ {},
-        /*ReadStatment*/ {},
-        /*ReadParameterTail*/ {},
-        /*ReadParameter*/ {},
-        /*WriteStatement*/ {},
-        /*WriteParameterTail*/ {},
-        /*WriteParameter*/ {},
-        /*AssignmentStatement*/ {},
-        /*IfStatement*/ {},
-        /*OptionalElsePart*/ {},
-        /*RepeatStatement*/ {},
-        /*WhileStatement*/ {},
-        /*ForStatement*/ {},
-        /*ControlVariable*/ {},
-        /*InitialValue*/ {},
-        /*StepValue*/ {},
-        /*FinalValue*/ {},
-        /*ProcedureStatement*/ {},
-        /*OptionalActualParameterList*/ {},
-        /*ActualParameterTail*/ {},
-        /*ActualParameter*/ {},
-        /*Expression*/ {},
-        /*OptionalRelationalPart*/ {},
-        /*RelationalOperator*/ {},
-        /*SimpleExpression*/ {},
-        /*TermTail*/ {},
-        /*OptionalSign*/ {},
-        /*AddingOperator*/ {},
-        /*Term*/ {},
-        /*FactorTail*/ {},
-        /*MultiplyingOperator*/ {},
-        /*Factor*/ {},
-        /*ProgramIdentifier*/ {},
-        /*VariableIdentifier*/ {},
-        /*ProcedureIdentifier*/ {},
-        /*FunctionIdentifier*/ {},
-        /*BooleanExpression*/ {},
-        /*OrdinalExpression*/ {},
-        /*IdentifierList*/ {},
-        /*IdentifierTail*/ {}
+        /*  SystemGoal*/{},
+        /*  Program*/ {},
+        /*  ProgramHeading*/ {},
+        /*  Block*/ {},
+        /*  VariableDeclarationPart*/ {},
+        /*5 VariableDeclaration*/ {},
+        /*  Type*/ {},
+        /*  ProcedureAndFunctionDeclarationPart*/ {},
+        /*  ProcedureDeclaration*/ {},
+        /*  FunctionDeclaration*/ {},
+        /*10ProcedureHeading*/ {},
+        /*  FunctionHeading*/ {},
+        /*  OptionalFormalParameterList*/ {},
+        /*  FormalParameterSectionTail*/ {},
+        /*  FormalParameterSection*/ {},
+        /*15ValueParameterSection*/ {},
+        /*  VariableParameterSection*/ {},
+        /*  StatementPart*/ {},
+        /*  CompoundStatement*/ {},
+        /*  StatementTail*/ {},
+        /*20CompoundStatement*/ {},
+        /*  StatementSequence*/ {},
+        /*  StatementTail*/ {},
+        /*  Statement*/ {},
+        /*  EmptyStatement*/ {},
+        /*25ReadStatment*/ {},
+        /*  ReadParameterTail*/ {},
+        /*  ReadParameter*/ {},
+        /*  WriteStatement*/ {},
+        /*  WriteParameterTail*/ {},
+        /*30WriteParameter*/ {},
+        /*  AssignmentStatement*/ {},
+        /*  IfStatement*/ {},
+        /*  OptionalElsePart*/ {},
+        /*  RepeatStatement*/ {},
+        /*35WhileStatement*/ {},
+        /*  ForStatement*/ {},
+        /*  ControlVariable*/ {},
+        /*  InitialValue*/ {},
+        /*  StepValue*/ {},
+        /*40FinalValue*/ {},
+        /*  ProcedureStatement*/ {},
+        /*  OptionalActualParameterList*/ {},
+        /*  ActualParameterTail*/ {},
+        /*  ActualParameter*/ {},
+        /*45Expression*/ {},
+        /*  OptionalRelationalPart*/ {},
+        /*  RelationalOperator*/ {},
+        /*  SimpleExpression*/ {},
+        /*  TermTail*/ {},
+        /*50OptionalSign*/ {},
+        /*  AddingOperator*/ {},
+        /*  Term*/ {},
+        /*  FactorTail*/ {},
+        /*  MultiplyingOperator*/ {},
+        /*55Factor*/ {},
+        /*  ProgramIdentifier*/ {},
+        /*  VariableIdentifier*/ {},
+        /*  ProcedureIdentifier*/ {},
+        /*  FunctionIdentifier*/ {},
+        /*60BooleanExpression*/ {},
+        /*  OrdinalExpression*/ {},
+        /*  IdentifierList*/ {},
+        /*  IdentifierTail*/ {}
     };
 
     //get the tokens index in the look ahead table
@@ -223,6 +225,19 @@ public class Parser {
         return 1;
     }
 
+    private int ruleFile(int rule) {
+        if (rFile == null) {
+            try {
+                rFile = new PrintWriter("rule_list.txt", "UFT-8");
+            } catch (Exception e) {
+                System.out.println("Unable to make file rule_list.csv");
+                return 1;
+            }
+        }
+        rFile.print(rule + " ");
+        return 0;
+    }
+
     /**
      * If match was found consume it and look ahead
      *
@@ -246,6 +261,7 @@ public class Parser {
         if (err == null || expected == null) {
             System.err.println("Improper input to parser error function.");
         }
+        rFile.close();
         System.err.println("Error found " + err.getContents() + " "
                 + err.getID() + " at line " + err.getLine() + " col " + err.getCol());
         System.err.print("Was expecting ");
@@ -260,9 +276,10 @@ public class Parser {
      * @param rule The current rule
      * @return The rule to execute
      */
-    private int getRule(int rule) {
-        //  TODO: Lookahead
-        return 0;
+    private int getRule(int nonTerminal) {
+        int rule = Table[nonTerminal][tokenIndex(l1.getID())];
+        ruleFile(rule); //write the rule taken
+        return rule;
     }
 
     //*************************************************************************
@@ -444,7 +461,7 @@ public class Parser {
             String[] err = {"procedure"};
             error(l1, err);
         }
-        procedureIdentifier();
+        ProcedureIdentifier();
         OptionalFormalParameterList();
     }
 
@@ -455,7 +472,7 @@ public class Parser {
             String[] err = {"function"};
             error(l1, err);
         }
-        functionIdentifier();
+        FunctionIdentifier();
         OptionalFormalParameterList();
     }
 
@@ -474,6 +491,95 @@ public class Parser {
             case 22:
                 break;
         }
+    }
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
     
 
     
@@ -572,7 +678,7 @@ public class Parser {
                 WriteStatement();
                 break;
             case 38:
-                AssignStatement();
+                AssignmentStatement();
                 break;
             case 39:
                 IfStatement();
@@ -598,138 +704,204 @@ public class Parser {
     //stubs for rules 40-47 
     // Jacob Barthelmeh
     private void EmptyStatement() {
-    }
-
-    private void ReadStatement() {
-        if (l1.getID() == Token.ID.READ) { //rule 45
-            match(l1);
-            if (l1.getID() == Token.ID.LPAREN) {
-                match(l1);
-                ReadParameter();
-                ReadParameterTail();
-                if (l1.getID() == Token.ID.RPAREN) {
-                    match(l1);
-                } else {
-                    String[] err = {")"};
-                    error(l1, err);
-                }
-            } else {
-                String[] err = {"("};
+        switch (getRule(24)) {
+            case 44:
+                break;
+            default:
+                String[] err = {""};
                 error(l1, err);
-            }
-        } else {
-            String[] err = {"read"};
-            error(l1, err);
         }
     }
 
+    private void ReadStatement() {
+        switch (getRule(25)) {
+            case 45://rule 45
+                if (l1.getID() == Token.ID.READ) { //rule 45
+                    match(l1);
+                    if (l1.getID() == Token.ID.LPAREN) {
+                        match(l1);
+                        ReadParameter();
+                        ReadParameterTail();
+                        if (l1.getID() == Token.ID.RPAREN) {
+                            match(l1);
+                        } else {
+                            String[] err = {")"};
+                            error(l1, err);
+                        }
+                    } else {
+                        String[] err = {"("};
+                        error(l1, err);
+                    }
+                } else {
+                    String[] err = {"read"};
+                    error(l1, err);
+                }
+                break;
+            default:
+                String exp[] = {""};
+                error(l1, exp);
+        }
+
+    }
+
     private void ReadParameterTail() {
-        switch (l1.getID()) {
-            case COMMA: //rule 46
+        switch (getRule(26)) {
+            case 46: //rule 46
                 match(l1);
                 ReadParameter();
                 ReadParameterTail();
                 break;
-
-            //@TODO handle case of e rule 47
+            case 47://handle case of e rule 47
+                break;
             default:
-                String[] err = {"comma", "e"};
+                String[] err = {"comma"};
                 error(l1, err);
         }
     }
 
     private void ReadParameter() {
-        VariableIdentifier(); //rule 48
+        switch (getRule(27)) {
+            case 48://rule 48
+                VariableIdentifier();
+                break;
+            default:
+                String exp[] = {""};
+                error(l1, exp);
+        }
     }
 
-    private void WriteStatment() {
-        switch (l1.getID()) {
-            case WRITE: //rule 49
+    private void WriteStatement() {
+        switch (getRule(28)) {
+            case 49: //rule 49
                 match(l1);
+                if (l1.getID() == Token.ID.LPAREN) {
+                    match(l1);
+                    WriteParameter();
+                    WriteParameterTail();
+                    if (l1.getID() == Token.ID.RPAREN) {
+                        match(l1);
+                    } else {
+                        String[] err = {")"};
+                        error(l1, err);
+                    }
+                } else {
+                    String[] err = {"("};
+                    error(l1, err);
+                }
                 break;
 
-            case WRITELN: //rule 50
+            case 59: //rule 50
                 match(l1);
+                if (l1.getID() == Token.ID.LPAREN) {
+                    match(l1);
+                    WriteParameter();
+                    WriteParameterTail();
+                    if (l1.getID() == Token.ID.RPAREN) {
+                        match(l1);
+                    } else {
+                        String[] err = {")"};
+                        error(l1, err);
+                    }
+                } else {
+                    String[] err = {"("};
+                    error(l1, err);
+                }
                 break;
 
             default:
                 String[] err = {"write", "writeln"};
                 error(l1, err);
         }
-        if (l1.getID() == Token.ID.LPAREN) {
-            match(l1);
-            WriteParameter();
-            WriteParameterTail();
-            if (l1.getID() == Token.ID.RPAREN) {
-                match(l1);
-            } else {
-                String[] err = {")"};
-                error(l1, err);
-            }
-        } else {
-            String[] err = {"("};
-            error(l1, err);
-        }
     }
 
     private void WriteParameterTail() {
-        switch (l1.getID()) {
-            case COMMA: //rule 51
+        switch (getRule(29)) {
+            case 51: //rule 51
                 match(l1);
                 WriteParameter();
                 WriteParameterTail();
                 break;
-
-            //@TODO cas of e rule 52
+            case 52://case of e rule 52
+                break;
             default:
-                String[] err = {",", "e"};
+                String[] err = {","};
                 error(l1, err);
         }
     }
 
     private void WriteParameter() {
-        OrdinalExpression(); //rule 53
+        switch (getRule(30)) {
+            case 53://rule 53
+                OrdinalExpression();
+                break;
+            default:
+                String exp[] = {""};
+                error(l1, exp);
+        }
     }
 
     private void AssignmentStatement() {
-        VariableIdentifier(); //rule 54
-        FunctionIdentifier(); //rule 55
-        if (l1.getID() == Token.ID.ASSIGN) {
-            match(l1);
-            Expression();
-        } else {
-            String[] err = {"assign"};
-            error(l1, err);
+        switch (getRule(31)) {
+            case 54: //rule 54
+                VariableIdentifier();
+                if (l1.getID() == Token.ID.ASSIGN) {
+                    match(l1);
+                    Expression();
+                } else {
+                    String[] err = {"assign"};
+                    error(l1, err);
+                }
+                break;
+            case 55://rule 55
+                FunctionIdentifier(); //rule 55
+                if (l1.getID() == Token.ID.ASSIGN) {
+                    match(l1);
+                    Expression();
+                } else {
+                    String[] err = {"assign"};
+                    error(l1, err);
+                }
+                break;
+            default:
+                String[] err = {"else", "e"};
+                error(l1, err);
+
         }
     }
 
     private void IfStatement() {
-        //rule 56
-        if (l1.getID() == Token.ID.IF) {
-            match(l1);
-            BooleanExpression();
-            if (l1.getID() == Token.ID.THEN) {
-                match(l1);
-                Statement();
-                OptionalElsePart();
-            } else {
-                String[] err = {"then"};
-                error(l1, err);
-            }
-        } else {
-            String[] err = {"if"};
-            error(l1, err);
+        switch (getRule(32)) {
+            case 56: //rule 56
+                if (l1.getID() == Token.ID.IF) {
+                    match(l1);
+                    BooleanExpression();
+                    if (l1.getID() == Token.ID.THEN) {
+                        match(l1);
+                        Statement();
+                        OptionalElsePart();
+                    } else {
+                        String[] err = {"then"};
+                        error(l1, err);
+                    }
+                } else {
+                    String[] err = {"if"};
+                    error(l1, err);
+                }
+                break;
+            default:
+                String exp[] = {""};
+                error(l1, exp);
         }
     }
 
     private void OptionalElsePart() {
-        switch (l1.getID()) {
-            case ELSE: //rule 57
+        switch (getRule(33)) {
+            case 57: //rule 57
                 match(l1);
                 Statement();
                 break;
-
-            //@TODO case of e rule 58
+            case 58://case of e rule 58
+                break;
             default:
                 String[] err = {"else", "e"};
                 error(l1, err);
@@ -738,82 +910,114 @@ public class Parser {
     }
 
     private void RepeatStatement() {
-        //rule 59
-        if (l1.getID() == Token.ID.REPEAT) {
-            match(l1);
-            StatementSequence();
-            if (l1.getID() == Token.ID.UNTIL) {
-                match(l1);
-                BooleanExpression();
-            } else {
-                String[] err = {"until"};
-                error(l1, err);
-            }
-        } else {
-            String[] err = {"repeat"};
-            error(l1, err);
+        switch (getRule(34)) {
+            case 59://rule 59
+                if (l1.getID() == Token.ID.REPEAT) {
+                    match(l1);
+                    StatementSequence();
+                    if (l1.getID() == Token.ID.UNTIL) {
+                        match(l1);
+                        BooleanExpression();
+                    } else {
+                        String[] err = {"until"};
+                        error(l1, err);
+                    }
+                } else {
+                    String[] err = {"repeat"};
+                    error(l1, err);
+                }
+                break;
+            default:
+                String exp[] = {""};
+                error(l1, exp);
         }
     }
 
     private void WhileStatement() {
-        //rule 60
-        if (l1.getID() == Token.ID.WHILE) {
-            match(l1);
-            BooleanExpression();
-            if (l1.getID() == Token.ID.DO) {
-                match(l1);
-                Statement();
-            } else {
-                String[] err = {"do"};
-                error(l1, err);
-            }
-        } else {
-            String[] err = {"while"};
-            error(l1, err);
+        switch (getRule(35)) {
+            case 60://rule 60
+                if (l1.getID() == Token.ID.WHILE) {
+                    match(l1);
+                    BooleanExpression();
+                    if (l1.getID() == Token.ID.DO) {
+                        match(l1);
+                        Statement();
+                    } else {
+                        String[] err = {"do"};
+                        error(l1, err);
+                    }
+                } else {
+                    String[] err = {"while"};
+                    error(l1, err);
+                }
+                break;
+            default:
+                String exp[] = {"while"};
+                error(l1, exp);
         }
     }
 
     private void ForStatement() {
-        //rule 61
-        if (l1.getID() == Token.ID.FOR) {
-            match(l1);
-            ControlVariable();
-            if (l1.getID() == Token.ID.ASSIGN) {
-                match(l1);
-                InitialValue();
-                StepValue();
-                FinalValue();
-                if (l1.getID() == Token.ID.DO) {
+        switch (getRule(36)) {
+            case 61://rule 61
+                if (l1.getID() == Token.ID.FOR) {
                     match(l1);
-                    Statement();
+                    ControlVariable();
+                    if (l1.getID() == Token.ID.ASSIGN) {
+                        match(l1);
+                        InitialValue();
+                        StepValue();
+                        FinalValue();
+                        if (l1.getID() == Token.ID.DO) {
+                            match(l1);
+                            Statement();
+                        } else {
+                            String[] err = {"do"};
+                            error(l1, err);
+                        }
+                    } else {
+                        String[] err = {":="};
+                        error(l1, err);
+                    }
                 } else {
-                    String[] err = {"do"};
+                    String[] err = {"for"};
                     error(l1, err);
                 }
-            } else {
-                String[] err = {":="};
-                error(l1, err);
-            }
-        } else {
-            String[] err = {"for"};
-            error(l1, err);
+                break;
+            default:
+                String exp[] = {"for"};
+                error(l1, exp);
         }
     }
 
     private void ControlVariable() {
-        VariableIdentifier(); //rule 62
+        switch (getRule(37)) {
+            case 62://rule 62
+                VariableIdentifier();
+                break;
+            default:
+                String exp[] = {""};
+                error(l1, exp);
+        }
     }
 
     private void InitialValue() {
-        OrdinalExpression(); //rule 63
+        switch (getRule(38)) {
+            case 63://rule 63
+                OrdinalExpression();
+                break;
+            default:
+                String exp[] = {""};
+                error(l1, exp);
+        }
     }
 
     private void StepValue() {
-        switch (l1.getID()) {
-            case TO: //rule 64
+        switch (getRule(39)) {
+            case 64: //rule 64
                 match(l1);
                 break;
-            case DOWNTO: //rule 65
+            case 65: //rule 65
                 match(l1);
                 break;
             default:
@@ -823,19 +1027,31 @@ public class Parser {
     }
 
     private void FinalValue() {
-        //rule 66
-        OrdinalExpression();
+        switch (getRule(40)) {
+            case 66://rule 66
+                OrdinalExpression();
+                break;
+            default:
+                String exp[] = {""};
+                error(l1, exp);
+        }
     }
 
     private void ProcedureStatement() {
-        //rule 67
-        ProcedureIdentifier();
-        OptionalActualParameterList();
+        switch (getRule(41)) {
+            case 67://rule 67
+                ProcedureIdentifier();
+                OptionalActualParameterList();
+                break;
+            default:
+                String exp[] = {""};
+                error(l1, exp);
+        }
     }
 
     private void OptionalActualParameterList() {
-        switch (l1.getID()) {
-            case LPAREN: //rule 68
+        switch (getRule(42)) {
+            case 68: //rule 68
                 match(l1);
                 ActualParameter();
                 ActualParameterTail();
@@ -846,8 +1062,8 @@ public class Parser {
                     error(l1, err);
                 }
                 break;
-
-            //rule 69 @TODO switch on e
+            case 69://rule 69 switch on e
+                break;
             default:
                 String[] err = {"("};
                 error(l1, err);
@@ -855,14 +1071,14 @@ public class Parser {
     }
 
     private void ActualParameterTail() {
-        switch (l1.getID()) {
-            case COMMA: //rule 70
+        switch (getRule(43)) {
+            case 70: //rule 70
                 match(l1);
                 ActualParameter();
                 ActualParameterTail();
                 break;
-
-            // @TODO switch on e
+            case 71: //e
+                break;
             default:
                 String[] err = {","};
                 error(l1, err);
@@ -870,41 +1086,60 @@ public class Parser {
     }
 
     private void ActualParameter() {
-        OrdinalEpression();//rule 72
+        switch (getRule(44)) {
+            case 72:
+                OrdinalExpression();//rule 72
+                break;
+            default:
+                String exp[] = {""};
+                error(l1, exp);
+        }
     }
 
     private void Expression() {
-        SimpleExpression(); //rule 73
-        OptionalRelationalPart(); //rule 73
+        switch (getRule(45)) {
+            case 73:
+                SimpleExpression(); //rule 73
+                OptionalRelationalPart(); //rule 73
+                break;
+            default:
+                String exp[] = {""};
+                error(l1, exp);
+        }
     }
 
     private void OptionalRelationalPart() {
-        RelationalOperator(); //rule 74
-        SimpleExpression(); //rule 74
-        switch (l1.getID()) {
-            //rule 75
-            //@TODO switch on e
+        switch (getRule(46)) {
+            case 74:
+                RelationalOperator(); //rule 74
+                SimpleExpression(); //rule 74
+                break;
+            case 75://rule 75
+                break;
+            default:
+                String exp[] = {""};
+                error(l1, exp);
         }
     }
 
     private void RelationalOperator() {
-        switch (l1.getID()) {
-            case EQUAL: //rule 76
+        switch (getRule(47)) {
+            case 76: //rule 76
                 match(l1);
                 break;
-            case LTHAN: //rule 77
+            case 77: //rule 77
                 match(l1);
                 break;
-            case GTHAN: //rule 78
+            case 78: //rule 78
                 match(l1);
                 break;
-            case LEQUAL: //rule 79
+            case 79: //rule 79
                 match(l1);
                 break;
-            case GEQUAL: //rule 80
+            case 80: //rule 80
                 match(l1);
                 break;
-            case NEQUAL: //rule 81
+            case 81: //rule 81
                 match(l1);
                 break;
             default:
@@ -1030,7 +1265,7 @@ public class Parser {
                 }
             case IDENTIFIER:   // RULE 106
                 FunctionIdentifier();
-                OptionalActualParamterList();
+                OptionalActualParameterList();
                 break;
             default:
                 String[] exp = {"INTEGER", "FLOAT", "STRING_LIT", "TRUE", "FALSE", "NOT", "LPAREN EXPRESSION RPAREN", "FunctionIdentifier OptionalActualParameterList"};
