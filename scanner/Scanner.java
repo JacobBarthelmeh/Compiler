@@ -16,4 +16,12 @@ public class Scanner {
     public Scanner(String filename) {
         d = new Dispatcher(filename);
     }
+    
+    
+    /**
+     * Close file scanning from
+     */
+    public void close(){
+        d.close();
+    }
 }

@@ -1,6 +1,6 @@
 package compiler;
 
-import scanner.test;
+import tests.Test;
 
 public class Compiler {
 
@@ -10,7 +10,7 @@ public class Compiler {
     public static void main(String[] args) {
         //  This was done because a Netbeans bug caused the right click menu
         //  to glitch out.
-        test.main(args);
+        Test.main(args);
     }
     
 }

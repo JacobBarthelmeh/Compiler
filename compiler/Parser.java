@@ -17,6 +17,8 @@ public class Parser {
     private volatile Token l1; // look ahead token
     private volatile Scanner scanner;
     private volatile PrintWriter rFile;
+    private volatile String rule_tree_file = "rule_list.txt";
+    private volatile boolean error_flag = false;
 
     private int Table[][] = {
         /*  SystemGoal*/{},
@@ -214,21 +216,28 @@ public class Parser {
      * @param in file to be parsed
      * @return 0 on success
      */
-    public int setFile(String in) {
+    public int parseFile(String in) {
         try {
             scanner = new Scanner(in);
             l1 = scanner.nextToken();
-            return 0;
+            Program();
+            rFile.close();
+            scanner.close();
+            if (error_flag) {
+                return -1;
+            } else {
+                return 0;
+            }
         } catch (Exception e) {
-            System.err.println("Error set file " + in + " in parser");
+            System.err.println("Error parsing file " + in + " in parser " + e);
         }
-        return 1;
+        return -1;
     }
 
     private int ruleFile(int rule) {
         if (rFile == null) {
             try {
-                rFile = new PrintWriter("rule_list.txt", "UFT-8");
+                rFile = new PrintWriter(rule_tree_file, "UFT-8");
             } catch (Exception e) {
                 System.out.println("Unable to make file rule_list.csv");
                 return 1;
@@ -236,6 +245,15 @@ public class Parser {
         }
         rFile.print(rule + " ");
         return 0;
+    }
+
+    /**
+     * Used to set the output file for the rule tree created when parsing
+     *
+     * @param in name of file or directory
+     */
+    public void setRuleOutputFile(String in) {
+        this.rule_tree_file = in;
     }
 
     /**
@@ -249,6 +267,10 @@ public class Parser {
             System.exit(1);
         }
         l1 = scanner.nextToken();
+        if (l1 == null) {
+            System.err.println("Scanner gave the parser a null token");
+            System.exit(1);
+        }
     }
 
     /**
@@ -261,13 +283,16 @@ public class Parser {
         if (err == null || expected == null) {
             System.err.println("Improper input to parser error function.");
         }
-        rFile.close();
+        error_flag = true;
         System.err.println("Error found " + err.getContents() + " "
                 + err.getID() + " at line " + err.getLine() + " col " + err.getCol());
         System.err.print("Was expecting ");
         for (int i = 0; i < expected.length; i++) {
             System.err.print(", " + expected[i]);
         }
+        System.err.println("");
+
+        /* possibly a system exit here? */
     }
 
     /**
@@ -492,99 +517,6 @@ public class Parser {
                 break;
         }
     }
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
 
     private void FormalParameterSectionTail() {
         if (l1.getID() == Token.ID.SCOLON) {
@@ -701,7 +633,7 @@ public class Parser {
     }
 
     //**************************************************************************
-    //stubs for rules 40-47 
+    //rules 40-47 
     // Jacob Barthelmeh
     private void EmptyStatement() {
         switch (getRule(24)) {

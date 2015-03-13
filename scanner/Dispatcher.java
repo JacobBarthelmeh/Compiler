@@ -1,6 +1,6 @@
 package scanner;
 import compiler.Token;
-public class Dispatcher {
+public class Dispatcher {    
     public Token nextToken() {
         //  Precondition: c is the first character in the file
         //      OR the first character that hasn't been returned in 
@@ -70,6 +70,16 @@ public class Dispatcher {
     public Dispatcher(String filename) {
         r = new Reader(filename);
     }
+    
+        
+    /**
+     * close file
+     */
+    public void close(){
+        r.close();
+    }
+    
+    
     //  File handling
     private Reader r;
 }
