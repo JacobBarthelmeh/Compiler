@@ -51,9 +51,9 @@ public class FSA {
                     break;
                 case 2:
                     if (c >= '0' && c <= '9') {
-                        //transition to state 2
+                        //transition to state 5
                         str += c;
-                        id = Token.ID.FIXED_LIT;
+                        id = Token.ID.FLOAT_LIT;
                         state = 5;
                     } else {
                         //other character found
