@@ -6,6 +6,7 @@
 package compiler;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import scanner.Scanner;
@@ -24,187 +25,72 @@ public class Parser {
 
     private int Table[][];
     private String stackTrace = "";
-
-//    private int Table[][] = {
-//        /*  SystemGoal*/{},
-//        /*  Program*/ {},
-//        /*  ProgramHeading*/ {},
-//        /*  Block*/ {},
-//        /*  VariableDeclarationPart*/ {},
-//        /*5 VariableDeclaration*/ {},
-//        /*  Type*/ {},
-//        /*  ProcedureAndFunctionDeclarationPart*/ {},
-//        /*  ProcedureDeclaration*/ {},
-//        /*  FunctionDeclaration*/ {},
-//        /*10ProcedureHeading*/ {},
-//        /*  FunctionHeading*/ {},
-//        /*  OptionalFormalParameterList*/ {},
-//        /*  FormalParameterSectionTail*/ {},
-//        /*  FormalParameterSection*/ {},
-//        /*15ValueParameterSection*/ {},
-//        /*  VariableParameterSection*/ {},
-//        /*  StatementPart*/ {},
-//        /*  CompoundStatement*/ {},
-//        /*  StatementTail*/ {},
-//        /*20CompoundStatement*/ {},
-//        /*  StatementSequence*/ {},
-//        /*  StatementTail*/ {},
-//        /*  Statement*/ {},
-//        /*  EmptyStatement*/ {},
-//        /*25ReadStatment*/ {},
-//        /*  ReadParameterTail*/ {},
-//        /*  ReadParameter*/ {},
-//        /*  WriteStatement*/ {},
-//        /*  WriteParameterTail*/ {},
-//        /*30WriteParameter*/ {},
-//        /*  AssignmentStatement*/ {},
-//        /*  IfStatement*/ {},
-//        /*  OptionalElsePart*/ {},
-//        /*  RepeatStatement*/ {},
-//        /*35WhileStatement*/ {},
-//        /*  ForStatement*/ {},
-//        /*  ControlVariable*/ {},
-//        /*  InitialValue*/ {},
-//        /*  StepValue*/ {},
-//        /*40FinalValue*/ {},
-//        /*  ProcedureStatement*/ {},
-//        /*  OptionalActualParameterList*/ {},
-//        /*  ActualParameterTail*/ {},
-//        /*  ActualParameter*/ {},
-//        /*45Expression*/ {},
-//        /*  OptionalRelationalPart*/ {},
-//        /*  RelationalOperator*/ {},
-//        /*  SimpleExpression*/ {},
-//        /*  TermTail*/ {},
-//        /*50OptionalSign*/ {},
-//        /*  AddingOperator*/ {},
-//        /*  Term*/ {},
-//        /*  FactorTail*/ {},
-//        /*  MultiplyingOperator*/ {},
-//        /*55Factor*/ {},
-//        /*  ProgramIdentifier*/ {},
-//        /*  VariableIdentifier*/ {},
-//        /*  ProcedureIdentifier*/ {},
-//        /*  FunctionIdentifier*/ {},
-//        /*60BooleanExpression*/ {},
-//        /*  OrdinalExpression*/ {},
-//        /*  IdentifierList*/ {},
-//        /*  IdentifierTail*/ {}
-//    };
+    public enum NonTerminal {
+        SystemGoal,
+        Program,
+        ProgramHeading,
+        Block,
+        VariableDeclarationPart,
+        VariableDeclarationTail,
+        VariableDeclaration,
+        Type,
+        ProcedureAndFunctionDeclarationPart,
+        ProcedureDeclaration,
+        FunctionDeclaration,
+        ProcedureHeading,
+        FunctionHeading,
+        OptionalFormalParameterList,
+        FormalParameterSectionTail,
+        FormalParameterSection,
+        ValueParameterSection,
+        VariableParameterSection,
+        StatementPart,
+        CompoundStatement,
+        StatementSequence,
+        StatementTail,
+        Statement,
+        EmptyStatement,
+        ReadStatement,
+        ReadParameterTail,
+        ReadParameter,
+        WriteStatement,
+        WriteParameterTail,
+        WriteParameter,
+        AssignmentStatement,
+        IfStatement,
+        OptionalElsePart,
+        RepeatStatement,
+        WhileStatement,
+        ForStatement,
+        ControlVariable,
+        InitialValue,
+        StepValue,
+        FinalValue,
+        ProcedureStatement,
+        OptionalActualParameterList,
+        ActualParameterTail,
+        ActualParameter,
+        Expression,
+        OptionalRelationalPart,
+        RelationalOperator,
+        SimpleExpression,
+        TermTail,
+        OptionalSign,
+        AddingOperator,
+        Term,
+        FactorTail,
+        MultiplyingOperator,
+        Factor,
+        ProgramIdentifier,
+        VariableIdentifier,
+        ProcedureIdentifier,
+        FunctionIdentifier,
+        BooleanExpression,
+        OrdinalExpression,
+        IdentifierList,
+        IdentifierTail
+    };
     
-    //get the tokens index in the look ahead table
-    private int tokenIndex(Token.ID in) {
-        switch (in) {
-            case AND:
-                return 0;
-            case BEGIN:
-                return 1;
-            case BOOLEAN:
-                return 2;
-            case DIV:
-                return 3;
-            case DO:
-                return 4;
-            case DOWNTO:
-                return 5;
-            case ELSE:
-                return 6;
-            case END:
-                return 7;
-            case FALSE:
-                return 8;
-            case FIXED:
-                return 9;
-            case FLOAT:
-                return 10;
-            case FOR:
-                return 11;
-            case FUNCTION:
-                return 12;
-            case IF:
-                return 13;
-            case INTEGER:
-                return 14;
-            case MOD:
-                return 15;
-            case NOT:
-                return 16;
-            case OR:
-                return 17;
-            case PROCEDURE:
-                return 18;
-            case PROGRAM:
-                return 19;
-            case READ:
-                return 20;
-            case REPEAT:
-                return 21;
-            case STRING:
-                return 22;
-            case THEN:
-                return 23;
-            case TO:
-                return 24;
-            case TRUE:
-                return 25;
-            case UNTIL:
-                return 26;
-            case VAR:
-                return 27;
-            case WHILE:
-                return 28;
-            case WRITE:
-                return 29;
-            case WRITELN:
-                return 30;
-            case IDENTIFIER:
-                return 31;
-            case INTEGER_LIT:
-                return 32;
-            case FLOAT_LIT:
-                return 33;
-            case STRING_LIT:
-                return 34;
-            case PERIOD:
-                return 35;
-            case COMMA:
-                return 36;
-            case SCOLON:
-                return 37;
-            case COLON:
-                return 38;
-            case LPAREN:
-                return 39;
-            case RPAREN:
-                return 40;
-            case EQUAL:
-                return 41;
-            case GTHAN:
-                return 42;
-            case LTHAN:
-                return 43;
-            case LEQUAL:
-                return 44;
-            case GEQUAL:
-                return 45;
-            case NEQUAL:
-                return 46;
-            case ASSIGN:
-                return 47;
-            case PLUS:
-                return 48;
-            case MINUS:
-                return 49;
-            case TIMES:
-                return 50;
-            case FLOAT_DIVIDE:
-                return 51;
-            case EOF:
-                return 52;
-        }
-        return -1;
-    }
-
     /**
      * read in csv ll1 table
      */
@@ -228,7 +114,7 @@ public class Parser {
                 }
                 Table[index++] = tmparr;
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.out.println("Error creating ll1 table from ll1.csv " + e);
         }
     }
@@ -251,7 +137,7 @@ public class Parser {
         }
         i++; /* move over comma */
 
-        for (i = i; i < arr.length; i++) {
+        for (; i < arr.length; i++) {
             s += arr[i];
         }
 
@@ -308,11 +194,9 @@ public class Parser {
 
     /**
      * If match was found consume it and look ahead
-     *
-     * @param in the current token being looked at
      */
-    private void match(Token in) {
-        if (in == null) {
+    private void match() {
+        if (l1 == null) {
             System.err.println("Invalid input to parser match function.");
             System.exit(1);
         }
@@ -329,17 +213,15 @@ public class Parser {
      * @param err token that caused the error
      * @param expected array of expected tokens
      */
-    private void error(Token err, String[] expected) {
-        if (err == null || expected == null) {
+    private void error(String[] expected) {
+        if (expected == null) {
             System.err.println("Improper input to parser error function.");
         }
         error_flag = true;
-        System.err.println("Error found " + err.getContents() + " "
-                + err.getID() + " at line " + err.getLine() + " col " + err.getCol());
+        System.err.println("Error found " + l1.getContents() + " "
+                + l1.getID() + " at line " + l1.getLine() + " col " + l1.getCol());
         System.err.print("Was expecting ");
-        for (int i = 0; i < expected.length; i++) {
-            System.err.print(", " + expected[i]);
-        }
+        System.err.print(Arrays.toString(expected));
         System.err.println("");
 
         /* possibly a system exit here? */
@@ -351,8 +233,9 @@ public class Parser {
      * @param rule The current rule
      * @return The rule to execute
      */
-    private int getRule(int nonTerminal) {
-        int index = tokenIndex(l1.getID());
+    private int getRule(NonTerminal nt) {
+        int index = l1.getID().ordinal(),
+            nonTerminal = nt.ordinal();
         if (nonTerminal > Table.length) {
             System.out.println("Error nonTerminal " + nonTerminal + " is not in table");
             System.exit(1);
@@ -371,131 +254,194 @@ public class Parser {
     //  Stubs for rules 1-39
     private void SystemGoal() {
         stackTrace += "SystemGoal\n";
-        Program();  //  rule 2
-        if (l1.getID() == Token.ID.EOF) {
-            match(l1);
-        } else {
-            String[] err = {"end of file"};
-            error(l1, err);
+        switch (getRule(NonTerminal.SystemGoal)) {
+            case 1:
+                Program();
+                if (l1.getID() == Token.ID.EOF) {
+                    match();
+                } else {
+                    String[] err = {"end of file"};
+                    error(err);
+                }
+                break;
+            default:
+                String[] err = {"program"};
+                error(err);
         }
     }
 
     private void Program() {
         stackTrace += "Program\n";
-        ProgramHeading();
-        if (l1.getID() == Token.ID.SCOLON) {
-            match(l1);
-        } else {
-            String[] err = {";"};
-            error(l1, err);
-        }
-        Block();
-        if (l1.getID() == Token.ID.PERIOD) {
-            match(l1);
-        } else {
-            String[] err = {"."};
-            error(l1, err);
+        switch (getRule(NonTerminal.Program)) {
+            case 2:
+                ProgramHeading();
+                if (l1.getID() == Token.ID.SCOLON) {
+                    match();
+                } else {
+                    String[] err = {";"};
+                    error(err);
+                }
+                Block();
+                if (l1.getID() == Token.ID.PERIOD) {
+                    match();
+                } else {
+                    String[] err = {"."};
+                    error(err);
+                }
+                break;
+            default:
+                String[] err = {"program"};
+                error(err);
         }
     }
 
     private void ProgramHeading() {
         stackTrace += "ProgramHeading\n";
-        if (l1.getID() == Token.ID.PROGRAM) {
-            match(l1);
-        } else {
-            String[] err = {"program"};
-            error(l1, err);
+        switch (getRule(NonTerminal.ProgramHeading)) {
+            case 3:
+                if (l1.getID() == Token.ID.PROGRAM) {
+                    match();
+                } else {
+                    String[] err = {"program"};
+                    error(err);
+                }
+                ProgramIdentifier();
+            break;
+            default:
+                String[] err = {"program"};
+                error(err);
+                break;
         }
-        ProgramIdentifier();
     }
 
     private void Block() {
         stackTrace += "Block\n";
-        VariableDeclarationPart();
-        ProcedureAndFunctionDeclarationPart();
-        StatementPart();
+        switch (getRule(NonTerminal.Block)) {
+            case 4:
+                VariableDeclarationPart();
+                ProcedureAndFunctionDeclarationPart();
+                StatementPart();
+                break;
+            default:
+                String[] err = {""};
+                error(err);
+        }
     }
 
     private void VariableDeclarationPart() {
         stackTrace += "VariableDeclarationPart\n";
-        switch (getRule(5)) {
+        switch (getRule(NonTerminal.VariableDeclarationPart)) {
             case 5:
                 if (l1.getID() == Token.ID.VAR) {
-                    match(l1);
+                    match();
                 } else {
                     String[] err = {"var"};
-                    error(l1, err);
+                    error(err);
                 }
                 VariableDeclaration();
                 if (l1.getID() == Token.ID.SCOLON) {
-                    match(l1);
+                    match();
                 } else {
                     String[] err = {";"};
-                    error(l1, err);
+                    error(err);
                 }
                 VariableDeclarationTail();
                 break;
             case 6:
                 break;
             default:
-                //  No rule found!
-                String[] err = {"var", "procedure", "function", "begin"};
-                error(l1, err);
+                String[] err = {"var"};
+                error(err);
         }
     }
 
     private void VariableDeclarationTail() {
         stackTrace += "VariableDeclarationTail\n";
-        switch (getRule(7)) {
+        switch (getRule(NonTerminal.VariableDeclarationTail)) {
             case 7:
                 VariableDeclaration();
                 if (l1.getID() == Token.ID.SCOLON) {
-                    match(l1);
+                    match();
                 } else {
                     String[] err = {";"};
-                    error(l1, err);
+                    error(err);
                 }
                 VariableDeclarationTail();
             case 8:
                 break;
-            case -1:
+            default:
                 String[] err = {"Integer", "Float", "String", "Boolean"};
-                error(l1, err);
+                error(err);
                 break;
         }
     }
 
     private void VariableDeclaration() {
         stackTrace += "VariableDeclaration\n";
-        IdentifierList();
-        if (l1.getID() == Token.ID.COLON) {
-            match(l1);
-        } else {
-            String[] err = {":"};
-            error(l1, err);
+        switch (getRule(NonTerminal.VariableDeclaration)) {
+            case 9:
+                IdentifierList();
+                if (l1.getID() == Token.ID.COLON) {
+                    match();
+                } else {
+                    String[] err = {":"};
+                    error(err);
+                }
+                Type();
+            default:
+                String[] err = {"identifier"};
         }
-        Type();
     }
 
     private void Type() {
         stackTrace += "Type\n";
-        switch (getRule(10)) {
+        switch (getRule(NonTerminal.Type)) {
             case 10:
+                if (l1.getID() == Token.ID.INTEGER) {
+                    match();
+                    break;
+                }
+                else {
+                    String[] err = {"Integer"};
+                    error(err);
+                }
             case 11:
+                if (l1.getID() == Token.ID.FLOAT) {
+                    match();
+                    break;
+                }
+                else {
+                    String[] err = {"Float"};
+                    error(err);
+                }
             case 12:
+                if (l1.getID() == Token.ID.STRING) {
+                    match();
+                    break;
+                }
+                else {
+                    String[] err = {"String"};
+                    error(err);
+                }
             case 13:
-                match(l1);
-                break;
+                if (l1.getID() == Token.ID.BOOLEAN) {
+                    match();
+                    break;
+                }
+                else {
+                    String[] err = {"Boolean"};
+                    error(err);
+                }
             default:
                 String err[] = {"Integer", "Float", "String", "Boolean"};
-                error(l1, err);
+                error(err);
                 break;
         }
     }
 
     private void ProcedureAndFunctionDeclarationPart() {
         stackTrace += "ProcedureAndFunctionDeclarationPart\n";
-        switch (getRule(14)) {
+        switch (getRule(NonTerminal.ProcedureAndFunctionDeclarationPart)) {
             case 14:
                 ProcedureDeclaration();
                 ProcedureAndFunctionDeclarationPart();
@@ -506,179 +452,288 @@ public class Parser {
                 break;
             case 16:
                 break;
-            case -1:
+            default:
                 String err[] = {"procedure", "function", "begin"};
-                error(l1, err);
+                error(err);
                 break;
         }
     }
 
     private void ProcedureDeclaration() {
         stackTrace += "ProcedureDeclaration\n";
-        ProcedureHeading();
-        if (l1.getID() == Token.ID.SCOLON) {
-            match(l1);
-        } else {
-            String[] err = {";"};
-            error(l1, err);
-        }
-        Block();
-        if (l1.getID() == Token.ID.SCOLON) {
-            match(l1);
-        } else {
-            String[] err = {";"};
-            error(l1, err);
+        switch (getRule(NonTerminal.ProcedureDeclaration)) {
+            case 17:
+                ProcedureHeading();
+                if (l1.getID() == Token.ID.SCOLON) {
+                    match();
+                } else {
+                    String[] err = {";"};
+                    error(err);
+                }
+                Block();
+                if (l1.getID() == Token.ID.SCOLON) {
+                    match();
+                }
+                else {
+                    String[] err = {";"};
+                    error(err);
+                }
+                break;
+            default:
+                String[] err = {";"};
+                error(err);
+                break;
         }
     }
 
     private void FunctionDeclaration() {
         stackTrace += "FunctionDeclaration\n";
-        FunctionHeading();
-        if (l1.getID() == Token.ID.SCOLON) {
-            match(l1);
-        } else {
-            String[] err = {";"};
-            error(l1, err);
-        }
-        Block();
-        if (l1.getID() == Token.ID.SCOLON) {
-            match(l1);
-        } else {
-            String[] err = {";"};
-            error(l1, err);
+        switch (getRule(NonTerminal.FunctionDeclaration)) {
+            case 18:
+                FunctionHeading();
+                if (l1.getID() == Token.ID.SCOLON) {
+                    match();
+                } else {
+                    String[] err = {";"};
+                    error(err);
+                }
+                Block();
+                if (l1.getID() == Token.ID.SCOLON) {
+                    match();
+                }
+                else {
+                    String[] err = {";"};
+                    error(err);
+                }
+                break;
+            default:
+                String[] err = {";"};
+                error(err);
+                break;
         }
     }
 
     private void ProcedureHeading() {
         stackTrace += "ProcedureHeading\n";
-        if (l1.getID() == Token.ID.PROCEDURE) {
-            match(l1);
-        } else {
-            String[] err = {"procedure"};
-            error(l1, err);
+        switch (getRule(NonTerminal.ProcedureHeading)) {
+            case 19:
+                if (l1.getID() == Token.ID.PROCEDURE) {
+                    match();
+                } else {
+                    String[] err = {"procedure"};
+                    error(err);
+                }
+                ProcedureIdentifier();
+                OptionalFormalParameterList();
+                break;
+            default:
+                String[] err = {"procedure"};
+                error(err);
+                break;
         }
-        ProcedureIdentifier();
-        OptionalFormalParameterList();
     }
 
     private void FunctionHeading() {
         stackTrace += "FunctionHeading\n";
-        if (l1.getID() == Token.ID.FUNCTION) {
-            match(l1);
-        } else {
-            String[] err = {"function"};
-            error(l1, err);
+        switch (getRule(NonTerminal.FunctionHeading)) {
+            case 20:
+                if (l1.getID() == Token.ID.FUNCTION) {
+                    match();
+                } else {
+                    String[] err = {"function"};
+                    error(err);
+                }
+                FunctionIdentifier();
+                OptionalFormalParameterList();
+                break;
+            default:
+                String[] err = {"function"};
+                error(err);
+                break;
         }
-        FunctionIdentifier();
-        OptionalFormalParameterList();
     }
 
     private void OptionalFormalParameterList() {
         stackTrace += "OptionalFormalParameterList\n";
-        switch (getRule(21)) {
+        switch (getRule(NonTerminal.OptionalFormalParameterList)) {
             case 21:
                 if (l1.getID() == Token.ID.LPAREN) {
-                    match(l1);
+                    match();
                 } else {
                     String[] err = {"("};
-                    error(l1, err);
+                    error(err);
                 }
                 FormalParameterSection();
                 FormalParameterSectionTail();
                 break;
             case 22:
                 break;
+            default:
+                String[] err = {"(", ":"};
+                error(err);
+                break;
         }
     }
 
     private void FormalParameterSectionTail() {
         stackTrace += "FormalParameterSectionTail\n";
-        if (l1.getID() == Token.ID.SCOLON) {
-            match(l1);
-        } else {
-            String[] err = {";"};
-            error(l1, err);
+        switch (getRule(NonTerminal.FormalParameterSectionTail)) {
+            case 23:
+                if (l1.getID() == Token.ID.SCOLON) {
+                    match();
+                } else {
+                    String[] err = {";"};
+                    error(err);
+                }
+                FormalParameterSection();
+                FormalParameterSectionTail();
+            case 24:
+                break;
+            default:
+                String[] err = {";"};
+                error(err);
+                break;
         }
-        FormalParameterSection();
-        FormalParameterSectionTail();
     }
 
     private void FormalParameterSection() {
         stackTrace += "FormalParameterSection\n";
-        int branch = 0;
-        if (branch == 0) {
-            ValueParameterSection();
-        } else {
-            VariableParameterSection();
+        switch(getRule(NonTerminal.FormalParameterSection)) {
+            case 25:
+                ValueParameterSection();
+                break;
+            case 26:
+                VariableParameterSection();
+                break;
+            default:
+                String[] err = {"identifier", "var"};
+                error(err);
+                break;
         }
     }
 
     private void ValueParameterSection() {
         stackTrace += "ValueParameterSection\n";
-        IdentifierList();
-        if (l1.getID() == Token.ID.COLON) {
-            match(l1);
-        } else {
-            String[] err = {":"};
-            error(l1, err);
+        switch (getRule(NonTerminal.ValueParameterSection)) {
+            case 27:
+                IdentifierList();
+                if (l1.getID() == Token.ID.COLON) {
+                    match();
+                } else {
+                    String[] err = {":"};
+                    error(err);
+                }
+                Type();
+                break;
+            default:
+                String[] err = {":"};
+                error(err);
+                break;
         }
-        Type();
     }
 
     private void VariableParameterSection() {
         stackTrace += "VariableParameterSection\n";
-        if (l1.getID() == Token.ID.VAR) {
-            match(l1);
-        } else {
-            String[] err = {"var"};
-            error(l1, err);
+        switch (getRule(NonTerminal.VariableParameterSection)) {
+            case 28:
+                if (l1.getID() == Token.ID.VAR) {
+                    match();
+                } else {
+                    String[] err = {"var"};
+                    error(err);
+                }
+                IdentifierList();
+                if (l1.getID() == Token.ID.COLON) {
+                    match();
+                } else {
+                    String[] err = {":"};
+                    error(err);
+                }
+                Type();
+                break;
+            default:
+                String[] err = {"var"};
+                error(err);
+                break;
         }
-        IdentifierList();
-        if (l1.getID() == Token.ID.COLON) {
-            match(l1);
-        } else {
-            String[] err = {":"};
-            error(l1, err);
-        }
-        Type();
     }
 
     private void StatementPart() {
         stackTrace += "StatementPart\n";
-        CompoundStatement();
+        switch (getRule(NonTerminal.StatementPart)) {
+            case 29:
+                CompoundStatement();
+                break;
+            default:
+                String[] err = {"begin"};
+                error(err);
+                break;
+        }
     }
 
     private void CompoundStatement() {
         stackTrace += "CompoundStatement\n";
-        if (l1.getID() == Token.ID.BEGIN) {
-            match(l1);
-        } else {
-            String[] err = {"begin"};
-            error(l1, err);
-        }
-        StatementSequence();
-        if (l1.getID() == Token.ID.END) {
-            match(l1);
-        } else {
-            String[] err = {"end"};
-            error(l1, err);
+        switch (getRule(NonTerminal.CompoundStatement)) {
+            case 30:
+                if (l1.getID() == Token.ID.BEGIN) {
+                    match();
+                } else {
+                    String[] err = {"begin"};
+                    error(err);
+                }
+                StatementSequence();
+                if (l1.getID() == Token.ID.END) {
+                    match();
+                } else {
+                    String[] err = {"end"};
+                    error(err);
+                }
+                break;
+            default:
+                String[] err = {"begin"};
+                error(err);
+                break;
         }
     }
 
     private void StatementSequence() {
-        stackTrace += "StatementSwquence\n";
-        Statement();
-        StatementTail();
+        stackTrace += "StatementSequence\n";
+        switch (getRule(NonTerminal.StatementSequence)) {
+            case 31:
+                Statement();
+                StatementTail();
+                break;
+            default:
+                String[] err = {"begin", "read", "write", "writeln", "if", "repeat", "for", "procedure", "identifier"};
+                error(err);
+                break;
+        }
     }
 
     private void StatementTail() {
         stackTrace += "StatementTail\n";
+        switch(getRule(NonTerminal.StatementTail)) {
+            case 32:
+                if (l1.getID() == Token.ID.SCOLON) {
+                    match();
+                }
+                else {
+                    String[] err = {";"};
+                    error(err);
+                }
+                break;
+            case 33:
+                break;
+            default:
+                String[] err = {";", "end"};
+                error(err);
+                break;
+        }
     }
 
     private void Statement() {
         stackTrace += "Statement\n";
-        int branch = 0;
-        switch (branch) {
+        switch (getRule(NonTerminal.Statement)) {
             case 34:
                 EmptyStatement();
                 break;
@@ -710,7 +765,9 @@ public class Parser {
                 ProcedureStatement();
                 break;
             default:
-
+                String[] err = {"begin", "read", "write", "writeln", "if", "repeat", "for", "procedure", "identifier"};
+                error(err);
+                break;
         }
     }
 
@@ -719,52 +776,52 @@ public class Parser {
     // Jacob Barthelmeh
     private void EmptyStatement() {
         stackTrace += "EmptyStatement\n";
-        switch (getRule(24)) {
+        switch (getRule(NonTerminal.EmptyStatement)) {
             case 44:
                 break;
             default:
                 String[] err = {""};
-                error(l1, err);
+                error(err);
         }
     }
 
     private void ReadStatement() {
         stackTrace += "ReadStatement\n";
-        switch (getRule(25)) {
+        switch (getRule(NonTerminal.ReadStatement)) {
             case 45://rule 45
                 if (l1.getID() == Token.ID.READ) { //rule 45
-                    match(l1);
+                    match();
                     if (l1.getID() == Token.ID.LPAREN) {
-                        match(l1);
+                        match();
                         ReadParameter();
                         ReadParameterTail();
                         if (l1.getID() == Token.ID.RPAREN) {
-                            match(l1);
+                            match();
                         } else {
                             String[] err = {")"};
-                            error(l1, err);
+                            error(err);
                         }
                     } else {
                         String[] err = {"("};
-                        error(l1, err);
+                        error(err);
                     }
                 } else {
                     String[] err = {"read"};
-                    error(l1, err);
+                    error(err);
                 }
                 break;
             default:
                 String exp[] = {""};
-                error(l1, exp);
+                error(exp);
         }
 
     }
 
     private void ReadParameterTail() {
         stackTrace += "ReadParameterTail\n";
-        switch (getRule(26)) {
+        switch (getRule(NonTerminal.ReadParameterTail)) {
             case 46: //rule 46
-                match(l1);
+                match();
                 ReadParameter();
                 ReadParameterTail();
                 break;
@@ -772,72 +829,72 @@ public class Parser {
                 break;
             default:
                 String[] err = {"comma"};
-                error(l1, err);
+                error(err);
         }
     }
 
     private void ReadParameter() {
         stackTrace += "ReadParameter\n";
-        switch (getRule(27)) {
+        switch (getRule(NonTerminal.ReadParameter)) {
             case 48://rule 48
                 VariableIdentifier();
                 break;
             default:
                 String exp[] = {""};
-                error(l1, exp);
+                error(exp);
         }
     }
 
     private void WriteStatement() {
         stackTrace += "WriteStatment\n";
-        switch (getRule(28)) {
+        switch (getRule(NonTerminal.WriteStatement)) {
             case 49: //rule 49
-                match(l1);
+                match();
                 if (l1.getID() == Token.ID.LPAREN) {
-                    match(l1);
+                    match();
                     WriteParameter();
                     WriteParameterTail();
                     if (l1.getID() == Token.ID.RPAREN) {
-                        match(l1);
+                        match();
                     } else {
                         String[] err = {")"};
-                        error(l1, err);
+                        error(err);
                     }
                 } else {
                     String[] err = {"("};
-                    error(l1, err);
+                    error(err);
                 }
                 break;
 
             case 59: //rule 50
-                match(l1);
+                match();
                 if (l1.getID() == Token.ID.LPAREN) {
-                    match(l1);
+                    match();
                     WriteParameter();
                     WriteParameterTail();
                     if (l1.getID() == Token.ID.RPAREN) {
-                        match(l1);
+                        match();
                     } else {
                         String[] err = {")"};
-                        error(l1, err);
+                        error(err);
                     }
                 } else {
                     String[] err = {"("};
-                    error(l1, err);
+                    error(err);
                 }
                 break;
 
             default:
                 String[] err = {"write", "writeln"};
-                error(l1, err);
+                error(err);
         }
     }
 
     private void WriteParameterTail() {
         stackTrace += "WriteParameterTail\n";
-        switch (getRule(29)) {
+        switch (getRule(NonTerminal.WriteParameterTail)) {
             case 51: //rule 51
-                match(l1);
+                match();
                 WriteParameter();
                 WriteParameterTail();
                 break;
@@ -845,269 +902,269 @@ public class Parser {
                 break;
             default:
                 String[] err = {","};
-                error(l1, err);
+                error(err);
         }
     }
 
     private void WriteParameter() {
         stackTrace += "WriteParameter\n";
-        switch (getRule(30)) {
+        switch (getRule(NonTerminal.WriteParameter)) {
             case 53://rule 53
                 OrdinalExpression();
                 break;
             default:
                 String exp[] = {""};
-                error(l1, exp);
+                error(exp);
         }
     }
 
     private void AssignmentStatement() {
         stackTrace += "AssignmentStatement\n";
-        switch (getRule(31)) {
+        switch (getRule(NonTerminal.AssignmentStatement)) {
             case 54: //rule 54
                 VariableIdentifier();
                 if (l1.getID() == Token.ID.ASSIGN) {
-                    match(l1);
+                    match();
                     Expression();
                 } else {
                     String[] err = {"assign"};
-                    error(l1, err);
+                    error(err);
                 }
                 break;
             case 55://rule 55
                 FunctionIdentifier(); //rule 55
                 if (l1.getID() == Token.ID.ASSIGN) {
-                    match(l1);
+                    match();
                     Expression();
                 } else {
                     String[] err = {"assign"};
-                    error(l1, err);
+                    error(err);
                 }
                 break;
             default:
                 String[] err = {"else", "e"};
-                error(l1, err);
+                error(err);
 
         }
     }
 
     private void IfStatement() {
         stackTrace += "IfStatement\n";
-        switch (getRule(32)) {
+        switch (getRule(NonTerminal.IfStatement)) {
             case 56: //rule 56
                 if (l1.getID() == Token.ID.IF) {
-                    match(l1);
+                    match();
                     BooleanExpression();
                     if (l1.getID() == Token.ID.THEN) {
-                        match(l1);
+                        match();
                         Statement();
                         OptionalElsePart();
                     } else {
                         String[] err = {"then"};
-                        error(l1, err);
+                        error(err);
                     }
                 } else {
                     String[] err = {"if"};
-                    error(l1, err);
+                    error(err);
                 }
                 break;
             default:
                 String exp[] = {""};
-                error(l1, exp);
+                error(exp);
         }
     }
 
     private void OptionalElsePart() {
         stackTrace += "OptionalElsePart\n";
-        switch (getRule(33)) {
+        switch (getRule(NonTerminal.OptionalElsePart)) {
             case 57: //rule 57
-                match(l1);
+                match();
                 Statement();
                 break;
             case 58://case of e rule 58
                 break;
             default:
                 String[] err = {"else", "e"};
-                error(l1, err);
+                error(err);
 
         }
     }
 
     private void RepeatStatement() {
         stackTrace += "RepeatStatement\n";
-        switch (getRule(34)) {
+        switch (getRule(NonTerminal.RepeatStatement)) {
             case 59://rule 59
                 if (l1.getID() == Token.ID.REPEAT) {
-                    match(l1);
+                    match();
                     StatementSequence();
                     if (l1.getID() == Token.ID.UNTIL) {
-                        match(l1);
+                        match();
                         BooleanExpression();
                     } else {
                         String[] err = {"until"};
-                        error(l1, err);
+                        error(err);
                     }
                 } else {
                     String[] err = {"repeat"};
-                    error(l1, err);
+                    error(err);
                 }
                 break;
             default:
                 String exp[] = {""};
-                error(l1, exp);
+                error(exp);
         }
     }
 
     private void WhileStatement() {
         stackTrace += "WhileStatment\n";
-        switch (getRule(35)) {
+        switch (getRule(NonTerminal.WhileStatement)) {
             case 60://rule 60
                 if (l1.getID() == Token.ID.WHILE) {
-                    match(l1);
+                    match();
                     BooleanExpression();
                     if (l1.getID() == Token.ID.DO) {
-                        match(l1);
+                        match();
                         Statement();
                     } else {
                         String[] err = {"do"};
-                        error(l1, err);
+                        error(err);
                     }
                 } else {
                     String[] err = {"while"};
-                    error(l1, err);
+                    error(err);
                 }
                 break;
             default:
                 String exp[] = {"while"};
-                error(l1, exp);
+                error(exp);
         }
     }
 
     private void ForStatement() {
         stackTrace += "ForStatement\n";
-        switch (getRule(36)) {
+        switch (getRule(NonTerminal.ForStatement)) {
             case 61://rule 61
                 if (l1.getID() == Token.ID.FOR) {
-                    match(l1);
+                    match();
                     ControlVariable();
                     if (l1.getID() == Token.ID.ASSIGN) {
-                        match(l1);
+                        match();
                         InitialValue();
                         StepValue();
                         FinalValue();
                         if (l1.getID() == Token.ID.DO) {
-                            match(l1);
+                            match();
                             Statement();
                         } else {
                             String[] err = {"do"};
-                            error(l1, err);
+                            error(err);
                         }
                     } else {
                         String[] err = {":="};
-                        error(l1, err);
+                        error(err);
                     }
                 } else {
                     String[] err = {"for"};
-                    error(l1, err);
+                    error(err);
                 }
                 break;
             default:
                 String exp[] = {"for"};
-                error(l1, exp);
+                error(exp);
         }
     }
 
     private void ControlVariable() {
         stackTrace += "ControlVariable\n";
-        switch (getRule(37)) {
+        switch (getRule(NonTerminal.ControlVariable)) {
             case 62://rule 62
                 VariableIdentifier();
                 break;
             default:
                 String exp[] = {""};
-                error(l1, exp);
+                error(exp);
         }
     }
 
     private void InitialValue() {
         stackTrace += "InitialValue\n";
-        switch (getRule(38)) {
+        switch (getRule(NonTerminal.InitialValue)) {
             case 63://rule 63
                 OrdinalExpression();
                 break;
             default:
                 String exp[] = {""};
-                error(l1, exp);
+                error(exp);
         }
     }
 
     private void StepValue() {
         stackTrace += "StepValue\n";
-        switch (getRule(39)) {
+        switch (getRule(NonTerminal.StepValue)) {
             case 64: //rule 64
-                match(l1);
+                match();
                 break;
             case 65: //rule 65
-                match(l1);
+                match();
                 break;
             default:
                 String[] err = {"to", "downto"};
-                error(l1, err);
+                error(err);
         }
     }
 
     private void FinalValue() {
         stackTrace += "FinalValue\n";
-        switch (getRule(40)) {
+        switch (getRule(NonTerminal.FinalValue)) {
             case 66://rule 66
                 OrdinalExpression();
                 break;
             default:
                 String exp[] = {""};
-                error(l1, exp);
+                error(exp);
         }
     }
 
     private void ProcedureStatement() {
         stackTrace += "ProcedureStatment\n";
-        switch (getRule(41)) {
+        switch (getRule(NonTerminal.ProcedureStatement)) {
             case 67://rule 67
                 ProcedureIdentifier();
                 OptionalActualParameterList();
                 break;
             default:
                 String exp[] = {""};
-                error(l1, exp);
+                error(exp);
         }
     }
 
     private void OptionalActualParameterList() {
         stackTrace += "OptionalActualParameterList\n";
-        switch (getRule(42)) {
+        switch (getRule(NonTerminal.OptionalActualParameterList)) {
             case 68: //rule 68
-                match(l1);
+                match();
                 ActualParameter();
                 ActualParameterTail();
                 if (l1.getID() == Token.ID.RPAREN) {
-                    match(l1);
+                    match();
                 } else {
                     String[] err = {")"};
-                    error(l1, err);
+                    error(err);
                 }
                 break;
             case 69://rule 69 switch on e
                 break;
             default:
                 String[] err = {"("};
-                error(l1, err);
+                error(err);
         }
     }
 
     private void ActualParameterTail() {
         stackTrace += "ActualParameterTail\n";
-        switch (getRule(43)) {
+        switch (getRule(NonTerminal.ActualParameterTail)) {
             case 70: //rule 70
-                match(l1);
+                match();
                 ActualParameter();
                 ActualParameterTail();
                 break;
@@ -1115,38 +1172,38 @@ public class Parser {
                 break;
             default:
                 String[] err = {","};
-                error(l1, err);
+                error(err);
         }
     }
 
     private void ActualParameter() {
         stackTrace += "ActualParameter\n";
-        switch (getRule(44)) {
+        switch (getRule(NonTerminal.ActualParameter)) {
             case 72:
                 OrdinalExpression();//rule 72
                 break;
             default:
                 String exp[] = {""};
-                error(l1, exp);
+                error(exp);
         }
     }
 
     private void Expression() {
         stackTrace += "Expression\n";
-        switch (getRule(45)) {
+        switch (getRule(NonTerminal.Expression)) {
             case 73:
                 SimpleExpression(); //rule 73
                 OptionalRelationalPart(); //rule 73
                 break;
             default:
                 String exp[] = {""};
-                error(l1, exp);
+                error(exp);
         }
     }
 
     private void OptionalRelationalPart() {
         stackTrace += "OptionalRelationalPart\n";
-        switch (getRule(46)) {
+        switch (getRule(NonTerminal.OptionalRelationalPart)) {
             case 74:
                 RelationalOperator(); //rule 74
                 SimpleExpression(); //rule 74
@@ -1155,34 +1212,34 @@ public class Parser {
                 break;
             default:
                 String exp[] = {""};
-                error(l1, exp);
+                error(exp);
         }
     }
 
     private void RelationalOperator() {
         stackTrace += "RelationalOperator\n";
-        switch (getRule(47)) {
+        switch (getRule(NonTerminal.RelationalOperator)) {
             case 76: //rule 76
-                match(l1);
+                match();
                 break;
             case 77: //rule 77
-                match(l1);
+                match();
                 break;
             case 78: //rule 78
-                match(l1);
+                match();
                 break;
             case 79: //rule 79
-                match(l1);
+                match();
                 break;
             case 80: //rule 80
-                match(l1);
+                match();
                 break;
             case 81: //rule 81
-                match(l1);
+                match();
                 break;
             default:
                 String exp[] = {"EQUAL", "LTHAN", "GTHAN", "LEQUAL", "GEQUAL", "NEQUAL"};
-                error(l1, exp);
+                error(exp);
         }
     }
 
@@ -1209,15 +1266,15 @@ public class Parser {
         stackTrace += "OptionalSign\n";
         switch (l1.getID()) {
             case PLUS: // Rule 85
-                match(l1);
+                match();
                 break;
             case MINUS: // RULE 86
-                match(l1);
+                match();
                 break;
             // Rule 87 @TODO switch on e
             default:
                 String exp[] = {"PLUS", "MINUS"};
-                error(l1, exp);
+                error(exp);
         }
     }
 
@@ -1225,17 +1282,17 @@ public class Parser {
         stackTrace += "AddingOperator\n";
         switch (l1.getID()) {
             case PLUS: // Rule 88
-                match(l1);
+                match();
                 break;
             case MINUS: // RULE 89
-                match(l1);
+                match();
                 break;
             case OR: // RULE 90
-                match(l1);
+                match();
                 break;
             default:
                 String exp[] = {"PLUS", "MINUS", "OR"};
-                error(l1, exp);
+                error(exp);
         }
     }
 
@@ -1259,19 +1316,19 @@ public class Parser {
         stackTrace += "MultiplyingOperator\n";
         switch (l1.getID()) {
             case TIMES:         // RULE 94
-                match(l1);
+                match();
                 break;
             case FLOAT_DIVIDE:  // RULE 95
-                match(l1);
+                match();
                 break;
             case DIV:           // RULE 96
-                match(l1);
+                match();
                 break;
             case MOD:           // RULE 97
-                match(l1);
+                match();
                 break;
             case AND:           // RULE 98
-                match(l1);
+                match();
                 break;
         }
     }
@@ -1280,34 +1337,34 @@ public class Parser {
         stackTrace += "Factor\n";
         switch (l1.getID()) {
             case INTEGER:
-                match(l1);      // RULE 99
+                match();      // RULE 99
                 break;
             case FLOAT:
-                match(l1);      // RULE 100
+                match();      // RULE 100
                 break;
             case STRING_LIT:
-                match(l1);      // RULE 101
+                match();      // RULE 101
                 break;
             case TRUE:          // RULE 102
-                match(l1);
+                match();
                 break;
             case FALSE:         // RULE 103
-                match(l1);
+                match();
                 break;
             case NOT:           // RULE 104
-                match(l1);
+                match();
                 Factor();
                 break;
             case LPAREN:        // RULE 105
-                match(l1);
+                match();
                 Expression();
                 switch (l1.getID()) {
                     case RPAREN:
-                        match(l1);
+                        match();
                         break;
                     default:
                         String exp[] = {")"};
-                        error(l1, exp);
+                        error(exp);
                 }
             case IDENTIFIER:   // RULE 106
                 FunctionIdentifier();
@@ -1315,7 +1372,7 @@ public class Parser {
                 break;
             default:
                 String[] exp = {"INTEGER", "FLOAT", "STRING_LIT", "TRUE", "FALSE", "NOT", "LPAREN EXPRESSION RPAREN", "FunctionIdentifier OptionalActualParameterList"};
-                error(l1, exp);
+                error(exp);
         }
     }
 
@@ -1323,11 +1380,11 @@ public class Parser {
         stackTrace += "ProgramIdentifier\n";
         switch (l1.getID()) {
             case IDENTIFIER:    // RULE 107
-                match(l1);
+                match();
                 break;
             default:
                 String[] exp = {"IDENTIFIER"};
-                error(l1, exp);
+                error(exp);
         }
     }
 
@@ -1335,11 +1392,11 @@ public class Parser {
         stackTrace += "VariableIdentifier\n";
         switch (l1.getID()) {
             case IDENTIFIER:    // RULE 108
-                match(l1);
+                match();
                 break;
             default:
                 String[] exp = {"IDENTIFIER"};
-                error(l1, exp);
+                error(exp);
         }
     }
 
@@ -1347,11 +1404,11 @@ public class Parser {
         stackTrace += "ProcedureIdentifier\n";
         switch (l1.getID()) {
             case IDENTIFIER:     // RULE 109
-                match(l1);
+                match();
                 break;
             default:
                 String[] exp = {"IDENTIFIER"};
-                error(l1, exp);
+                error(exp);
         }
     }
 
@@ -1359,11 +1416,11 @@ public class Parser {
         stackTrace += "FunctionIdentifier\n";
         switch (l1.getID()) {
             case IDENTIFIER:    // RULE 110
-                match(l1);
+                match();
                 break;
             default:
                 String[] exp = {"IDENTIFIER"};
-                error(l1, exp);
+                error(exp);
         }
     }
 
@@ -1381,12 +1438,12 @@ public class Parser {
         stackTrace += "IdentifierList\n";
         switch (l1.getID()) {
             case IDENTIFIER:    // RULE 113
-                match(l1);
+                match();
                 IdentifierTail();
                 break;
             default:
                 String[] exp = {"IDENTIFIER"};
-                error(l1, exp);
+                error(exp);
         }
     }
 
@@ -1394,12 +1451,12 @@ public class Parser {
         stackTrace += "IdentifierTail\n";
         switch (l1.getID()) {
             case COMMA:
-                match(l1); // RULE 114
+                match(); // RULE 114
                 if (l1.getID() == Token.ID.IDENTIFIER) {
-                    match(l1);
+                    match();
                 } else {
                     String[] err = {"IDENTIFIER"};
-                    error(l1, err);
+                    error(err);
                 }
                 IdentifierTail();
                 break;
