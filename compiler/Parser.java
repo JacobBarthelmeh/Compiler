@@ -156,7 +156,7 @@ public class Parser {
         try {
             scanner = new Scanner(in);
             l1 = scanner.nextToken();
-            Program();
+            SystemGoal();
             rFile.close();
             scanner.close();
             if (error_flag) {
@@ -176,12 +176,13 @@ public class Parser {
         if (rFile == null) {
             try {
                 rFile = new PrintWriter(rule_tree_file);
+                rFile.println("Rules Taken");
             } catch (Exception e) {
                 System.out.println("Unable to make file " + rule_tree_file);
                 return 1;
             }
         }
-        rFile.print(rule + " ");
+        rFile.println(rule);
         return 0;
     }
 
