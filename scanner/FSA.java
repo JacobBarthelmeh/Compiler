@@ -237,7 +237,7 @@ public class FSA {
                         r.nextChar();
                         break;
                     }
-                    return new Token("Identifier ending in _", Token.ID.ERROR, row, col);
+                    return new Token(str, Token.ID.IDENTIFIER, row, col);
                 case 2:
                     c = r.peekChar();
                     if (c == '_') {
@@ -287,7 +287,6 @@ public class FSA {
             case "then": return new Token(str, Token.ID.THEN, row, col);
             case "true": return new Token(str, Token.ID.TRUE, row, col);
             case "to": return new Token(str, Token.ID.TO, row, col);
-            case "type": return new Token(str, Token.ID.TYPE, row, col);
             case "until": return new Token(str, Token.ID.UNTIL, row, col);
             case "var": return new Token(str, Token.ID.VAR, row, col);
             case "while": return new Token(str, Token.ID.WHILE, row, col);
@@ -483,7 +482,7 @@ public class FSA {
                     return new Token(str, Token.ID.STRING_LIT, row, col);
                 case 3:
                     return new Token("String not closed",
-                            Token.ID.RUN_STRING, row, col);
+                            Token.ID.EOF, row, col);
             }
         }
         return null;

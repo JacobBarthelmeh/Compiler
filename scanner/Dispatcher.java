@@ -22,7 +22,7 @@ public class Dispatcher {
                     c = r.nextChar();   //  Accept next character always
                 }
                 if (c == '\u001a') {
-                    return new Token("Comment not closed", Token.ID.RUN_COMMENT, row, col);
+                    return new Token("Comment not closed", Token.ID.EOF, row, col);
                 }
                 r.nextChar();
                 return nextToken();
@@ -30,7 +30,7 @@ public class Dispatcher {
             case '}':
                 r.nextChar();
                 return new Token("Comment not closed at " +
-                        r.linenumber + " col " + r.col, Token.ID.ERROR, row, col);
+                        r.linenumber + " col " + r.col, Token.ID.EOF, row, col);
             //  Begin FSAs!
             case '\'': return FSA.TEST_STRING_LIT(r, row, col);
             case ':': return FSA.TEST_COLON(r, row, col);
@@ -65,7 +65,7 @@ public class Dispatcher {
                 return new Token("\u001a", Token.ID.EOF, row, col);
         }
         r.nextChar();
-        return new Token("Unidentified symbol " + c, Token.ID.ERROR, row, col);
+        return new Token("" + c, Token.ID.IDENTIFIER, row, col);
     }
     public Dispatcher(String filename) {
         r = new Reader(filename);
