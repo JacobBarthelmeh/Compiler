@@ -228,6 +228,9 @@ public class Parser {
         System.err.println("");
 
         /* possibly a system exit here? */
+        System.out.println(stackTrace);
+        rFile.close();
+        System.exit(0);
     }
 
     /**
@@ -370,6 +373,7 @@ public class Parser {
                     error(err);
                 }
                 VariableDeclarationTail();
+                break;
             case 8:
                 break;
             default:
@@ -391,6 +395,7 @@ public class Parser {
                     error(err);
                 }
                 Type();
+                break;
             default:
                 String[] err = {"identifier"};
         }
@@ -407,6 +412,7 @@ public class Parser {
                     String[] err = {"Integer"};
                     error(err);
                 }
+                break;
             case 11:
                 if (l1.getID() == Token.ID.FLOAT) {
                     match();
@@ -415,6 +421,7 @@ public class Parser {
                     String[] err = {"Float"};
                     error(err);
                 }
+            break;
             case 12:
                 if (l1.getID() == Token.ID.STRING) {
                     match();
@@ -423,6 +430,7 @@ public class Parser {
                     String[] err = {"String"};
                     error(err);
                 }
+            break;
             case 13:
                 if (l1.getID() == Token.ID.BOOLEAN) {
                     match();
@@ -431,6 +439,7 @@ public class Parser {
                     String[] err = {"Boolean"};
                     error(err);
                 }
+                break;
             default:
                 String err[] = {"Integer", "Float", "String", "Boolean"};
                 error(err);
@@ -584,6 +593,7 @@ public class Parser {
                 }
                 FormalParameterSection();
                 FormalParameterSectionTail();
+                break;
             case 24:
                 break;
             default:
@@ -778,6 +788,7 @@ public class Parser {
             default:
                 String[] err = {""};
                 error(err);
+                break;
         }
     }
 
@@ -809,6 +820,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
 
     }
@@ -826,6 +838,7 @@ public class Parser {
             default:
                 String[] err = {"comma"};
                 error(err);
+                break;
         }
     }
 
@@ -838,6 +851,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -899,6 +913,7 @@ public class Parser {
             default:
                 String[] err = {","};
                 error(err);
+                break;
         }
     }
 
@@ -911,6 +926,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -940,7 +956,7 @@ public class Parser {
             default:
                 String[] err = {"else", "e"};
                 error(err);
-
+                break;
         }
     }
 
@@ -967,6 +983,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -982,6 +999,7 @@ public class Parser {
             default:
                 String[] err = {"else", "e"};
                 error(err);
+                break;
 
         }
     }
@@ -1008,6 +1026,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -1033,6 +1052,7 @@ public class Parser {
             default:
                 String exp[] = {"while"};
                 error(exp);
+                break;
         }
     }
 
@@ -1067,6 +1087,7 @@ public class Parser {
             default:
                 String exp[] = {"for"};
                 error(exp);
+                break;
         }
     }
 
@@ -1079,6 +1100,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -1091,6 +1113,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -1106,6 +1129,7 @@ public class Parser {
             default:
                 String[] err = {"to", "downto"};
                 error(err);
+                break;
         }
     }
 
@@ -1118,6 +1142,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -1131,6 +1156,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -1153,6 +1179,7 @@ public class Parser {
             default:
                 String[] err = {"("};
                 error(err);
+                break;
         }
     }
 
@@ -1169,6 +1196,7 @@ public class Parser {
             default:
                 String[] err = {","};
                 error(err);
+                break;
         }
     }
 
@@ -1181,6 +1209,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -1194,6 +1223,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -1209,6 +1239,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -1236,6 +1267,7 @@ public class Parser {
             default:
                 String exp[] = {"EQUAL", "LTHAN", "GTHAN", "LEQUAL", "GEQUAL", "NEQUAL"};
                 error(exp);
+                break;
         }
     }
 
@@ -1252,6 +1284,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -1268,6 +1301,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -1284,6 +1318,7 @@ public class Parser {
             default:
                 String exp[] = {"+", "-"};
                 error(exp);
+                break;
         }
     }
 
@@ -1302,6 +1337,7 @@ public class Parser {
             default:
                 String exp[] = {"+", "-", "or"};
                 error(exp);
+                break;
         }
     }
 
@@ -1315,6 +1351,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -1331,6 +1368,7 @@ public class Parser {
             default:
                 String exp[] = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -1355,6 +1393,7 @@ public class Parser {
             default:
                 String exp[] = {"*", "/", "div", "%", "amd"};
                 error(exp);
+                break;
         }
     }
 
@@ -1391,13 +1430,18 @@ public class Parser {
                         String exp[] = {")"};
                         error(exp);
                 }
+                break;
             case 106:   // RULE 106
                 FunctionIdentifier();
                 OptionalActualParameterList();
                 break;
+            case 116:  // RULE 116
+                match();
+                break;
             default:
                 String[] exp = {"INTEGER", "FLOAT", "STRING_LIT", "TRUE", "FALSE", "NOT", "LPAREN EXPRESSION RPAREN", "FunctionIdentifier OptionalActualParameterList"};
                 error(exp);
+                break;
         }
     }
 
@@ -1410,6 +1454,7 @@ public class Parser {
             default:
                 String[] exp = {"IDENTIFIER"};
                 error(exp);
+                break;
         }
     }
 
@@ -1422,6 +1467,7 @@ public class Parser {
             default:
                 String[] exp = {"IDENTIFIER"};
                 error(exp);
+                break;
         }
     }
 
@@ -1434,6 +1480,7 @@ public class Parser {
             default:
                 String[] exp = {"IDENTIFIER"};
                 error(exp);
+                break;
         }
     }
 
@@ -1446,6 +1493,7 @@ public class Parser {
             default:
                 String[] exp = {"IDENTIFIER"};
                 error(exp);
+                break;
         }
     }
 
@@ -1458,6 +1506,7 @@ public class Parser {
             default:
                 String[] exp = {""};
                 error(exp);
+                break;
         }
     }
 
@@ -1468,8 +1517,9 @@ public class Parser {
                 Expression();
                 break;
             default:
-                String[] exp = {""};
+                String[] exp = {"expression"};
                 error(exp);
+                break;
         }
     }
 
@@ -1483,6 +1533,7 @@ public class Parser {
             default:
                 String[] exp = {"IDENTIFIER"};
                 error(exp);
+                break;
         }
     }
 
@@ -1503,6 +1554,8 @@ public class Parser {
                 break;
             default:
                 String[] err = {"COMMA IDENTIFIER IdentifierTail"};
+                error(err);
+                break;
         }
     }
 }
