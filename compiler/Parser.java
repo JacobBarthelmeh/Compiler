@@ -25,7 +25,9 @@ public class Parser {
 
     private int Table[][];
     private String stackTrace = "";
+
     public enum NonTerminal {
+
         SystemGoal,
         Program,
         ProgramHeading,
@@ -90,7 +92,7 @@ public class Parser {
         IdentifierList,
         IdentifierTail
     };
-    
+
     /**
      * read in csv ll1 table
      */
@@ -235,7 +237,7 @@ public class Parser {
      */
     private int getRule(NonTerminal nt) {
         int index = l1.getID().ordinal(),
-            nonTerminal = nt.ordinal();
+                nonTerminal = nt.ordinal();
         if (nonTerminal > Table.length) {
             System.out.println("Error nonTerminal " + nonTerminal + " is not in table");
             System.exit(1);
@@ -306,7 +308,7 @@ public class Parser {
                     error(err);
                 }
                 ProgramIdentifier();
-            break;
+                break;
             default:
                 String[] err = {"program"};
                 error(err);
@@ -400,8 +402,7 @@ public class Parser {
                 if (l1.getID() == Token.ID.INTEGER) {
                     match();
                     break;
-                }
-                else {
+                } else {
                     String[] err = {"Integer"};
                     error(err);
                 }
@@ -409,8 +410,7 @@ public class Parser {
                 if (l1.getID() == Token.ID.FLOAT) {
                     match();
                     break;
-                }
-                else {
+                } else {
                     String[] err = {"Float"};
                     error(err);
                 }
@@ -418,8 +418,7 @@ public class Parser {
                 if (l1.getID() == Token.ID.STRING) {
                     match();
                     break;
-                }
-                else {
+                } else {
                     String[] err = {"String"};
                     error(err);
                 }
@@ -427,8 +426,7 @@ public class Parser {
                 if (l1.getID() == Token.ID.BOOLEAN) {
                     match();
                     break;
-                }
-                else {
+                } else {
                     String[] err = {"Boolean"};
                     error(err);
                 }
@@ -473,8 +471,7 @@ public class Parser {
                 Block();
                 if (l1.getID() == Token.ID.SCOLON) {
                     match();
-                }
-                else {
+                } else {
                     String[] err = {";"};
                     error(err);
                 }
@@ -500,8 +497,7 @@ public class Parser {
                 Block();
                 if (l1.getID() == Token.ID.SCOLON) {
                     match();
-                }
-                else {
+                } else {
                     String[] err = {";"};
                     error(err);
                 }
@@ -598,7 +594,7 @@ public class Parser {
 
     private void FormalParameterSection() {
         stackTrace += "FormalParameterSection\n";
-        switch(getRule(NonTerminal.FormalParameterSection)) {
+        switch (getRule(NonTerminal.FormalParameterSection)) {
             case 25:
                 ValueParameterSection();
                 break;
@@ -712,12 +708,11 @@ public class Parser {
 
     private void StatementTail() {
         stackTrace += "StatementTail\n";
-        switch(getRule(NonTerminal.StatementTail)) {
+        switch (getRule(NonTerminal.StatementTail)) {
             case 32:
                 if (l1.getID() == Token.ID.SCOLON) {
                     match();
-                }
-                else {
+                } else {
                     String[] err = {";"};
                     error(err);
                 }
@@ -1247,115 +1242,144 @@ public class Parser {
     //stubs for rules 78 - 150
     private void SimpleExpression() {
         stackTrace += "SimpleExpression\n";
-        OptionalSign(); // Rule 82
-        Term();
-        TermTail();
+        switch (getRule(NonTerminal.SimpleExpression)) {
+            case 82:
+                OptionalSign(); // Rule 82
+                Term();
+                TermTail();
+                break;
+            default:
+                String exp[] = {""};
+                error(exp);
+        }
     }
 
     private void TermTail() {
         stackTrace += "TermTail\n";
-        AddingOperator(); // Rule 83
-        Term();           // Rule 83
-        TermTail();       // Rule 83
-        switch (l1.getID()) {
-            // Rule 84
+        switch (getRule(NonTerminal.TermTail)) {
+            case 83:
+                AddingOperator(); // Rule 83
+                Term();           // Rule 83
+                TermTail();       // Rule 83
+                break;
+            case 84:
+                break;
+            default:
+                String exp[] = {""};
+                error(exp);
         }
     }
 
     private void OptionalSign() {
         stackTrace += "OptionalSign\n";
-        switch (l1.getID()) {
-            case PLUS: // Rule 85
+        switch (getRule(NonTerminal.OptionalSign)) {
+            case 85: // +
                 match();
                 break;
-            case MINUS: // RULE 86
-                match();
+            case 86: // -
                 break;
-            // Rule 87 @TODO switch on e
+            case 87: // e
+                break;
             default:
-                String exp[] = {"PLUS", "MINUS"};
+                String exp[] = {"+", "-"};
                 error(exp);
         }
     }
 
     private void AddingOperator() {
         stackTrace += "AddingOperator\n";
-        switch (l1.getID()) {
-            case PLUS: // Rule 88
+        switch (getRule(NonTerminal.AddingOperator)) {
+            case 88: // +
                 match();
                 break;
-            case MINUS: // RULE 89
+            case 89: // -
                 match();
                 break;
-            case OR: // RULE 90
+            case 90: // or
                 match();
                 break;
             default:
-                String exp[] = {"PLUS", "MINUS", "OR"};
+                String exp[] = {"+", "-", "or"};
                 error(exp);
         }
     }
 
     private void Term() {
         stackTrace += "Term\n";
-        Factor();      // RULE 91
-        FactorTail();  // RULE 91
+        switch (getRule(NonTerminal.Term)) {
+            case 91:
+                Factor();      // RULE 91
+                FactorTail();  // RULE 91
+                break;
+            default:
+                String exp[] = {""};
+                error(exp);
+        }
     }
 
     private void FactorTail() {
         stackTrace += "FactorTail\n";
-        MultiplyingOperator();  // RULE 92
-        Factor();               // RULE 92
-        FactorTail();           // RULE 92
-        switch (l1.getID()) {
-            // RULE 93
+        switch (getRule(NonTerminal.FactorTail)) {
+            case 92:
+                MultiplyingOperator();  // RULE 92
+                Factor();               // RULE 92
+                FactorTail();           // RULE 92
+                break;
+            case 93:
+                break;
+            default:
+                String exp[] = {""};
+                error(exp);
         }
     }
 
     private void MultiplyingOperator() {
         stackTrace += "MultiplyingOperator\n";
-        switch (l1.getID()) {
-            case TIMES:         // RULE 94
+        switch (getRule(NonTerminal.MultiplyingOperator)) {
+            case 94:         //  * RULE 94
                 match();
                 break;
-            case FLOAT_DIVIDE:  // RULE 95
+            case 95:  // / RULE 95
                 match();
                 break;
-            case DIV:           // RULE 96
+            case 96:           // / RULE 96
                 match();
                 break;
-            case MOD:           // RULE 97
+            case 97:           // % RULE 97
                 match();
                 break;
-            case AND:           // RULE 98
+            case 98:           // and RULE 98
                 match();
                 break;
+            default:
+                String exp[] = {"*", "/", "div", "%", "amd"};
+                error(exp);
         }
     }
 
     private void Factor() {
         stackTrace += "Factor\n";
-        switch (l1.getID()) {
-            case INTEGER:
-                match();      // RULE 99
+        switch (getRule(NonTerminal.Factor)) {
+            case 99:
+                match();      //int RULE 99
                 break;
-            case FLOAT:
+            case 100:
                 match();      // RULE 100
                 break;
-            case STRING_LIT:
+            case 101:
                 match();      // RULE 101
                 break;
-            case TRUE:          // RULE 102
+            case 102:          // RULE 102
                 match();
                 break;
-            case FALSE:         // RULE 103
+            case 103:         // RULE 103
                 match();
                 break;
-            case NOT:           // RULE 104
+            case 104:           // RULE 104
                 match();
                 Factor();
                 break;
-            case LPAREN:        // RULE 105
+            case 105:        // RULE 105
                 match();
                 Expression();
                 switch (l1.getID()) {
@@ -1366,7 +1390,7 @@ public class Parser {
                         String exp[] = {")"};
                         error(exp);
                 }
-            case IDENTIFIER:   // RULE 106
+            case 106:   // RULE 106
                 FunctionIdentifier();
                 OptionalActualParameterList();
                 break;
@@ -1378,8 +1402,8 @@ public class Parser {
 
     private void ProgramIdentifier() {
         stackTrace += "ProgramIdentifier\n";
-        switch (l1.getID()) {
-            case IDENTIFIER:    // RULE 107
+        switch (getRule(NonTerminal.ProgramIdentifier)) {
+            case 107:    // RULE 107
                 match();
                 break;
             default:
@@ -1390,8 +1414,8 @@ public class Parser {
 
     private void VariableIdentifier() {
         stackTrace += "VariableIdentifier\n";
-        switch (l1.getID()) {
-            case IDENTIFIER:    // RULE 108
+        switch (getRule(NonTerminal.VariableIdentifier)) {
+            case 108:    // RULE 108
                 match();
                 break;
             default:
@@ -1402,8 +1426,8 @@ public class Parser {
 
     private void ProcedureIdentifier() {
         stackTrace += "ProcedureIdentifier\n";
-        switch (l1.getID()) {
-            case IDENTIFIER:     // RULE 109
+        switch (getRule(NonTerminal.ProcedureIdentifier)) {
+            case 109:     // RULE 109
                 match();
                 break;
             default:
@@ -1414,8 +1438,8 @@ public class Parser {
 
     private void FunctionIdentifier() {
         stackTrace += "FunctionIdentifier\n";
-        switch (l1.getID()) {
-            case IDENTIFIER:    // RULE 110
+        switch (getRule(NonTerminal.FunctionIdentifier)) {
+            case 110:    // RULE 110
                 match();
                 break;
             default:
@@ -1426,18 +1450,32 @@ public class Parser {
 
     private void BooleanExpression() {
         stackTrace += "BooleanExpression\n";
-        Expression();           // RULE 111
+        switch (getRule(NonTerminal.BooleanExpression)) {
+            case 111:    // RULE 111
+                Expression();           // RULE 111
+                break;
+            default:
+                String[] exp = {""};
+                error(exp);
+        }
     }
 
     private void OrdinalExpression() {
         stackTrace += "OrdinalExpression\n";
-        Expression();           // RULE 112
+        switch (getRule(NonTerminal.BooleanExpression)) {
+            case 112:    // RULE 112
+                Expression();
+                break;
+            default:
+                String[] exp = {""};
+                error(exp);
+        }
     }
 
     private void IdentifierList() {
         stackTrace += "IdentifierList\n";
-        switch (l1.getID()) {
-            case IDENTIFIER:    // RULE 113
+        switch (getRule(NonTerminal.IdentifierList)) {
+            case 113:    // RULE 113
                 match();
                 IdentifierTail();
                 break;
@@ -1449,8 +1487,8 @@ public class Parser {
 
     private void IdentifierTail() {
         stackTrace += "IdentifierTail\n";
-        switch (l1.getID()) {
-            case COMMA:
+        switch (getRule(NonTerminal.IdentifierTail)) {
+            case 114:
                 match(); // RULE 114
                 if (l1.getID() == Token.ID.IDENTIFIER) {
                     match();
@@ -1460,8 +1498,8 @@ public class Parser {
                 }
                 IdentifierTail();
                 break;
-            // @TODO Switch on e
-            // for rule 115
+            case 115: // for rule 115
+                break;
             default:
                 String[] err = {"COMMA IDENTIFIER IdentifierTail"};
         }
