@@ -727,6 +727,8 @@ public class Parser {
                     String[] err = {";"};
                     error(err);
                 }
+                Statement();
+                StatementTail();
                 break;
             case 33:
                 break;
