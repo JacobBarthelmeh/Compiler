@@ -442,7 +442,7 @@ public class Parser {
                     String[] err = {"Float"};
                     error(err);
                 }
-            break;
+                break;
             case 12:
                 if (l1.getID() == Token.ID.STRING) {
                     match();
@@ -451,7 +451,7 @@ public class Parser {
                     String[] err = {"String"};
                     error(err);
                 }
-            break;
+                break;
             case 13:
                 if (l1.getID() == Token.ID.BOOLEAN) {
                     match();
@@ -899,7 +899,7 @@ public class Parser {
                 }
                 break;
 
-            case 59: //rule 50
+            case 50: //rule 50
                 match();
                 if (l1.getID() == Token.ID.LPAREN) {
                     match();
@@ -1335,6 +1335,7 @@ public class Parser {
                 match();
                 break;
             case 86: // -
+                match();
                 break;
             case 87: // e
                 break;
@@ -1535,7 +1536,7 @@ public class Parser {
 
     private void OrdinalExpression() {
         stackTrace += "OrdinalExpression\n";
-        switch (getRule(NonTerminal.BooleanExpression)) {
+        switch (getRule(NonTerminal.OrdinalExpression)) {
             case 112:    // RULE 112
                 Expression();
                 break;
