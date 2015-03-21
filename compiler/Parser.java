@@ -26,6 +26,7 @@ public class Parser {
     private int Table[][];
     private String stackTrace = "";
 
+    // Enumeration of the non-terminal nodes
     public enum NonTerminal {
 
         SystemGoal,
@@ -101,12 +102,20 @@ public class Parser {
             /* java scanner used to read in ll1.csv table */
             java.util.Scanner sc = new java.util.Scanner(new File("ll1.csv"));
             sc.nextLine();
+            // Table is of size 63 because there are 63 elements in the
+            // enumeration 'NonTerminal'
             Table = new int[63][];
-            int index = 0;
+            int index = 0; // Iterator for adding elements into table
+            // Begin reading the csv file containing the ll1 table
             while (sc.hasNext()) {
-                String str = sc.nextLine();
-                char[] arr = str.toCharArray();
-                arr = (removeStr(arr).toCharArray());
+                String str = sc.nextLine(); // Read in line from ll1 table
+                char[] arr = str.toCharArray(); // Convert to character array for manipulation
+                // ll1 table is formatted <line_number><comma><rules commas etc.>
+                // so two removeStr calls are necessary. The first does away with the line
+                // number and initial comma, the second does away with the non-terminals name
+                // which was captured above in the enumeration.
+                // EG "2, Program ,,42," would go to "2, Program ,,42,"
+                arr = (removeStr(arr).toCharArray()); 
                 arr = (removeStr(arr).toCharArray());
                 int[] tmparr = new int[52];
                 for (int i = 0; i < 52; i++) {
@@ -130,19 +139,31 @@ public class Parser {
 
         return s;
     }
-
+    
+    /**
+     * Removes 
+     * @param arr a character array from one line of the ll1 csv table
+     * @return a substring built from the passed parameter containing the characters from one character beyond the first comma to the end of the array
+     */
     private String removeStr(char[] arr) {
         String s = "";
-        int i = 0;
+        int i = 0; // Iterator variable
+        // Takes a char array from the CSV ll1 table and iterates through
+        // the array until the end of the array is reached, or a comma
+        // is reached
         while (arr[i] != ',' && i < arr.length) {
             i++;
         }
         i++; /* move over comma */
-
-        for (; i < arr.length; i++) {
+        
+        // Generates a substring built from the original character array
+        // The substring contains the original character array except
+        // for the first character up to the first ',' character.
+        // If the array has no commas, the substring will be blank
+        // EG "asdfasdfasdf,hello world" would return the substring "hello world"
+        for (i = i; i < arr.length; i++) {
             s += arr[i];
         }
-
         return s;
     }
 
