@@ -8,36 +8,88 @@ import scanner.Scanner;
 public class Test {
 
     /* input files */
-    static String scannerIn = "testfile.mp";
-    static String parserIn = "testfile.mp";
+    static String scannerInC = "c-testfile.mp";
+    static String parserInC = "c-testfile.mp";
+    static String scannerInB = "b-testfile.mp";
+    static String parserInB = "b-testfile.mp";
+    static String scannerInA = "a-testfile.mp";
+    static String parserInA = "a-testfile.mp";
+
 
     /* output files */
-    static String scannerOut = "scanner_test.txt";
-    static String parserOut = "parser_test.txt";
+    static String scannerOutC = "c-scanner_test.txt";
+    static String parserOutC = "c-parser_test.txt";
+    static String scannerOutB = "b-scanner_test.txt";
+    static String parserOutB = "b-parser_test.txt";
+    static String scannerOutA = "a-scanner_test.txt";
+    static String parserOutA = "a-parser_test.txt";
 
     public static void main(String[] args) {
-        System.out.println("Running all test");
+        System.out.println("Running C ranked tests");
 
         /**
          * ******* Scanner ************
          */
         System.out.print("Scanner Test ....");
-        if (scanner_test(scannerIn, scannerOut) == true) {
+        if (scanner_test(scannerInC, scannerOutC) == true) {
             System.out.println("pass");
         } else {
-            System.err.println("fail!!!");
+            System.out.println("fail!!!");
         }
 
         /**
          * ******* Parser ************
          */
         System.out.print("Parser Test ....");
-        if (parser_test(parserIn, parserOut) == true) {
+        if (parser_test(parserInC, parserOutC) == true) {
             System.out.println("pass");
         } else {
-            System.err.println("fail!!!");
+            System.out.println("fail!!!");
         }
 
+        System.out.println("Running B ranked tests");
+
+        /**
+         * ******* Scanner ************
+         */
+        System.out.print("Scanner Test ....");
+        if (scanner_test(scannerInB, scannerOutB) == true) {
+            System.out.println("pass");
+        } else {
+            System.out.println("fail!!!");
+        }
+
+        /**
+         * ******* Parser ************
+         */
+        System.out.print("Parser Test ....");
+        if (parser_test(parserInB, parserOutB) == true) {
+            System.out.println("pass");
+        } else {
+            System.out.println("fail!!!");
+        }
+
+        System.out.println("Running A ranked tests");
+
+        /**
+         * ******* Scanner ************
+         */
+        System.out.print("Scanner Test ....");
+        if (scanner_test(scannerInA, scannerOutA) == true) {
+            System.out.println("pass");
+        } else {
+            System.out.println("fail!!!");
+        }
+
+        /**
+         * ******* Parser ************
+         */
+        System.out.print("Parser Test ....");
+        if (parser_test(parserInA, parserOutA) == true) {
+            System.out.println("pass");
+        } else {
+            System.out.println("fail!!!");
+        }
     }
 
     /**
