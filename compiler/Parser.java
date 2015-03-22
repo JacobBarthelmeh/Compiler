@@ -314,9 +314,9 @@ public class Parser {
     //*************************************************************************
     // ll(1) table rules
     // See Complete-LL(1)-Table-2015-03-10.xlsx for information
-    // Rules 1-39
+    // Nonterminals 1-39
     
-    // Rule 1
+    // Nonterminal 1
     private void SystemGoal() {
         stackTrace += "SystemGoal\n";
         switch (getRule(NonTerminal.SystemGoal)) {
@@ -335,7 +335,7 @@ public class Parser {
         }
     }
     
-    // Rule 2
+    // Nonterminal 2
     private void Program() {
         stackTrace += "Program\n";
         switch (getRule(NonTerminal.Program)) {
@@ -361,7 +361,7 @@ public class Parser {
         }
     }
     
-    // Rule 3
+    // Nonterminal 3
     private void ProgramHeading() {
         stackTrace += "ProgramHeading\n";
         switch (getRule(NonTerminal.ProgramHeading)) {
@@ -381,7 +381,7 @@ public class Parser {
         }
     }
     
-    // Rule 4
+    // Nonterminal 4
     private void Block() {
         stackTrace += "Block\n";
         switch (getRule(NonTerminal.Block)) {
@@ -396,7 +396,7 @@ public class Parser {
         }
     }
 
-    // Rule 5
+    // Nonterminal 5
     private void VariableDeclarationPart() {
         stackTrace += "VariableDeclarationPart\n";
         switch (getRule(NonTerminal.VariableDeclarationPart)) {
@@ -424,7 +424,7 @@ public class Parser {
         }
     }
     
-    // Rule 6
+    // Nonterminal 6
     private void VariableDeclarationTail() {
         stackTrace += "VariableDeclarationTail\n";
         switch (getRule(NonTerminal.VariableDeclarationTail)) {
@@ -447,7 +447,7 @@ public class Parser {
         }
     }
 
-    // Rule 7
+    // Nonterminal 7
     private void VariableDeclaration() {
         stackTrace += "VariableDeclaration\n";
         switch (getRule(NonTerminal.VariableDeclaration)) {
@@ -466,7 +466,7 @@ public class Parser {
         }
     }
 
-    // Rule 8
+    // Nonterminal 8
     private void Type() {
         stackTrace += "Type\n";
         switch (getRule(NonTerminal.Type)) {
@@ -513,7 +513,7 @@ public class Parser {
         }
     }
 
-    // Rule 9
+    // Nonterminal 9
     private void ProcedureAndFunctionDeclarationPart() {
         stackTrace += "ProcedureAndFunctionDeclarationPart\n";
         switch (getRule(NonTerminal.ProcedureAndFunctionDeclarationPart)) {
@@ -534,7 +534,7 @@ public class Parser {
         }
     }
 
-    // Rule 10
+    // Nonterminal 10
     private void ProcedureDeclaration() {
         stackTrace += "ProcedureDeclaration\n";
         switch (getRule(NonTerminal.ProcedureDeclaration)) {
@@ -561,7 +561,7 @@ public class Parser {
         }
     }
 
-    // Rule 11
+    // Nonterminal 11
     private void FunctionDeclaration() {
         stackTrace += "FunctionDeclaration\n";
         switch (getRule(NonTerminal.FunctionDeclaration)) {
@@ -588,7 +588,7 @@ public class Parser {
         }
     }
 
-    // Rule 12
+    // Nonterminal 12
     private void ProcedureHeading() {
         stackTrace += "ProcedureHeading\n";
         switch (getRule(NonTerminal.ProcedureHeading)) {
@@ -609,7 +609,7 @@ public class Parser {
         }
     }
 
-    // Rule 13
+    // Nonterminal 13
     private void FunctionHeading() {
         stackTrace += "FunctionHeading\n";
         switch (getRule(NonTerminal.FunctionHeading)) {
@@ -630,7 +630,7 @@ public class Parser {
         }
     }
 
-    // Rule 14
+    // Nonterminal 14
     private void OptionalFormalParameterList() {
         stackTrace += "OptionalFormalParameterList\n";
         switch (getRule(NonTerminal.OptionalFormalParameterList)) {
@@ -653,7 +653,7 @@ public class Parser {
         }
     }
 
-    // Rule 15
+    // Nonterminal 15
     private void FormalParameterSectionTail() {
         stackTrace += "FormalParameterSectionTail\n";
         switch (getRule(NonTerminal.FormalParameterSectionTail)) {
@@ -676,7 +676,7 @@ public class Parser {
         }
     }
 
-    // Rule 16
+    // Nonterminal 16
     private void FormalParameterSection() {
         stackTrace += "FormalParameterSection\n";
         switch (getRule(NonTerminal.FormalParameterSection)) {
@@ -693,7 +693,7 @@ public class Parser {
         }
     }
 
-    // Rule 17
+    // Nonterminal 17
     private void ValueParameterSection() {
         stackTrace += "ValueParameterSection\n";
         switch (getRule(NonTerminal.ValueParameterSection)) {
@@ -714,7 +714,7 @@ public class Parser {
         }
     }
 
-    // Rule 18
+    // Nonterminal 18
     private void VariableParameterSection() {
         stackTrace += "VariableParameterSection\n";
         switch (getRule(NonTerminal.VariableParameterSection)) {
@@ -741,7 +741,7 @@ public class Parser {
         }
     }
     
-    // Rule 19
+    // Nonterminal 19
     private void StatementPart() {
         stackTrace += "StatementPart\n";
         switch (getRule(NonTerminal.StatementPart)) {
@@ -755,7 +755,7 @@ public class Parser {
         }
     }
 
-    // Rule 20
+    // Nonterminal 20
     private void CompoundStatement() {
         stackTrace += "CompoundStatement\n";
         switch (getRule(NonTerminal.CompoundStatement)) {
@@ -781,7 +781,7 @@ public class Parser {
         }
     }
 
-    // Rule 21
+    // Nonterminal 21
     private void StatementSequence() {
         stackTrace += "StatementSequence\n";
         switch (getRule(NonTerminal.StatementSequence)) {
@@ -796,7 +796,7 @@ public class Parser {
         }
     }
 
-    // Rule 22
+    // Nonterminal 22
     private void StatementTail() {
         stackTrace += "StatementTail\n";
         switch (getRule(NonTerminal.StatementTail)) {
@@ -819,7 +819,7 @@ public class Parser {
         }
     }
 
-    // Rule 23
+    // Nonterminal 23
     private void Statement() {
         stackTrace += "Statement\n";
         switch (getRule(NonTerminal.Statement)) {
@@ -864,7 +864,7 @@ public class Parser {
     // rules 40-47 
     // Jacob Barthelmeh
     
-    // Rule 24
+    // Nonterminal 24
     private void EmptyStatement() {
         stackTrace += "EmptyStatement\n";
         switch (getRule(NonTerminal.EmptyStatement)) {
@@ -877,7 +877,7 @@ public class Parser {
         }
     }
 
-    // Rule 25
+    // Nonterminal 25
     private void ReadStatement() {
         stackTrace += "ReadStatement\n";
         switch (getRule(NonTerminal.ReadStatement)) {
@@ -911,7 +911,7 @@ public class Parser {
 
     }
 
-    // Rule 26
+    // Nonterminal 26
     private void ReadParameterTail() {
         stackTrace += "ReadParameterTail\n";
         switch (getRule(NonTerminal.ReadParameterTail)) {
@@ -929,7 +929,7 @@ public class Parser {
         }
     }
 
-    // Rule 27
+    // Nonterminal 27
     private void ReadParameter() {
         stackTrace += "ReadParameter\n";
         switch (getRule(NonTerminal.ReadParameter)) {
@@ -943,7 +943,7 @@ public class Parser {
         }
     }
 
-    // Rule 28
+    // Nonterminal 28
     private void WriteStatement() {
         stackTrace += "WriteStatment\n";
         switch (getRule(NonTerminal.WriteStatement)) {
@@ -989,7 +989,7 @@ public class Parser {
         }
     }
 
-    // Rule 29
+    // Nonterminal 29
     private void WriteParameterTail() {
         stackTrace += "WriteParameterTail\n";
         switch (getRule(NonTerminal.WriteParameterTail)) {
@@ -1007,7 +1007,7 @@ public class Parser {
         }
     }
 
-    // Rule 30
+    // Nonterminal 30
     private void WriteParameter() {
         stackTrace += "WriteParameter\n";
         switch (getRule(NonTerminal.WriteParameter)) {
@@ -1021,7 +1021,7 @@ public class Parser {
         }
     }
 
-    // Rule 31
+    // Nonterminal 31
     private void AssignmentStatement() {
         stackTrace += "AssignmentStatement\n";
         switch (getRule(NonTerminal.AssignmentStatement)) {
@@ -1052,7 +1052,7 @@ public class Parser {
         }
     }
 
-    // Rule 32
+    // Nonterminal 32
     private void IfStatement() {
         stackTrace += "IfStatement\n";
         switch (getRule(NonTerminal.IfStatement)) {
@@ -1080,7 +1080,7 @@ public class Parser {
         }
     }
 
-    // Rule 33
+    // Nonterminal 33
     private void OptionalElsePart() {
         stackTrace += "OptionalElsePart\n";
         switch (getRule(NonTerminal.OptionalElsePart)) {
@@ -1098,7 +1098,7 @@ public class Parser {
         }
     }
 
-    // Rule 34
+    // Nonterminal 34
     private void RepeatStatement() {
         stackTrace += "RepeatStatement\n";
         switch (getRule(NonTerminal.RepeatStatement)) {
@@ -1125,7 +1125,7 @@ public class Parser {
         }
     }
 
-    // Rule 35
+    // Nonterminal 35
     private void WhileStatement() {
         stackTrace += "WhileStatment\n";
         switch (getRule(NonTerminal.WhileStatement)) {
@@ -1152,7 +1152,7 @@ public class Parser {
         }
     }
 
-    // Rule 36
+    // Nonterminal 36
     private void ForStatement() {
         stackTrace += "ForStatement\n";
         switch (getRule(NonTerminal.ForStatement)) {
@@ -1188,7 +1188,7 @@ public class Parser {
         }
     }
 
-    // Rule 37
+    // Nonterminal 37
     private void ControlVariable() {
         stackTrace += "ControlVariable\n";
         switch (getRule(NonTerminal.ControlVariable)) {
@@ -1202,7 +1202,7 @@ public class Parser {
         }
     }
 
-    // Rule 38
+    // Nonterminal 38
     private void InitialValue() {
         stackTrace += "InitialValue\n";
         switch (getRule(NonTerminal.InitialValue)) {
@@ -1216,7 +1216,7 @@ public class Parser {
         }
     }
 
-    // Rule 39
+    // Nonterminal 39
     private void StepValue() {
         stackTrace += "StepValue\n";
         switch (getRule(NonTerminal.StepValue)) {
@@ -1233,7 +1233,7 @@ public class Parser {
         }
     }
 
-    // Rule 40
+    // Nonterminal 40
     private void FinalValue() {
         stackTrace += "FinalValue\n";
         switch (getRule(NonTerminal.FinalValue)) {
@@ -1247,7 +1247,7 @@ public class Parser {
         }
     }
 
-    // Rule 41
+    // Nonterminal 41
     private void ProcedureStatement() {
         stackTrace += "ProcedureStatment\n";
         switch (getRule(NonTerminal.ProcedureStatement)) {
@@ -1262,7 +1262,7 @@ public class Parser {
         }
     }
 
-    // Rule 42
+    // Nonterminal 42
     private void OptionalActualParameterList() {
         stackTrace += "OptionalActualParameterList\n";
         switch (getRule(NonTerminal.OptionalActualParameterList)) {
@@ -1286,7 +1286,7 @@ public class Parser {
         }
     }
 
-    // Rule 43
+    // Nonterminal 43
     private void ActualParameterTail() {
         stackTrace += "ActualParameterTail\n";
         switch (getRule(NonTerminal.ActualParameterTail)) {
@@ -1304,7 +1304,7 @@ public class Parser {
         }
     }
 
-    // Rule 44
+    // Nonterminal 44
     private void ActualParameter() {
         stackTrace += "ActualParameter\n";
         switch (getRule(NonTerminal.ActualParameter)) {
@@ -1318,7 +1318,7 @@ public class Parser {
         }
     }
 
-    // Rule 45
+    // Nonterminal 45
     private void Expression() {
         stackTrace += "Expression\n";
         switch (getRule(NonTerminal.Expression)) {
@@ -1333,7 +1333,7 @@ public class Parser {
         }
     }
 
-    // Rule 46
+    // Nonterminal 46
     private void OptionalRelationalPart() {
         stackTrace += "OptionalRelationalPart\n";
         switch (getRule(NonTerminal.OptionalRelationalPart)) {
@@ -1350,7 +1350,7 @@ public class Parser {
         }
     }
 
-    // Rule 47
+    // Nonterminal 47
     private void RelationalOperator() {
         stackTrace += "RelationalOperator\n";
         switch (getRule(NonTerminal.RelationalOperator)) {
@@ -1382,7 +1382,7 @@ public class Parser {
     //**************************************************************************
     //stubs for rules 78 - 150
     
-    // Rule 48
+    // Nonterminal 48
     private void SimpleExpression() {
         stackTrace += "SimpleExpression\n";
         switch (getRule(NonTerminal.SimpleExpression)) {
@@ -1398,7 +1398,7 @@ public class Parser {
         }
     }
 
-    // Rule 49
+    // Nonterminal 49
     private void TermTail() {
         stackTrace += "TermTail\n";
         switch (getRule(NonTerminal.TermTail)) {
@@ -1416,7 +1416,7 @@ public class Parser {
         }
     }
 
-    // Rule 50
+    // Nonterminal 50
     private void OptionalSign() {
         stackTrace += "OptionalSign\n";
         switch (getRule(NonTerminal.OptionalSign)) {
@@ -1435,7 +1435,7 @@ public class Parser {
         }
     }
 
-    // Rule 51
+    // Nonterminal 51
     private void AddingOperator() {
         stackTrace += "AddingOperator\n";
         switch (getRule(NonTerminal.AddingOperator)) {
@@ -1455,7 +1455,7 @@ public class Parser {
         }
     }
 
-    // Rule 52
+    // Nonterminal 52
     private void Term() {
         stackTrace += "Term\n";
         switch (getRule(NonTerminal.Term)) {
@@ -1470,7 +1470,7 @@ public class Parser {
         }
     }
 
-    // Rule 53
+    // Nonterminal 53
     private void FactorTail() {
         stackTrace += "FactorTail\n";
         switch (getRule(NonTerminal.FactorTail)) {
@@ -1488,7 +1488,7 @@ public class Parser {
         }
     }
 
-    // Rule 54
+    // Nonterminal 54
     private void MultiplyingOperator() {
         stackTrace += "MultiplyingOperator\n";
         switch (getRule(NonTerminal.MultiplyingOperator)) {
@@ -1514,7 +1514,7 @@ public class Parser {
         }
     }
 
-    // Rule 55
+    // Nonterminal 55
     private void Factor() {
         stackTrace += "Factor\n";
         switch (getRule(NonTerminal.Factor)) {
@@ -1563,7 +1563,7 @@ public class Parser {
         }
     }
 
-    // Rule 56
+    // Nonterminal 56
     private void ProgramIdentifier() {
         stackTrace += "ProgramIdentifier\n";
         switch (getRule(NonTerminal.ProgramIdentifier)) {
@@ -1577,7 +1577,7 @@ public class Parser {
         }
     }
 
-    // Rule 57
+    // Nonterminal 57
     private void VariableIdentifier() {
         stackTrace += "VariableIdentifier\n";
         switch (getRule(NonTerminal.VariableIdentifier)) {
@@ -1591,7 +1591,7 @@ public class Parser {
         }
     }
 
-    // Rule 58
+    // Nonterminal 58
     private void ProcedureIdentifier() {
         stackTrace += "ProcedureIdentifier\n";
         switch (getRule(NonTerminal.ProcedureIdentifier)) {
@@ -1605,7 +1605,7 @@ public class Parser {
         }
     }
 
-    // Rule 59
+    // Nonterminal 59
     private void FunctionIdentifier() {
         stackTrace += "FunctionIdentifier\n";
         switch (getRule(NonTerminal.FunctionIdentifier)) {
@@ -1619,7 +1619,7 @@ public class Parser {
         }
     }
 
-    // Rule 60
+    // Nonterminal 60
     private void BooleanExpression() {
         stackTrace += "BooleanExpression\n";
         switch (getRule(NonTerminal.BooleanExpression)) {
@@ -1633,7 +1633,7 @@ public class Parser {
         }
     }
 
-    // 61
+    // Nonterminal 61
     private void OrdinalExpression() {
         stackTrace += "OrdinalExpression\n";
         switch (getRule(NonTerminal.OrdinalExpression)) {
@@ -1647,7 +1647,7 @@ public class Parser {
         }
     }
 
-    // Rule 62
+    // Nonterminal 62
     private void IdentifierList() {
         stackTrace += "IdentifierList\n";
         switch (getRule(NonTerminal.IdentifierList)) {
@@ -1662,7 +1662,7 @@ public class Parser {
         }
     }
 
-    // Rule 63
+    // Nonterminal 63
     private void IdentifierTail() {
         stackTrace += "IdentifierTail\n";
         switch (getRule(NonTerminal.IdentifierTail)) {
