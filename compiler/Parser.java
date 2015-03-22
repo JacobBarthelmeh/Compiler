@@ -118,10 +118,6 @@ public class Parser {
                 // and after the second call it would go to ",,42,"
                 arr = (removeStr(arr).toCharArray()); 
                 arr = (removeStr(arr).toCharArray());
-                
-                // QUESTION!
-                // the tmparr has 52 elements which I assume are for the terminals. However,
-                // there are 53 not 52 terminals. Could this be a source of potential error?
                 int[] tmparr = new int[52];
                 for (int i = 0; i < 52; i++) {
                     // Looks at the current line from the csv table and returns either
@@ -138,7 +134,15 @@ public class Parser {
                     tmparr[i] = (current.equals("")) ? -1 : Integer.parseInt(current);
                     // Check the next terminal and continue building the table
                     arr = (removeStr(arr).toCharArray());
-                }
+                }   
+                
+                
+                // QUESTION!
+                // the tmparr has 52 elements which I assume are for the terminals. However,
+                // there are 53 not 52 terminals. Could this be a source of potential error?
+                System.out.println("left over " + Arrays.toString(arr)); // print off of whats left over in char array. I count 52 tokens -- JRB
+                
+                
                 Table[index] = tmparr; // Builds the ll1 tables current non-terminal line
                 index++; // Iterate to the next non-terminal
             }
