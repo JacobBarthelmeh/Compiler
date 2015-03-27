@@ -17,11 +17,11 @@ import scanner.Scanner;
  */
 public class Parser {
 
-    private volatile Token l1; // look ahead token
-    private volatile Scanner scanner;
-    private volatile PrintWriter rFile;
-    private volatile String rule_tree_file = "rule_list.csv"; // Contains rules for going from non-terminals to terminals
-    private volatile boolean error_flag = false;
+    private Token l1; // look ahead token
+    private Scanner scanner;
+    private PrintWriter rFile;
+    private String rule_tree_file = "rule_list.csv"; // Contains rules for going from non-terminals to terminals
+    private boolean error_flag = false;
 
     private int Table[][];
     private String stackTrace = "";
