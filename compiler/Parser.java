@@ -29,24 +29,24 @@ public class Parser {
     // Enumeration of the non-terminal nodes
     public enum NonTerminal {
 
-        SystemGoal,
+        SystemGoal, // Generate symbol table
         Program,
         ProgramHeading,
         Block,
-        VariableDeclarationPart,
+        VariableDeclarationPart, // Symbol table call needed
         VariableDeclarationTail,
         VariableDeclaration,
         Type,
         ProcedureAndFunctionDeclarationPart,
         ProcedureDeclaration,
-        FunctionDeclaration,
-        ProcedureHeading,
+        FunctionDeclaration, // Symbol table call needed, generate new symbol table
+        ProcedureHeading, // generate new symbol table
         FunctionHeading,
         OptionalFormalParameterList,
         FormalParameterSectionTail,
         FormalParameterSection,
         ValueParameterSection,
-        VariableParameterSection,
+        VariableParameterSection, // Symbol table call needed
         StatementPart,
         CompoundStatement,
         StatementSequence,
@@ -60,11 +60,11 @@ public class Parser {
         WriteParameterTail,
         WriteParameter,
         AssignmentStatement,
-        IfStatement,
+        IfStatement, // New symbol table needed
         OptionalElsePart,
         RepeatStatement,
-        WhileStatement,
-        ForStatement,
+        WhileStatement, // New symbol table needed
+        ForStatement, // New symbol table needed
         ControlVariable,
         InitialValue,
         StepValue,
@@ -84,10 +84,10 @@ public class Parser {
         FactorTail,
         MultiplyingOperator,
         Factor,
-        ProgramIdentifier,
-        VariableIdentifier,
-        ProcedureIdentifier,
-        FunctionIdentifier,
+        ProgramIdentifier, 
+        VariableIdentifier, 
+        ProcedureIdentifier, 
+        FunctionIdentifier, 
         BooleanExpression,
         OrdinalExpression,
         IdentifierList,
@@ -405,7 +405,7 @@ public class Parser {
     }
 
     // Nonterminal 5
-    // <VariableDeclarationPart> --> var <VariableDeclaration> ; <VariableDeclarationTail> RULE #5
+    // <VariableDeclarationPart> --> <VariableDeclaration> ; <VariableDeclarationTail> RULE #5
     // <VariableDeclarationPart> --> lambda RULE #6
     private void VariableDeclarationPart() {
         stackTrace += "VariableDeclarationPart\n";
