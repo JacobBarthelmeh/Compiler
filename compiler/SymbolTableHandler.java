@@ -64,5 +64,6 @@ public class SymbolTableHandler {
             str += "Nesting level " + i + ":\n";
             str += tables[i].toString();
         }
+        return str;
     }
 }
