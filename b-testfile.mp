@@ -31,5 +31,5 @@ begin
     {test B ranked loops}
     if (testbool) then
         testbool := not testbool;
-        
+        end.
 end.
