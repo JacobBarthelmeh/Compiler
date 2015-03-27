@@ -4,24 +4,32 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 public class SymbolTable {
     HashMap<String, SymbolEntry> entries;
-    String name;
-    public SymbolTable (String name) {
-        this.name = name;
+    int offset;
+    public SymbolTable () {
         entries = new HashMap();
+        offset = 0;
     }
-    public SymbolEntry addEntry(String name, SymbolEntry.Type type, 
-            SymbolEntry.Kind kind, SymbolEntry.Memory mem,
-            ArrayList<Parameter> parameters) {
-        SymbolEntry entry = new SymbolEntry(type, kind, mem, parameters);
-        entries.put(name, entry);
-        return entry;
+    public void addEntry(SymbolEntry entry) {
+        entry.offset = offset;
+        entries.put(entry.name, entry);
+        switch (entry.type) {
+            case INTEGER:
+                offset += 4;
+            case FLOAT:
+                offset += 8;
+            case BOOLEAN:
+                offset += 1;
+            case STRING:
+                offset += 1;
+        }
+        
     }
     public SymbolEntry getEntry(String name) {
         return entries.get(name);
     }
     @Override
     public String toString() {
-        String str = " Name | Type | Kind | Memory\n";
+        String str = " Name | Type | Kind | Offset\n";
         for (Entry<String, SymbolEntry> entry : entries.entrySet()) {
             SymbolEntry e = entry.getValue();
             str += e + "\n";

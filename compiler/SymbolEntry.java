@@ -11,43 +11,25 @@ public class SymbolEntry {
     };
     public enum Kind {
         VARIABLE,
-        PARAMETER,
+        INPARAMETER,
+        INOUTPARAMETER,
         PROCEDURE,
         FUNCTION,
         NOKIND
     };
-    public enum Memory {
-        COPY,
-        REFERENCE,
-        NOMEM
-    };
-    Type type;
-    Kind kind;
-    Memory mem;
-    ArrayList<Parameter> params;
-    public SymbolEntry(Type type, Kind kind, Memory mem, ArrayList<Parameter> params) {
-        this.type = type;
-        this.kind = kind;
-        this.mem = mem;
-        this.params = params;
+    public String name;
+    public Type type;
+    public Kind kind;
+    public ArrayList<Parameter> params;
+    public int offset;
+    public SymbolEntry(String lexeme) {
+        name = lexeme;
     }
-    public Type getType() {
-        return type;
-    }
-    public Kind getKind() {
-        return kind;
-    }
-    public Memory getMemory() {
-        return mem;
-    }
-    public ArrayList<Parameter> getParameters() {
-        return params;
-    }
+    
     @Override
     public String toString() {
         return  type + " | " +
                 kind + " | " + 
-                mem + " | " + 
                 (params == null ? "" : params.toString());
     }
 }

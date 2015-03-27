@@ -16,7 +16,7 @@ import scanner.Scanner;
  * @author team 4
  */
 public class Parser {
-
+    private SymbolTableHandler sh;
     private Token l1; // look ahead token
     private Scanner scanner;
     private PrintWriter rFile;
@@ -118,8 +118,8 @@ public class Parser {
                 // and after the second call it would go to ",,42,"
                 arr = (removeStr(arr).toCharArray()); 
                 arr = (removeStr(arr).toCharArray());
-                int[] tmparr = new int[52];
-                for (int i = 0; i < 52; i++) {
+                int[] tmparr = new int[Token.ID.values().length];
+                for (int i = 0; i < tmparr.length; i++) {
                     // Looks at the current line from the csv table and returns either
                     // an empty string meaning that the non-terminal is not associated
                     // with the current terminal, or returns an integer in the form
@@ -149,6 +149,7 @@ public class Parser {
         } catch (IOException e) {
             System.out.println("Error creating ll1 table from ll1.csv " + e);
         }
+        sh = new SymbolTableHandler();
     }
 
     /**
