@@ -18,6 +18,7 @@ import scanner.Scanner;
 public class Parser {
 
     private Token l1; // look ahead token
+    private Token l2; // used for some cases when table is ll2
     private Scanner scanner;
     private PrintWriter rFile;
     private String rule_tree_file = "rule_list.csv"; // Contains rules for going from non-terminals to terminals
