@@ -5,12 +5,27 @@ program foo;
 	testint2: integer;
 	testbool: Boolean; {case of "b" seems to matter, check on that}
 	
-begin
+	
+	{test A ranked procedure and function calls}
+    	procedure autobot(a: integer; var x: float);
+		begin {procedure autobot}
+			read(auto);
+			testint := 3;	
+        		
+		end;
+	
+	function yoda(force: float);
+		begin
+			testfloat2 := force;
+		end;
+
+			
+begin {begin program foo}
+	
+	{test read and write}
 	read(in);
 	read(in2);
-	
-	{write('out'); {does not work yet}}
-	
+	write('out');
 	
 	{test of arithmetic}
 	testfloat := 4 mod 2;
@@ -27,6 +42,7 @@ begin
 	testbool := true;
 	testbool := not testbool;
 	testbool := false;
+	
 
     {test B ranked loops}
     if (testbool) then

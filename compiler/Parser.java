@@ -116,7 +116,7 @@ public class Parser {
                 // which was captured above in the enumeration.
                 // EG "2,Program ,,42," would go to "Program ,,42," after the first call
                 // and after the second call it would go to ",,42,"
-                arr = (removeStr(arr).toCharArray()); 
+                arr = (removeStr(arr).toCharArray());
                 arr = (removeStr(arr).toCharArray());
                 int[] tmparr = new int[52];
                 for (int i = 0; i < 52; i++) {
@@ -134,15 +134,8 @@ public class Parser {
                     tmparr[i] = (current.equals("")) ? -1 : Integer.parseInt(current);
                     // Check the next terminal and continue building the table
                     arr = (removeStr(arr).toCharArray());
-                }   
-                
-                
-                // QUESTION!
-                // the tmparr has 52 elements which I assume are for the terminals. However,
-                // there are 53 not 52 terminals. Could this be a source of potential error?
-                System.out.println("left over " + Arrays.toString(arr)); // print off of whats left over in char array. I count 52 tokens -- JRB
-                
-                
+                }
+
                 Table[index] = tmparr; // Builds the ll1 tables current non-terminal line
                 index++; // Iterate to the next non-terminal
             }
@@ -152,20 +145,21 @@ public class Parser {
     }
 
     /**
-     * 
+     *
      * @param arr character array generated from a line of the csv ll1 table
-     * @return A substring of the character array containing the elements ranging from char[0] up to the first ',' character
+     * @return A substring of the character array containing the elements
+     * ranging from char[0] up to the first ',' character
      *
      * Because of the order in which this method and the removeStr method below
      * are called, only character arrays such as ",,,3,,4,53,,," will be passed
-     * in, meaning that the string returned will either be empty, or it will
-     * be an integer represented in string form.
+     * in, meaning that the string returned will either be empty, or it will be
+     * an integer represented in string form.
      */
     private String nextStr(char[] arr) {
         // Substring to be returned
         String s = "";
         int i = 0; // iterator variable
-        
+
         // Finds an integer and returns it in the form of a string or finds
         // a ',' and returns an empty string.
         while (arr[i] != ',' && i < arr.length) {
@@ -175,11 +169,14 @@ public class Parser {
 
         return s;
     }
-    
+
     /**
-     * Removes 
+     * Removes
+     *
      * @param arr a character array from one line of the ll1 csv table
-     * @return a substring built from the passed parameter containing the characters from one character beyond the first comma to the end of the array
+     * @return a substring built from the passed parameter containing the
+     * characters from one character beyond the first comma to the end of the
+     * array
      */
     private String removeStr(char[] arr) {
         String s = "";
@@ -191,7 +188,7 @@ public class Parser {
             i++;
         }
         i++; /* move over comma */
-        
+
         // Generates a substring built from the original character array
         // The substring contains the original character array except
         // for the first character up to the first ',' character.
@@ -261,7 +258,12 @@ public class Parser {
             System.err.println("Invalid input to parser match function.");
             System.exit(1);
         }
-        l1 = scanner.nextToken();
+        if (l2 == null) {
+            l1 = scanner.nextToken();
+        } else {
+            l1 = l2;
+            l2 = null;
+        }
         if (l1 == null) {
             System.err.println("Scanner gave the parser a null token");
             System.exit(1);
@@ -299,8 +301,8 @@ public class Parser {
      */
     private int getRule(NonTerminal nt) {
         int index = l1.getID().ordinal(), // The index corresponding to the current look ahead token
-            nonTerminal = nt.ordinal();
-        
+                nonTerminal = nt.ordinal();
+
         if (nonTerminal > Table.length) {
             System.out.println("Error nonTerminal " + nonTerminal + " is not in table");
             System.exit(1);
@@ -339,7 +341,7 @@ public class Parser {
                 error(err);
         }
     }
-    
+
     // Nonterminal 2
     // <Program> --> <ProgramHeading> ; <Block> . RULE #2
     private void Program() {
@@ -366,7 +368,7 @@ public class Parser {
                 error(err);
         }
     }
-    
+
     // Nonterminal 3
     // <ProgramHeading> --> program <ProgramIdentifier> RULE #3
     private void ProgramHeading() {
@@ -387,7 +389,7 @@ public class Parser {
                 break;
         }
     }
-    
+
     // Nonterminal 4
     // <Block> --> <VariableDeclarationPart> <ProcedureAndFunctionDeclarationPart> <StatementPart> RULE #4
     private void Block() {
@@ -433,7 +435,7 @@ public class Parser {
                 error(err);
         }
     }
-    
+
     // Nonterminal 6
     // <VariableDeclarationTail> --> <VariableDeclaration> ; <VariableDeclarationTail> RULE #7
     // <VariableDeclarationTail> --> lambda RULE #8
@@ -669,6 +671,12 @@ public class Parser {
                 }
                 FormalParameterSection();
                 FormalParameterSectionTail();
+                if (l1.getID() == Token.ID.RPAREN) {
+                    match();
+                } else {
+                    String[] err = {")"};
+                    error(err);
+                }
                 break;
             case 22:
                 break;
@@ -698,7 +706,7 @@ public class Parser {
             case 24:
                 break;
             default:
-                String[] err = {";"};
+                String[] err = {";", ")"};
                 error(err);
                 break;
         }
@@ -772,7 +780,7 @@ public class Parser {
                 break;
         }
     }
-    
+
     // Nonterminal 19
     // <StatementPart> --> <CompoundStatement> RULE #29
     private void StatementPart() {
@@ -1628,7 +1636,17 @@ public class Parser {
     // <Factor> --> <VariableIdentifier> RULE #116
     private void Factor() {
         stackTrace += "Factor\n";
-        switch (getRule(NonTerminal.Factor)) {
+
+        //handle special case in table that branchs when id is not at end of statement
+        int rule = getRule(NonTerminal.Factor);
+        if (rule == 106) {
+            l2 = scanner.nextToken();
+            if (l2.getID() != Token.ID.SCOLON) {
+                rule = 116;
+            }
+        }
+
+        switch (rule) {
             case 99:
                 match();      //int RULE 99
                 break;
