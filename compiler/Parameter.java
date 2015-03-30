@@ -1,8 +1,8 @@
 package compiler;
 public class Parameter {
     public String name;
-    public SymbolEntry.Type type;
-    public Parameter(String name, SymbolEntry.Type type){
+    public Symbol.Type type;
+    public Parameter(String name, Symbol.Type type){
         this.name = name;
         this.type = type;
     }

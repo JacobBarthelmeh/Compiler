@@ -3,13 +3,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 public class SymbolTable {
-    HashMap<String, SymbolEntry> entries;
+    HashMap<String, Symbol> entries;
     int offset;
     public SymbolTable () {
         entries = new HashMap();
         offset = 0;
     }
-    public void addEntry(SymbolEntry entry) {
+    public void addEntry(Symbol entry) {
         entry.offset = offset;
         entries.put(entry.name, entry);
         switch (entry.type) {
@@ -24,14 +24,14 @@ public class SymbolTable {
         }
         
     }
-    public SymbolEntry getEntry(String name) {
+    public Symbol getEntry(String name) {
         return entries.get(name);
     }
     @Override
     public String toString() {
         String str = " Name | Type | Kind | Offset\n";
-        for (Entry<String, SymbolEntry> entry : entries.entrySet()) {
-            SymbolEntry e = entry.getValue();
+        for (Entry<String, Symbol> entry : entries.entrySet()) {
+            Symbol e = entry.getValue();
             str += e + "\n";
         }
         return str;

@@ -16,7 +16,7 @@ import scanner.Scanner;
  * @author team 4
  */
 public class Parser {
-    private SymbolTableHandler sh;
+    private final SymbolTableHandler sh;
     private Token l1; // look ahead token
     private Token l2; // used for some cases when table is ll2
     private Scanner scanner;
@@ -196,7 +196,7 @@ public class Parser {
         // for the first character up to the first ',' character.
         // If the array has no commas, the substring will be blank
         // EG "asdfasdfasdf,hello world" would return the substring "hello world"
-        for (i = i; i < arr.length; i++) {
+        for (; i < arr.length; i++) {
             s += arr[i];
         }
         return s;
@@ -341,6 +341,7 @@ public class Parser {
             default:
                 String[] err = {"program"};
                 error(err);
+                break;
         }
     }
 
@@ -350,6 +351,7 @@ public class Parser {
         stackTrace += "Program\n";
         switch (getRule(NonTerminal.Program)) {
             case 2:
+                sh.pushTable(); //  Construct the original table
                 ProgramHeading(); // nonterminal 3
                 if (l1.getID() == Token.ID.SCOLON) {
                     match();
@@ -368,6 +370,7 @@ public class Parser {
             default:
                 String[] err = {"program"};
                 error(err);
+                break;
         }
     }
 
@@ -480,6 +483,7 @@ public class Parser {
                 break;
             default:
                 String[] err = {"identifier"};
+                error(err);
         }
     }
 
@@ -571,6 +575,7 @@ public class Parser {
                     String[] err = {";"};
                     error(err);
                 }
+                sh.pushTable();
                 Block();
                 if (l1.getID() == Token.ID.SCOLON) {
                     match();
@@ -599,6 +604,7 @@ public class Parser {
                     String[] err = {";"};
                     error(err);
                 }
+                sh.pushTable();
                 Block();
                 if (l1.getID() == Token.ID.SCOLON) {
                     match();

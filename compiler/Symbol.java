@@ -1,6 +1,6 @@
 package compiler;
 import java.util.ArrayList;
-public class SymbolEntry {
+public class Symbol {
     public enum Type {
         INTEGER,
         FIXED,
@@ -22,7 +22,7 @@ public class SymbolEntry {
     public Kind kind;
     public ArrayList<Parameter> params;
     public int offset;
-    public SymbolEntry(String lexeme) {
+    public Symbol(String lexeme) {
         name = lexeme;
     }
     
