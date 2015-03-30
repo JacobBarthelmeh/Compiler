@@ -8,8 +8,7 @@ program foo;
 begin
 	read(in);
 	read(in2);
-	
-	{write('out'); {does not work yet}}
+	write('out'); 
 	
 	
 	{test of arithmetic}
