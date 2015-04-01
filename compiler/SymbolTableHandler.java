@@ -2,6 +2,8 @@ package compiler;
 import java.util.ArrayList;
 public class SymbolTableHandler {
     private Symbol entry;
+    private boolean isParam;
+    private Parameter param;
     public int nestinglevel;
     private final SymbolTable[] tables;
     public SymbolTableHandler() {
@@ -9,20 +11,36 @@ public class SymbolTableHandler {
         nestinglevel = -1;
     }
     public void startEntry(String lexeme){
+        if (tables[nestinglevel].getEntry(lexeme) != null) {
+            throw new RuntimeException("Entry with lexeme " + lexeme + " already exists for this nesting level.");
+        }
+        isParam = false;
         entry = new Symbol(lexeme);
         entry.params = new ArrayList<>();
     }
-    public void addParameter(Parameter p) {
+    public void addParameter(String name) {
+        if (isParam) {
+            throw new RuntimeException("Cannot add a parameter to a parameter.");   
+        }
         if (entry == null) {
             throw new RuntimeException("Parameters cannot be added to null entry.");
         }
-        entry.params.add(p);
+        param = new Parameter(name, Symbol.Type.NOTYPE);
+    }
+    public void finishParameter() {
+        isParam = false;
+        entry.params.add(param);
     }
     public void setType(Symbol.Type type) {
         if (entry == null) {
             throw new RuntimeException("Type cannot be set to null entry.");
         }
-        entry.type = type;
+        if (isParam) {
+            param.type = type;
+        }
+        else {
+            entry.type = type;
+        }
     }
     public void setKind(Symbol.Kind kind) {
         if (entry == null) {

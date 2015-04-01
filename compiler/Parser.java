@@ -29,7 +29,6 @@ public class Parser {
 
     // Enumeration of the non-terminal nodes
     public enum NonTerminal {
-
         SystemGoal, // Generate symbol table
         Program,
         ProgramHeading,
@@ -160,11 +159,10 @@ public class Parser {
     private String nextStr(char[] arr) {
         // Substring to be returned
         String s = "";
-        int i = 0; // iterator variable
 
         // Finds an integer and returns it in the form of a string or finds
         // a ',' and returns an empty string.
-        while (arr[i] != ',' && i < arr.length) {
+        for (int i = 0; i < arr.length && arr[i] != ','; i++) {
             s += arr[i];
             i++;
         }
@@ -186,7 +184,7 @@ public class Parser {
         // Takes a char array from the CSV ll1 table and iterates through
         // the array until the end of the array is reached, or a comma
         // is reached
-        while (arr[i] != ',' && i < arr.length) {
+        while (i < arr.length && arr[i] != ',') {
             i++;
         }
         i++; /* move over comma */
@@ -498,6 +496,7 @@ public class Parser {
             case 10:
                 if (l1.getID() == Token.ID.INTEGER) {
                     match();
+                    sh.setType(Symbol.Type.INTEGER);
                     break;
                 } else {
                     String[] err = {"Integer"};
@@ -507,6 +506,7 @@ public class Parser {
             case 11:
                 if (l1.getID() == Token.ID.FLOAT) {
                     match();
+                    sh.setType(Symbol.Type.FLOAT);
                     break;
                 } else {
                     String[] err = {"Float"};
@@ -516,6 +516,7 @@ public class Parser {
             case 12:
                 if (l1.getID() == Token.ID.STRING) {
                     match();
+                    sh.setType(Symbol.Type.STRING);
                     break;
                 } else {
                     String[] err = {"String"};
@@ -525,6 +526,7 @@ public class Parser {
             case 13:
                 if (l1.getID() == Token.ID.BOOLEAN) {
                     match();
+                    sh.setType(Symbol.Type.BOOLEAN);
                     break;
                 } else {
                     String[] err = {"Boolean"};
