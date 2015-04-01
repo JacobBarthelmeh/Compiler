@@ -15,6 +15,26 @@ public class SymbolTableHandler {
         entry = new Symbol("DEFAULT");
         entry.params = new ArrayList<>();
     }
+    public void finishEntry(){
+        if (entry == null) {
+            throw new RuntimeException("Cannot finalize a null entry.");
+        }
+        tables[nestinglevel].addEntry(entry);
+        entry = null;
+    }
+    public void startParameter() {
+        if (isParam) {
+            throw new RuntimeException("Cannot add a parameter to a parameter.");   
+        }
+        if (entry == null) {
+            throw new RuntimeException("Parameters cannot be added to null entry.");
+        }
+        param = new Parameter("DEFAULT", Symbol.Type.NOTYPE);
+    }
+    public void finishParameter() {
+        isParam = false;
+        entry.params.add(param);
+    }
     public void setName(String name) {
         if (entry == null) {
             throw new RuntimeException("Parameters cannot be added to null entry.");
@@ -28,19 +48,6 @@ public class SymbolTableHandler {
             }
             entry.name = name;
         }
-    }
-    public void addParameter() {
-        if (isParam) {
-            throw new RuntimeException("Cannot add a parameter to a parameter.");   
-        }
-        if (entry == null) {
-            throw new RuntimeException("Parameters cannot be added to null entry.");
-        }
-        param = new Parameter("DEFAULT", Symbol.Type.NOTYPE);
-    }
-    public void finishParameter() {
-        isParam = false;
-        entry.params.add(param);
     }
     public void setType(Symbol.Type type) {
         if (entry == null) {
@@ -58,13 +65,6 @@ public class SymbolTableHandler {
             throw new RuntimeException("Kind cannot be set to null entry.");
         }
         entry.kind = kind;
-    }
-    public void finishEntry(){
-        if (entry == null) {
-            throw new RuntimeException("Cannot finalize a null entry.");
-        }
-        tables[nestinglevel].addEntry(entry);
-        entry = null;
     }
     public void pushTable() {
         if (entry != null) {

@@ -8,6 +8,7 @@ package compiler;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import scanner.Scanner;
 
@@ -578,7 +579,6 @@ public class Parser {
                     String[] err = {";"};
                     error(err);
                 }
-                sh.pushTable();
                 Block();
                 if (l1.getID() == Token.ID.SCOLON) {
                     match();
@@ -635,8 +635,17 @@ public class Parser {
                     String[] err = {"procedure"};
                     error(err);
                 }
+                String name = "";   //   Get this from the next function call
                 ProcedureIdentifier();
                 OptionalFormalParameterList();
+                ArrayList<Parameter> params = sh.getEntry(name).params;
+                sh.pushTable();
+                for (Parameter p : params) {
+                    sh.startEntry();
+                    sh.setName(p.name);
+                    sh.setType(p.type);
+                    sh.finishEntry();
+                }
                 break;
             default:
                 String[] err = {"procedure"};
@@ -657,8 +666,17 @@ public class Parser {
                     String[] err = {"function"};
                     error(err);
                 }
+                String name = ""; // get this from the identifier call
                 FunctionIdentifier();
                 OptionalFormalParameterList();
+                ArrayList<Parameter> params = sh.getEntry(name).params;
+                sh.pushTable();
+                for (Parameter p : params) {
+                    sh.startEntry();
+                    sh.setName(p.name);
+                    sh.setType(p.type);
+                    sh.finishEntry();
+                }
                 break;
             default:
                 String[] err = {"function"};
@@ -748,7 +766,7 @@ public class Parser {
         stackTrace += "ValueParameterSection\n";
         switch (getRule(NonTerminal.ValueParameterSection)) {
             case 27:
-                sh.addParameter();
+                sh.startParameter();
                 IdentifierList();
                 if (l1.getID() == Token.ID.COLON) {
                     match();
@@ -778,7 +796,7 @@ public class Parser {
                     String[] err = {"var"};
                     error(err);
                 }
-                sh.addParameter();
+                sh.startParameter();
                 IdentifierList();
                 if (l1.getID() == Token.ID.COLON) {
                     match();
