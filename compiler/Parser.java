@@ -401,6 +401,7 @@ public class Parser {
                 VariableDeclarationPart();
                 ProcedureAndFunctionDeclarationPart();
                 StatementPart();
+                sh.popTable();
                 break;
             default:
                 String[] err = {""};
@@ -469,6 +470,7 @@ public class Parser {
         stackTrace += "VariableDeclaration\n";
         switch (getRule(NonTerminal.VariableDeclaration)) {
             case 9:
+                sh.startEntry();
                 IdentifierList();
                 if (l1.getID() == Token.ID.COLON) {
                     match();
@@ -477,6 +479,7 @@ public class Parser {
                     error(err);
                 }
                 Type();
+                sh.finishEntry();
                 break;
             default:
                 String[] err = {"identifier"};
@@ -746,6 +749,7 @@ public class Parser {
         stackTrace += "ValueParameterSection\n";
         switch (getRule(NonTerminal.ValueParameterSection)) {
             case 27:
+                sh.addParameter();
                 IdentifierList();
                 if (l1.getID() == Token.ID.COLON) {
                     match();
@@ -754,6 +758,7 @@ public class Parser {
                     error(err);
                 }
                 Type();
+                sh.finishParameter();
                 break;
             default:
                 String[] err = {":"};
@@ -774,6 +779,7 @@ public class Parser {
                     String[] err = {"var"};
                     error(err);
                 }
+                sh.addParameter();
                 IdentifierList();
                 if (l1.getID() == Token.ID.COLON) {
                     match();
@@ -782,6 +788,7 @@ public class Parser {
                     error(err);
                 }
                 Type();
+                sh.finishParameter();
                 break;
             default:
                 String[] err = {"var"};
@@ -1797,6 +1804,7 @@ public class Parser {
         stackTrace += "IdentifierList\n";
         switch (getRule(NonTerminal.IdentifierList)) {
             case 113:    // RULE 113
+                sh.setName(l1.getContents());
                 match();
                 IdentifierTail();
                 break;

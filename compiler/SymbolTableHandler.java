@@ -10,22 +10,33 @@ public class SymbolTableHandler {
         tables = new SymbolTable[10];
         nestinglevel = -1;
     }
-    public void startEntry(String lexeme){
-        if (tables[nestinglevel].getEntry(lexeme) != null) {
-            throw new RuntimeException("Entry with lexeme " + lexeme + " already exists for this nesting level.");
-        }
+    public void startEntry(){
         isParam = false;
-        entry = new Symbol(lexeme);
+        entry = new Symbol("DEFAULT");
         entry.params = new ArrayList<>();
     }
-    public void addParameter(String name) {
+    public void setName(String name) {
+        if (entry == null) {
+            throw new RuntimeException("Parameters cannot be added to null entry.");
+        }
+        if (isParam) {
+            param.name = name;
+        }
+        else {
+            if (tables[nestinglevel].getEntry(name) != null) {
+                throw new RuntimeException("Entry with lexeme " + name + " already exists for this nesting level.");
+            }
+            entry.name = name;
+        }
+    }
+    public void addParameter() {
         if (isParam) {
             throw new RuntimeException("Cannot add a parameter to a parameter.");   
         }
         if (entry == null) {
             throw new RuntimeException("Parameters cannot be added to null entry.");
         }
-        param = new Parameter(name, Symbol.Type.NOTYPE);
+        param = new Parameter("DEFAULT", Symbol.Type.NOTYPE);
     }
     public void finishParameter() {
         isParam = false;
@@ -48,7 +59,7 @@ public class SymbolTableHandler {
         }
         entry.kind = kind;
     }
-    public void finalizeEntry(){
+    public void finishEntry(){
         if (entry == null) {
             throw new RuntimeException("Cannot finalize a null entry.");
         }
