@@ -118,8 +118,8 @@ public class Parser {
                 // and after the second call it would go to ",,42,"
                 arr = (removeStr(arr).toCharArray());
                 arr = (removeStr(arr).toCharArray());
-                int[] tmparr = new int[Token.ID.values().length];
-                for (int i = 0; i < tmparr.length; i++) {
+                int[] tmparr = new int[52];
+                for (int i = 0; i < 52; i++) {
                     // Looks at the current line from the csv table and returns either
                     // an empty string meaning that the non-terminal is not associated
                     // with the current terminal, or returns an integer in the form
@@ -320,7 +320,6 @@ public class Parser {
     // ll(1) table rules
     // See Complete-LL(1)-Table-2015-03-10.xlsx for information
     // Nonterminals 1-39
-    
     // Nonterminal 1
     // <SystemGoal> --> <Program> EOF RULE #1
     private void SystemGoal() {
@@ -934,7 +933,6 @@ public class Parser {
     //**************************************************************************
     // rules 40-47 
     // Jacob Barthelmeh
-    
     // Nonterminal 24
     // <EmptyStatement> --> lambda RULE #44
     private void EmptyStatement() {
@@ -1490,7 +1488,6 @@ public class Parser {
 
     //**************************************************************************
     //stubs for rules 78 - 150
-    
     // Nonterminal 48
     // <SimpleExpression> --> <OptionalSign> <Term> <TermTail> RULE #82
     private void SimpleExpression() {
