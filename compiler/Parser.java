@@ -164,7 +164,6 @@ public class Parser {
         // a ',' and returns an empty string.
         for (int i = 0; i < arr.length && arr[i] != ','; i++) {
             s += arr[i];
-            i++;
         }
 
         return s;
