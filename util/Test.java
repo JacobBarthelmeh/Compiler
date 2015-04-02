@@ -1,6 +1,6 @@
 package util;
 
-import compiler.Parser;
+import parser.Parser;
 import compiler.Token;
 import java.io.PrintWriter;
 import scanner.Scanner;

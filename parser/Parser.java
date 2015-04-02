@@ -3,8 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package compiler;
+package parser;
 
+import compiler.Token;
+import symboltable.Parameter;
+import symboltable.SymbolTableHandler;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;

@@ -1,4 +1,4 @@
-package compiler;
+package symboltable;
 import java.util.ArrayList;
 import util.*;
 public class SymbolTableHandler {
