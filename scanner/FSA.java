@@ -1,5 +1,6 @@
 package scanner;
 
+import util.Reader;
 import compiler.Token;
 import javax.swing.JOptionPane;
 import util.Terminal;

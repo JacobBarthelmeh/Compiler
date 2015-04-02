@@ -1,6 +1,7 @@
 package symboltable;
 import java.util.ArrayList;
-import util.*;
+import util.Type;
+import util.Kind;
 public class Symbol {
     public String name;
     public Type type;

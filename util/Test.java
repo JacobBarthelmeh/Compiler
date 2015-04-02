@@ -111,7 +111,7 @@ public class Test {
                     System.out.println("Null return");
                     cancel = true;
                 } else {
-                    pw.println(t.getTerminal() + "," + t.getLine() + "," + t.getCol());
+                    pw.println(t.toString());
                     s += t.getContents() + " ";
                 }
             } while (t == null || t.getTerminal() != Terminal.EOF);

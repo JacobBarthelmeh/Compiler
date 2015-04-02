@@ -8,7 +8,7 @@ public class Scanner {
     public Token nextToken() {
         return d.nextToken();
     }
-    private Dispatcher d;
+    private final Dispatcher d;
     /**
      * Constructs a dispatcher to read from a file
      * @param filename The name of the file to search for

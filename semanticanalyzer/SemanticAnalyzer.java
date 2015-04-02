@@ -1,14 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package semanticanalyzer;
 
-/**
- *
- * @author
- */
+import util.Writer;
 public class SemanticAnalyzer {
 
     /**
@@ -78,4 +70,10 @@ public class SemanticAnalyzer {
 
     }
 
+    
+    public SemanticAnalyzer(String filename) {
+        w = new Writer(filename);
+    }
+    
+    private final Writer w;
 }

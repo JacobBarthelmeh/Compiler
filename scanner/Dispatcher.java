@@ -1,4 +1,5 @@
 package scanner;
+import util.Reader;
 import compiler.Token;
 import util.Terminal;
 public class Dispatcher {    
