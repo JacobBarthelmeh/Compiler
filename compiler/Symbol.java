@@ -1,22 +1,7 @@
 package compiler;
 import java.util.ArrayList;
+import util.*;
 public class Symbol {
-    public enum Type {
-        INTEGER,
-        FIXED,
-        FLOAT,
-        STRING,
-        BOOLEAN,
-        NOTYPE
-    };
-    public enum Kind {
-        VARIABLE,
-        INPARAMETER,
-        INOUTPARAMETER,
-        PROCEDURE,
-        FUNCTION,
-        NOKIND
-    };
     public String name;
     public Type type;
     public Kind kind;

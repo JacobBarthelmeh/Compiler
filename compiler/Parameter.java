@@ -1,8 +1,10 @@
 package compiler;
+
+import util.Type;
 public class Parameter {
     public String name;
-    public Symbol.Type type;
-    public Parameter(String name, Symbol.Type type){
+    public Type type;
+    public Parameter(String name, Type type){
         this.name = name;
         this.type = type;
     }

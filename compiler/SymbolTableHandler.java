@@ -1,5 +1,6 @@
 package compiler;
 import java.util.ArrayList;
+import util.*;
 public class SymbolTableHandler {
     private Symbol entry;
     private boolean isParam;
@@ -29,7 +30,7 @@ public class SymbolTableHandler {
         if (entry == null) {
             throw new RuntimeException("Parameters cannot be added to null entry.");
         }
-        param = new Parameter("DEFAULT", Symbol.Type.NOTYPE);
+        param = new Parameter("DEFAULT", Type.NOTYPE);
     }
     public void finishParameter() {
         isParam = false;
@@ -49,7 +50,7 @@ public class SymbolTableHandler {
             entry.name = name;
         }
     }
-    public void setType(Symbol.Type type) {
+    public void setType(Type type) {
         if (entry == null) {
             throw new RuntimeException("Type cannot be set to null entry.");
         }
@@ -60,7 +61,7 @@ public class SymbolTableHandler {
             entry.type = type;
         }
     }
-    public void setKind(Symbol.Kind kind) {
+    public void setKind(Kind kind) {
         if (entry == null) {
             throw new RuntimeException("Kind cannot be set to null entry.");
         }

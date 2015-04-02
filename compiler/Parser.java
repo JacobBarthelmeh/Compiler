@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import scanner.Scanner;
+import util.*;
 
 /**
  *
@@ -27,73 +28,6 @@ public class Parser {
 
     private int Table[][];
     private String stackTrace = "";
-
-    // Enumeration of the non-terminal nodes
-    public enum NonTerminal {
-        SystemGoal, // Generate symbol table
-        Program,
-        ProgramHeading,
-        Block,
-        VariableDeclarationPart, // Symbol table call needed
-        VariableDeclarationTail,
-        VariableDeclaration,
-        Type,
-        ProcedureAndFunctionDeclarationPart,
-        ProcedureDeclaration,
-        FunctionDeclaration, // Symbol table call needed, generate new symbol table
-        ProcedureHeading, // generate new symbol table
-        FunctionHeading,
-        OptionalFormalParameterList,
-        FormalParameterSectionTail,
-        FormalParameterSection,
-        ValueParameterSection,
-        VariableParameterSection, // Symbol table call needed
-        StatementPart,
-        CompoundStatement,
-        StatementSequence,
-        StatementTail,
-        Statement,
-        EmptyStatement,
-        ReadStatement,
-        ReadParameterTail,
-        ReadParameter,
-        WriteStatement,
-        WriteParameterTail,
-        WriteParameter,
-        AssignmentStatement,
-        IfStatement, // New symbol table needed
-        OptionalElsePart,
-        RepeatStatement,
-        WhileStatement, // New symbol table needed
-        ForStatement, // New symbol table needed
-        ControlVariable,
-        InitialValue,
-        StepValue,
-        FinalValue,
-        ProcedureStatement,
-        OptionalActualParameterList,
-        ActualParameterTail,
-        ActualParameter,
-        Expression,
-        OptionalRelationalPart,
-        RelationalOperator,
-        SimpleExpression,
-        TermTail,
-        OptionalSign,
-        AddingOperator,
-        Term,
-        FactorTail,
-        MultiplyingOperator,
-        Factor,
-        ProgramIdentifier, 
-        VariableIdentifier, 
-        ProcedureIdentifier, 
-        FunctionIdentifier, 
-        BooleanExpression,
-        OrdinalExpression,
-        IdentifierList,
-        IdentifierTail
-    };
 
     /**
      * read in csv ll1 table
@@ -282,7 +216,7 @@ public class Parser {
         }
         error_flag = true;
         System.err.println("Error found " + l1.getContents() + " "
-                + l1.getID() + " at line " + l1.getLine() + " col " + l1.getCol());
+                + l1.getTerminal() + " at line " + l1.getLine() + " col " + l1.getCol());
         System.err.print("Was expecting ");
         System.err.print(Arrays.toString(expected));
         System.err.println("");
@@ -300,7 +234,7 @@ public class Parser {
      * @return The rule to execute
      */
     private int getRule(NonTerminal nt) {
-        int index = l1.getID().ordinal(), // The index corresponding to the current look ahead token
+        int index = l1.getTerminal().ordinal(), // The index corresponding to the current look ahead token
                 nonTerminal = nt.ordinal();
 
         if (nonTerminal > Table.length) {
@@ -308,7 +242,7 @@ public class Parser {
             System.exit(1);
         }
         if (index > Table[nonTerminal].length) {
-            System.out.println("Error token " + index + "  " + l1.getID() + " not in table ");
+            System.out.println("Error token " + index + "  " + l1.getTerminal() + " not in table ");
             System.out.println(" " + Table[nonTerminal].length);
             System.exit(1);
         }
@@ -328,7 +262,7 @@ public class Parser {
         switch (getRule(NonTerminal.SystemGoal)) {
             case 1:
                 Program(); // nonterminal 2
-                if (l1.getID() == Token.ID.EOF) {
+                if (l1.getTerminal() == Terminal.EOF) {
                     match();
                 } else {
                     String[] err = {"end of file"};
@@ -350,14 +284,14 @@ public class Parser {
             case 2:
                 sh.pushTable(); //  Construct the original table
                 ProgramHeading(); // nonterminal 3
-                if (l1.getID() == Token.ID.SCOLON) {
+                if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
                     String[] err = {";"};
                     error(err);
                 }
                 Block(); // nonterminal 4
-                if (l1.getID() == Token.ID.PERIOD) {
+                if (l1.getTerminal() == Terminal.PERIOD) {
                     match();
                 } else {
                     String[] err = {"."};
@@ -377,7 +311,7 @@ public class Parser {
         stackTrace += "ProgramHeading\n";
         switch (getRule(NonTerminal.ProgramHeading)) {
             case 3:
-                if (l1.getID() == Token.ID.PROGRAM) {
+                if (l1.getTerminal() == Terminal.PROGRAM) {
                     match();
                 } else {
                     String[] err = {"program"};
@@ -416,14 +350,14 @@ public class Parser {
         stackTrace += "VariableDeclarationPart\n";
         switch (getRule(NonTerminal.VariableDeclarationPart)) {
             case 5:
-                if (l1.getID() == Token.ID.VAR) {
+                if (l1.getTerminal() == Terminal.VAR) {
                     match();
                 } else {
                     String[] err = {"var"};
                     error(err);
                 }
                 VariableDeclaration();
-                if (l1.getID() == Token.ID.SCOLON) {
+                if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
                     String[] err = {";"};
@@ -447,7 +381,7 @@ public class Parser {
         switch (getRule(NonTerminal.VariableDeclarationTail)) {
             case 7:
                 VariableDeclaration();
-                if (l1.getID() == Token.ID.SCOLON) {
+                if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
                     String[] err = {";"};
@@ -470,16 +404,21 @@ public class Parser {
         stackTrace += "VariableDeclaration\n";
         switch (getRule(NonTerminal.VariableDeclaration)) {
             case 9:
-                sh.startEntry();
-                IdentifierList();
-                if (l1.getID() == Token.ID.COLON) {
+                ArrayList<String> str = IdentifierList();
+                if (l1.getTerminal() == Terminal.COLON) {
                     match();
                 } else {
                     String[] err = {":"};
                     error(err);
                 }
-                Type();
-                sh.finishEntry();
+                Type type = Type();
+                for (String s : str) {
+                    sh.startEntry();
+                    sh.setName(s);
+                    sh.setType(type);
+                    sh.setKind(Kind.VARIABLE);
+                    sh.finishEntry();
+                }
                 break;
             default:
                 String[] err = {"identifier"};
@@ -492,53 +431,49 @@ public class Parser {
     // <Type> --> Float RULE #11
     // <Type> --> String RULE #12
     // <Type> --> Boolean RULE #13
-    private void Type() {
+    private Type Type() {
         stackTrace += "Type\n";
         switch (getRule(NonTerminal.Type)) {
             case 10:
-                if (l1.getID() == Token.ID.INTEGER) {
+                if (l1.getTerminal() == Terminal.INTEGER) {
                     match();
-                    sh.setType(Symbol.Type.INTEGER);
-                    break;
+                    return Type.INTEGER;
                 } else {
                     String[] err = {"Integer"};
                     error(err);
+                    return Type.NOTYPE;
                 }
-                break;
             case 11:
-                if (l1.getID() == Token.ID.FLOAT) {
+                if (l1.getTerminal() == Terminal.FLOAT) {
                     match();
-                    sh.setType(Symbol.Type.FLOAT);
-                    break;
+                    return Type.FLOAT;
                 } else {
                     String[] err = {"Float"};
                     error(err);
+                    return Type.NOTYPE;
                 }
-                break;
             case 12:
-                if (l1.getID() == Token.ID.STRING) {
+                if (l1.getTerminal() == Terminal.STRING) {
                     match();
-                    sh.setType(Symbol.Type.STRING);
-                    break;
+                    return Type.STRING;
                 } else {
                     String[] err = {"String"};
                     error(err);
+                    return Type.NOTYPE;
                 }
-                break;
             case 13:
-                if (l1.getID() == Token.ID.BOOLEAN) {
+                if (l1.getTerminal() == Terminal.BOOLEAN) {
                     match();
-                    sh.setType(Symbol.Type.BOOLEAN);
-                    break;
+                    return Type.BOOLEAN;
                 } else {
                     String[] err = {"Boolean"};
                     error(err);
+                return Type.NOTYPE;
                 }
-                break;
             default:
                 String err[] = {"Integer", "Float", "String", "Boolean"};
                 error(err);
-                break;
+                return Type.NOTYPE;
         }
     }
 
@@ -573,14 +508,14 @@ public class Parser {
         switch (getRule(NonTerminal.ProcedureDeclaration)) {
             case 17:
                 ProcedureHeading();
-                if (l1.getID() == Token.ID.SCOLON) {
+                if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
                     String[] err = {";"};
                     error(err);
                 }
                 Block();
-                if (l1.getID() == Token.ID.SCOLON) {
+                if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
                     String[] err = {";"};
@@ -601,7 +536,7 @@ public class Parser {
         switch (getRule(NonTerminal.FunctionDeclaration)) {
             case 18:
                 FunctionHeading();
-                if (l1.getID() == Token.ID.SCOLON) {
+                if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
                     String[] err = {";"};
@@ -609,7 +544,7 @@ public class Parser {
                 }
                 sh.pushTable();
                 Block();
-                if (l1.getID() == Token.ID.SCOLON) {
+                if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
                     String[] err = {";"};
@@ -629,14 +564,13 @@ public class Parser {
         stackTrace += "ProcedureHeading\n";
         switch (getRule(NonTerminal.ProcedureHeading)) {
             case 19:
-                if (l1.getID() == Token.ID.PROCEDURE) {
+                if (l1.getTerminal() == Terminal.PROCEDURE) {
                     match();
                 } else {
                     String[] err = {"procedure"};
                     error(err);
                 }
-                String name = "";   //   Get this from the next function call
-                ProcedureIdentifier();
+                String name = ProcedureIdentifier();
                 OptionalFormalParameterList();
                 ArrayList<Parameter> params = sh.getEntry(name).params;
                 sh.pushTable();
@@ -660,14 +594,13 @@ public class Parser {
         stackTrace += "FunctionHeading\n";
         switch (getRule(NonTerminal.FunctionHeading)) {
             case 20:
-                if (l1.getID() == Token.ID.FUNCTION) {
+                if (l1.getTerminal() == Terminal.FUNCTION) {
                     match();
                 } else {
                     String[] err = {"function"};
                     error(err);
                 }
-                String name = ""; // get this from the identifier call
-                FunctionIdentifier();
+                String name = FunctionIdentifier();
                 OptionalFormalParameterList();
                 ArrayList<Parameter> params = sh.getEntry(name).params;
                 sh.pushTable();
@@ -692,7 +625,7 @@ public class Parser {
         stackTrace += "OptionalFormalParameterList\n";
         switch (getRule(NonTerminal.OptionalFormalParameterList)) {
             case 21:
-                if (l1.getID() == Token.ID.LPAREN) {
+                if (l1.getTerminal() == Terminal.LPAREN) {
                     match();
                 } else {
                     String[] err = {"("};
@@ -700,7 +633,7 @@ public class Parser {
                 }
                 FormalParameterSection();
                 FormalParameterSectionTail();
-                if (l1.getID() == Token.ID.RPAREN) {
+                if (l1.getTerminal() == Terminal.RPAREN) {
                     match();
                 } else {
                     String[] err = {")"};
@@ -723,7 +656,7 @@ public class Parser {
         stackTrace += "FormalParameterSectionTail\n";
         switch (getRule(NonTerminal.FormalParameterSectionTail)) {
             case 23:
-                if (l1.getID() == Token.ID.SCOLON) {
+                if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
                     String[] err = {";"};
@@ -766,16 +699,20 @@ public class Parser {
         stackTrace += "ValueParameterSection\n";
         switch (getRule(NonTerminal.ValueParameterSection)) {
             case 27:
-                sh.startParameter();
-                IdentifierList();
-                if (l1.getID() == Token.ID.COLON) {
+                ArrayList<String> str = IdentifierList();
+                if (l1.getTerminal() == Terminal.COLON) {
                     match();
                 } else {
                     String[] err = {":"};
                     error(err);
                 }
-                Type();
-                sh.finishParameter();
+                Type type = Type();
+                for (String s : str)  {
+                    sh.startParameter();
+                    sh.setName(s);
+                    sh.setType(type);
+                    sh.finishParameter();
+                }
                 break;
             default:
                 String[] err = {":"};
@@ -790,22 +727,26 @@ public class Parser {
         stackTrace += "VariableParameterSection\n";
         switch (getRule(NonTerminal.VariableParameterSection)) {
             case 28:
-                if (l1.getID() == Token.ID.VAR) {
+                if (l1.getTerminal() == Terminal.VAR) {
                     match();
                 } else {
                     String[] err = {"var"};
                     error(err);
                 }
-                sh.startParameter();
-                IdentifierList();
-                if (l1.getID() == Token.ID.COLON) {
+                ArrayList<String> str = IdentifierList();
+                if (l1.getTerminal() == Terminal.COLON) {
                     match();
                 } else {
                     String[] err = {":"};
                     error(err);
                 }
-                Type();
-                sh.finishParameter();
+                Type type = Type();
+                for (String s : str)  {
+                    sh.startParameter();
+                    sh.setName(s);
+                    sh.setType(type);
+                    sh.finishParameter();
+                }
                 break;
             default:
                 String[] err = {"var"};
@@ -835,14 +776,14 @@ public class Parser {
         stackTrace += "CompoundStatement\n";
         switch (getRule(NonTerminal.CompoundStatement)) {
             case 30:
-                if (l1.getID() == Token.ID.BEGIN) {
+                if (l1.getTerminal() == Terminal.BEGIN) {
                     match();
                 } else {
                     String[] err = {"begin"};
                     error(err);
                 }
                 StatementSequence();
-                if (l1.getID() == Token.ID.END) {
+                if (l1.getTerminal() == Terminal.END) {
                     match();
                 } else {
                     String[] err = {"end"};
@@ -879,7 +820,7 @@ public class Parser {
         stackTrace += "StatementTail\n";
         switch (getRule(NonTerminal.StatementTail)) {
             case 32:
-                if (l1.getID() == Token.ID.SCOLON) {
+                if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
                     String[] err = {";"};
@@ -971,13 +912,13 @@ public class Parser {
         stackTrace += "ReadStatement\n";
         switch (getRule(NonTerminal.ReadStatement)) {
             case 45://rule 45
-                if (l1.getID() == Token.ID.READ) { //rule 45
+                if (l1.getTerminal() == Terminal.READ) { //rule 45
                     match();
-                    if (l1.getID() == Token.ID.LPAREN) {
+                    if (l1.getTerminal() == Terminal.LPAREN) {
                         match();
                         ReadParameter();
                         ReadParameterTail();
-                        if (l1.getID() == Token.ID.RPAREN) {
+                        if (l1.getTerminal() == Terminal.RPAREN) {
                             match();
                         } else {
                             String[] err = {")"};
@@ -1043,11 +984,11 @@ public class Parser {
         switch (getRule(NonTerminal.WriteStatement)) {
             case 49: //rule 49
                 match();
-                if (l1.getID() == Token.ID.LPAREN) {
+                if (l1.getTerminal() == Terminal.LPAREN) {
                     match();
                     WriteParameter();
                     WriteParameterTail();
-                    if (l1.getID() == Token.ID.RPAREN) {
+                    if (l1.getTerminal() == Terminal.RPAREN) {
                         match();
                     } else {
                         String[] err = {")"};
@@ -1061,11 +1002,11 @@ public class Parser {
 
             case 50: //rule 50
                 match();
-                if (l1.getID() == Token.ID.LPAREN) {
+                if (l1.getTerminal() == Terminal.LPAREN) {
                     match();
                     WriteParameter();
                     WriteParameterTail();
-                    if (l1.getID() == Token.ID.RPAREN) {
+                    if (l1.getTerminal() == Terminal.RPAREN) {
                         match();
                     } else {
                         String[] err = {")"};
@@ -1126,7 +1067,7 @@ public class Parser {
         switch (getRule(NonTerminal.AssignmentStatement)) {
             case 54: //rule 54
                 VariableIdentifier();
-                if (l1.getID() == Token.ID.ASSIGN) {
+                if (l1.getTerminal() == Terminal.ASSIGN) {
                     match();
                     Expression();
                 } else {
@@ -1136,7 +1077,7 @@ public class Parser {
                 break;
             case 55://rule 55
                 FunctionIdentifier(); //rule 55
-                if (l1.getID() == Token.ID.ASSIGN) {
+                if (l1.getTerminal() == Terminal.ASSIGN) {
                     match();
                     Expression();
                 } else {
@@ -1157,10 +1098,10 @@ public class Parser {
         stackTrace += "IfStatement\n";
         switch (getRule(NonTerminal.IfStatement)) {
             case 56: //rule 56
-                if (l1.getID() == Token.ID.IF) {
+                if (l1.getTerminal() == Terminal.IF) {
                     match();
                     BooleanExpression();
-                    if (l1.getID() == Token.ID.THEN) {
+                    if (l1.getTerminal() == Terminal.THEN) {
                         match();
                         Statement();
                         OptionalElsePart();
@@ -1206,10 +1147,10 @@ public class Parser {
         stackTrace += "RepeatStatement\n";
         switch (getRule(NonTerminal.RepeatStatement)) {
             case 59://rule 59
-                if (l1.getID() == Token.ID.REPEAT) {
+                if (l1.getTerminal() == Terminal.REPEAT) {
                     match();
                     StatementSequence();
-                    if (l1.getID() == Token.ID.UNTIL) {
+                    if (l1.getTerminal() == Terminal.UNTIL) {
                         match();
                         BooleanExpression();
                     } else {
@@ -1234,10 +1175,10 @@ public class Parser {
         stackTrace += "WhileStatment\n";
         switch (getRule(NonTerminal.WhileStatement)) {
             case 60://rule 60
-                if (l1.getID() == Token.ID.WHILE) {
+                if (l1.getTerminal() == Terminal.WHILE) {
                     match();
                     BooleanExpression();
-                    if (l1.getID() == Token.ID.DO) {
+                    if (l1.getTerminal() == Terminal.DO) {
                         match();
                         Statement();
                     } else {
@@ -1262,15 +1203,15 @@ public class Parser {
         stackTrace += "ForStatement\n";
         switch (getRule(NonTerminal.ForStatement)) {
             case 61://rule 61
-                if (l1.getID() == Token.ID.FOR) {
+                if (l1.getTerminal() == Terminal.FOR) {
                     match();
                     ControlVariable();
-                    if (l1.getID() == Token.ID.ASSIGN) {
+                    if (l1.getTerminal() == Terminal.ASSIGN) {
                         match();
                         InitialValue();
                         StepValue();
                         FinalValue();
-                        if (l1.getID() == Token.ID.DO) {
+                        if (l1.getTerminal() == Terminal.DO) {
                             match();
                             Statement();
                         } else {
@@ -1383,7 +1324,7 @@ public class Parser {
                 match();
                 ActualParameter();
                 ActualParameterTail();
-                if (l1.getID() == Token.ID.RPAREN) {
+                if (l1.getTerminal() == Terminal.RPAREN) {
                     match();
                 } else {
                     String[] err = {")"};
@@ -1672,7 +1613,7 @@ public class Parser {
         int rule = getRule(NonTerminal.Factor);
         if (rule == 106) {
             l2 = scanner.nextToken();
-            if (l2.getID() != Token.ID.SCOLON) {
+            if (l2.getTerminal() != Terminal.SCOLON) {
                 rule = 116;
             }
         }
@@ -1700,7 +1641,7 @@ public class Parser {
             case 105:        // RULE 105
                 match();
                 Expression();
-                switch (l1.getID()) {
+                switch (l1.getTerminal()) {
                     case RPAREN:
                         match();
                         break;
@@ -1755,31 +1696,33 @@ public class Parser {
 
     // Nonterminal 58
     // <ProcedureIdentifier> --> identifier RULE #109
-    private void ProcedureIdentifier() {
+    private String ProcedureIdentifier() {
         stackTrace += "ProcedureIdentifier\n";
         switch (getRule(NonTerminal.ProcedureIdentifier)) {
             case 109:     // RULE 109
+                String str = l1.getContents();
                 match();
-                break;
+                return str;
             default:
                 String[] exp = {"IDENTIFIER"};
                 error(exp);
-                break;
+                return "";
         }
     }
 
     // Nonterminal 59
     // <FunctionIdentifier> --> identifier RULE #111
-    private void FunctionIdentifier() {
+    private String FunctionIdentifier() {
         stackTrace += "FunctionIdentifier\n";
         switch (getRule(NonTerminal.FunctionIdentifier)) {
             case 110:    // RULE 110
+                String str = l1.getContents();
                 match();
-                break;
+                return str;
             default:
                 String[] exp = {"IDENTIFIER"};
                 error(exp);
-                break;
+                return "";
         }
     }
 
@@ -1815,43 +1758,43 @@ public class Parser {
 
     // Nonterminal 62
     // <IdentifierList> --> identifier <IdentifierTail> RULE #114
-    private void IdentifierList() {
+    private ArrayList<String> IdentifierList() {
         stackTrace += "IdentifierList\n";
         switch (getRule(NonTerminal.IdentifierList)) {
             case 113:    // RULE 113
-                sh.setName(l1.getContents());
+                ArrayList<String> str = new ArrayList();
+                str.add(l1.getContents());
                 match();
-                IdentifierTail();
-                break;
+                return IdentifierTail(str);
             default:
                 String[] exp = {"IDENTIFIER"};
                 error(exp);
-                break;
+                return null;
         }
     }
 
     // Nonterminal 63
     // <IdentifierTail> --> , identifier <IdentifierTail> RULE #115
     // <IdentifierTail> --> lambda
-    private void IdentifierTail() {
+    private ArrayList<String> IdentifierTail(ArrayList<String> str) {
         stackTrace += "IdentifierTail\n";
         switch (getRule(NonTerminal.IdentifierTail)) {
             case 114:
                 match(); // RULE 114
-                if (l1.getID() == Token.ID.IDENTIFIER) {
+                if (l1.getTerminal() == Terminal.IDENTIFIER) {
+                    str.add(l1.getContents());
                     match();
                 } else {
                     String[] err = {"IDENTIFIER"};
                     error(err);
                 }
-                IdentifierTail();
-                break;
+                return IdentifierTail(str);
             case 115: // for rule 115
-                break;
+                return str;
             default:
                 String[] err = {"COMMA IDENTIFIER IdentifierTail"};
                 error(err);
-                break;
+                return str;
         }
     }
 }

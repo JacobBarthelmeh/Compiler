@@ -1,5 +1,6 @@
 package scanner;
 import compiler.Token;
+import util.Terminal;
 public class Dispatcher {    
     public Token nextToken() {
         //  Precondition: c is the first character in the file
@@ -22,7 +23,7 @@ public class Dispatcher {
                     c = r.nextChar();   //  Accept next character always
                 }
                 if (c == '\u001a') {
-                    return new Token("Comment not closed", Token.ID.EOF, row, col);
+                    return new Token("Comment not closed", Terminal.EOF, row, col);
                 }
                 r.nextChar();
                 return nextToken();
@@ -30,7 +31,7 @@ public class Dispatcher {
             case '}':
                 r.nextChar();
                 return new Token("Comment not closed at " +
-                        r.linenumber + " col " + r.col, Token.ID.EOF, row, col);
+                        r.linenumber + " col " + r.col, Terminal.EOF, row, col);
             //  Begin FSAs!
             case '\'': return FSA.TEST_STRING_LIT(r, row, col);
             case ':': return FSA.TEST_COLON(r, row, col);
@@ -62,10 +63,10 @@ public class Dispatcher {
             case 'Y': case 'Z': case '_':
                 return FSA.TEST_LETTER(r, row, col);
             case '\u001a':
-                return new Token("\u001a", Token.ID.EOF, row, col);
+                return new Token("\u001a", Terminal.EOF, row, col);
         }
         r.nextChar();
-        return new Token("" + c, Token.ID.IDENTIFIER, row, col);
+        return new Token("" + c, Terminal.IDENTIFIER, row, col);
     }
     public Dispatcher(String filename) {
         r = new Reader(filename);

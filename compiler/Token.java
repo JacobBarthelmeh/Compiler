@@ -1,13 +1,16 @@
 package compiler;
+import util.Terminal;
 public class Token {
     /**
      * Constructs a token
      * @param contents The semantic contents of the token
-     * @param id The classification of the token
+     * @param terminal The classification of the token
+     * @param line The line number of the token occurrence
+     * @param col The column number of the token's first character
      */
-    public Token(String contents, ID id, int line, int col) {
+    public Token(String contents, Terminal terminal, int line, int col) {
         this.contents = contents;
-        this.id = id;
+        this.terminal = terminal;
         this.line = line;
         this.col = col;
     }
@@ -21,13 +24,13 @@ public class Token {
         return contents;
     }
     //  ID - helpful for grammar
-    private final ID id;
+    private final Terminal terminal;
     /**
      * Gets the classification for the token
      * @return The classification
      */
-    public ID getID() {
-        return id;
+    public Terminal getTerminal() {
+        return terminal;
     }
     private final int line, col;
     public int getLine() {
@@ -38,62 +41,6 @@ public class Token {
     }
     @Override
     public String toString() {
-        return id + " " + contents + " at line " + line + " col " + col;
-    }
-    //  Enumeration of all possible types
-    public enum ID {
-        AND,
-        BEGIN,
-        BOOLEAN,
-        DIV,
-        DO,
-        DOWNTO,
-        ELSE,
-        END,
-        FALSE,
-        FIXED,
-        FLOAT,
-        FOR,
-        FUNCTION,
-        IF,
-        INTEGER,
-        MOD,
-        NOT,
-        OR,
-        PROCEDURE,
-        PROGRAM,
-        READ,
-        REPEAT,
-        STRING,
-        THEN,
-        TO,
-        TRUE,
-        UNTIL,
-        VAR,
-        WHILE,
-        WRITE,
-        WRITELN,
-        IDENTIFIER,
-        INTEGER_LIT,
-        FLOAT_LIT,
-        STRING_LIT,
-        PERIOD,
-        COMMA,
-        SCOLON,
-        COLON,
-        LPAREN,
-        RPAREN,
-        EQUAL,
-        GTHAN,
-        LTHAN,
-        LEQUAL,
-        GEQUAL,
-        NEQUAL,
-        ASSIGN,
-        PLUS,
-        MINUS,
-        TIMES,
-        FLOAT_DIVIDE,
-        EOF
+        return terminal + " " + contents + " at line " + line + " col " + col;
     }
 }

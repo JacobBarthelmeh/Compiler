@@ -1,4 +1,4 @@
-package tests;
+package util;
 
 import compiler.Parser;
 import compiler.Token;
@@ -111,10 +111,10 @@ public class Test {
                     System.out.println("Null return");
                     cancel = true;
                 } else {
-                    pw.println(t.getID() + "," + t.getLine() + "," + t.getCol());
+                    pw.println(t.getTerminal() + "," + t.getLine() + "," + t.getCol());
                     s += t.getContents() + " ";
                 }
-            } while (t == null || t.getID() != Token.ID.EOF);
+            } while (t == null || t.getTerminal() != Terminal.EOF);
             if (cancel) {
                 System.out.println("Compile failed due to syntax errors. Aborting...");
                 return false;
@@ -143,39 +143,39 @@ public class Test {
         Token t = null;
         try {
             t = scanner.nextToken();
-            //assert (t.getID() == Token.ID.FIXED_LIT);
+            //assert (t.getTerminal() == Terminal.FIXED_LIT);
             assert (t.getContents().equals("1.2"));
-            assert (scanner.nextToken().getID() == Token.ID.PERIOD);
-            //assert (scanner.nextToken().getID() == Token.ID.FIXED_LIT);
-            assert (scanner.nextToken().getID() == Token.ID.INTEGER_LIT);
-            assert (scanner.nextToken().getID() == Token.ID.IDENTIFIER);
-            assert (scanner.nextToken().getID() == Token.ID.PLUS);
-            assert (scanner.nextToken().getID() == Token.ID.PERIOD);
-            assert (scanner.nextToken().getID() == Token.ID.INTEGER_LIT);
-            assert (scanner.nextToken().getID() == Token.ID.PERIOD);
-            assert (scanner.nextToken().getID() == Token.ID.MINUS);
-            //assert (scanner.nextToken().getID() == Token.ID.FIXED_LIT);
-            assert (scanner.nextToken().getID() == Token.ID.IDENTIFIER);
-            assert (scanner.nextToken().getID() == Token.ID.FLOAT_LIT);
+            assert (scanner.nextToken().getTerminal() == Terminal.PERIOD);
+            //assert (scanner.nextToken().getTerminal() == Terminal.FIXED_LIT);
+            assert (scanner.nextToken().getTerminal() == Terminal.INTEGER_LIT);
+            assert (scanner.nextToken().getTerminal() == Terminal.IDENTIFIER);
+            assert (scanner.nextToken().getTerminal() == Terminal.PLUS);
+            assert (scanner.nextToken().getTerminal() == Terminal.PERIOD);
+            assert (scanner.nextToken().getTerminal() == Terminal.INTEGER_LIT);
+            assert (scanner.nextToken().getTerminal() == Terminal.PERIOD);
+            assert (scanner.nextToken().getTerminal() == Terminal.MINUS);
+            //assert (scanner.nextToken().getTerminal() == Terminal.FIXED_LIT);
+            assert (scanner.nextToken().getTerminal() == Terminal.IDENTIFIER);
+            assert (scanner.nextToken().getTerminal() == Terminal.FLOAT_LIT);
             t = scanner.nextToken();
-            assert (t.getID() == Token.ID.INTEGER_LIT);
+            assert (t.getTerminal() == Terminal.INTEGER_LIT);
             assert (t.getContents().equals("45"));
-            assert (scanner.nextToken().getID() == Token.ID.PERIOD);
-            assert (scanner.nextToken().getID() == Token.ID.MINUS);
-            assert (scanner.nextToken().getID() == Token.ID.INTEGER_LIT);
+            assert (scanner.nextToken().getTerminal() == Terminal.PERIOD);
+            assert (scanner.nextToken().getTerminal() == Terminal.MINUS);
+            assert (scanner.nextToken().getTerminal() == Terminal.INTEGER_LIT);
             t = scanner.nextToken();
-            assert (t.getID() == Token.ID.FLOAT_LIT);
+            assert (t.getTerminal() == Terminal.FLOAT_LIT);
             assert (t.getContents().equals("0e-1"));
-            assert (scanner.nextToken().getID() == Token.ID.INTEGER_LIT);
-            assert (scanner.nextToken().getID() == Token.ID.IDENTIFIER);
-            assert (scanner.nextToken().getID() == Token.ID.MINUS);
-            assert (scanner.nextToken().getID() == Token.ID.EQUAL);
-            //assert (scanner.nextToken().getID() == Token.ID.FIXED_LIT);
-            assert (scanner.nextToken().getID() == Token.ID.INTEGER_LIT);
-            assert (scanner.nextToken().getID() == Token.ID.MINUS);
-            assert (scanner.nextToken().getID() == Token.ID.INTEGER_LIT);
-            assert (scanner.nextToken().getID() == Token.ID.EQUAL);
-            assert (scanner.nextToken().getID() == Token.ID.INTEGER_LIT);
+            assert (scanner.nextToken().getTerminal() == Terminal.INTEGER_LIT);
+            assert (scanner.nextToken().getTerminal() == Terminal.IDENTIFIER);
+            assert (scanner.nextToken().getTerminal() == Terminal.MINUS);
+            assert (scanner.nextToken().getTerminal() == Terminal.EQUAL);
+            //assert (scanner.nextToken().getTerminal() == Terminal.FIXED_LIT);
+            assert (scanner.nextToken().getTerminal() == Terminal.INTEGER_LIT);
+            assert (scanner.nextToken().getTerminal() == Terminal.MINUS);
+            assert (scanner.nextToken().getTerminal() == Terminal.INTEGER_LIT);
+            assert (scanner.nextToken().getTerminal() == Terminal.EQUAL);
+            assert (scanner.nextToken().getTerminal() == Terminal.INTEGER_LIT);
         } catch (Exception e) {
             System.out.println("number test failed make sure file src/nuberTest.mp"
                     + " has not been changed");

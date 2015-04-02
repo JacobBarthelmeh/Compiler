@@ -2,6 +2,7 @@ package scanner;
 
 import compiler.Token;
 import javax.swing.JOptionPane;
+import util.Terminal;
 
 public class FSA {
 
@@ -14,7 +15,7 @@ public class FSA {
     public static Token TEST_DIGIT(Reader r, int row, int col) {
         String str = "";
         int state = 0;
-        Token.ID id = Token.ID.INTEGER_LIT;
+        Terminal id = Terminal.INTEGER_LIT;
         char c;
         do {
             c = r.nextChar();
@@ -53,7 +54,7 @@ public class FSA {
                     if (c >= '0' && c <= '9') {
                         //transition to state 5
                         str += c;
-                        id = Token.ID.FLOAT_LIT;
+                        id = Terminal.FLOAT_LIT;
                         state = 5;
                     } else {
                         //other character found
@@ -115,7 +116,7 @@ public class FSA {
                     if (c >= '0' && c <= '9') {
                         //transition to state 2
                         str += c;
-                        id = Token.ID.FLOAT_LIT;
+                        id = Terminal.FLOAT_LIT;
                         state = 7;
                     } else {
                         //other character found
@@ -139,7 +140,7 @@ public class FSA {
                     if (c >= '0' && c <= '9') {
                         //transition to state 2
                         str += c;
-                        id = Token.ID.FLOAT_LIT;
+                        id = Terminal.FLOAT_LIT;
                         state = 7;
                     } else {
                         //other character found
@@ -152,7 +153,7 @@ public class FSA {
                 case 10:
                     if (c >= '0' && c <= '9') {
                         str += c;
-                        id = Token.ID.FLOAT_LIT;
+                        id = Terminal.FLOAT_LIT;
                         state = 7;
                     } else {
                         //other character found
@@ -165,7 +166,7 @@ public class FSA {
                 case 12:
                     if (c >= '0' && c <= '9') {
                         str += c;
-                        id = Token.ID.FLOAT_LIT;
+                        id = Terminal.FLOAT_LIT;
                         state = 7;
                     } else {
                         //other character found
@@ -237,7 +238,7 @@ public class FSA {
                         r.nextChar();
                         break;
                     }
-                    return new Token(str, Token.ID.IDENTIFIER, row, col);
+                    return new Token(str, Terminal.IDENTIFIER, row, col);
                 case 2:
                     c = r.peekChar();
                     if (c == '_') {
@@ -260,39 +261,39 @@ public class FSA {
                     break;
             }
         }
-        switch (str) {
-            case "and": return new Token(str, Token.ID.AND, row, col);
-            case "begin": return new Token(str, Token.ID.BEGIN, row, col);
-            case "Boolean": return new Token(str, Token.ID.BOOLEAN, row, col);
-            case "div": return new Token(str, Token.ID.DIV, row, col);
-            case "do": return new Token(str, Token.ID.DO, row, col);
-            case "downto": return new Token(str, Token.ID.DOWNTO, row, col);
-            case "else": return new Token(str, Token.ID.ELSE, row, col);
-            case "end": return new Token(str, Token.ID.END, row, col);
-            case "flase": return new Token(str, Token.ID.FALSE, row, col);
-            case "fixed": return new Token(str, Token.ID.FIXED, row, col);
-            case "float": return new Token(str, Token.ID.FLOAT, row, col);
-            case "for": return new Token(str, Token.ID.FOR, row, col);
-            case "function": return new Token(str, Token.ID.FUNCTION, row, col);
-            case "if": return new Token(str, Token.ID.IF, row, col);
-            case "integer": return new Token(str, Token.ID.INTEGER, row, col);
-            case "mod": return new Token(str, Token.ID.MOD, row, col);
-            case "not": return new Token(str, Token.ID.NOT, row, col);
-            case "or": return new Token(str, Token.ID.OR, row, col);
-            case "procedure": return new Token(str, Token.ID.PROCEDURE, row, col);
-            case "program": return new Token(str, Token.ID.PROGRAM, row, col);
-            case "read": return new Token(str, Token.ID.READ, row, col);
-            case "repeat": return new Token(str, Token.ID.REPEAT, row, col);
-            case "string": return new Token(str, Token.ID.STRING, row, col);
-            case "then": return new Token(str, Token.ID.THEN, row, col);
-            case "true": return new Token(str, Token.ID.TRUE, row, col);
-            case "to": return new Token(str, Token.ID.TO, row, col);
-            case "until": return new Token(str, Token.ID.UNTIL, row, col);
-            case "var": return new Token(str, Token.ID.VAR, row, col);
-            case "while": return new Token(str, Token.ID.WHILE, row, col);
-            case "write": return new Token(str, Token.ID.WRITE, row, col);
-            case "writeln": return new Token(str, Token.ID.WRITELN, row, col);
-            default: return new Token(str, Token.ID.IDENTIFIER, row, col);
+        switch (str.toLowerCase()) {
+            case "and": return new Token(str, Terminal.AND, row, col);
+            case "begin": return new Token(str, Terminal.BEGIN, row, col);
+            case "boolean": return new Token(str, Terminal.BOOLEAN, row, col);
+            case "div": return new Token(str, Terminal.DIV, row, col);
+            case "do": return new Token(str, Terminal.DO, row, col);
+            case "downto": return new Token(str, Terminal.DOWNTO, row, col);
+            case "else": return new Token(str, Terminal.ELSE, row, col);
+            case "end": return new Token(str, Terminal.END, row, col);
+            case "flase": return new Token(str, Terminal.FALSE, row, col);
+            case "fixed": return new Token(str, Terminal.FIXED, row, col);
+            case "float": return new Token(str, Terminal.FLOAT, row, col);
+            case "for": return new Token(str, Terminal.FOR, row, col);
+            case "function": return new Token(str, Terminal.FUNCTION, row, col);
+            case "if": return new Token(str, Terminal.IF, row, col);
+            case "integer": return new Token(str, Terminal.INTEGER, row, col);
+            case "mod": return new Token(str, Terminal.MOD, row, col);
+            case "not": return new Token(str, Terminal.NOT, row, col);
+            case "or": return new Token(str, Terminal.OR, row, col);
+            case "procedure": return new Token(str, Terminal.PROCEDURE, row, col);
+            case "program": return new Token(str, Terminal.PROGRAM, row, col);
+            case "read": return new Token(str, Terminal.READ, row, col);
+            case "repeat": return new Token(str, Terminal.REPEAT, row, col);
+            case "string": return new Token(str, Terminal.STRING, row, col);
+            case "then": return new Token(str, Terminal.THEN, row, col);
+            case "true": return new Token(str, Terminal.TRUE, row, col);
+            case "to": return new Token(str, Terminal.TO, row, col);
+            case "until": return new Token(str, Terminal.UNTIL, row, col);
+            case "var": return new Token(str, Terminal.VAR, row, col);
+            case "while": return new Token(str, Terminal.WHILE, row, col);
+            case "write": return new Token(str, Terminal.WRITE, row, col);
+            case "writeln": return new Token(str, Terminal.WRITELN, row, col);
+            default: return new Token(str, Terminal.IDENTIFIER, row, col);
         }
         
         /*
@@ -364,71 +365,71 @@ public class FSA {
             //  Switch is a machine-level hashmap
             switch (str) {
                 case "and":
-                    return new Token(str, Token.ID.AND);
+                    return new Token(str, Terminal.AND);
                 case "begin":
-                    return new Token(str, Token.ID.BEGIN);
+                    return new Token(str, Terminal.BEGIN);
                 case "Boolean":
-                    return new Token(str, Token.ID.BOOLEAN);
+                    return new Token(str, Terminal.BOOLEAN);
                 case "div":
-                    return new Token(str, Token.ID.DIV);
+                    return new Token(str, Terminal.DIV);
                 case "do":
-                    return new Token(str, Token.ID.DO);
+                    return new Token(str, Terminal.DO);
                 case "downto":
-                    return new Token(str, Token.ID.DOWNTO);
+                    return new Token(str, Terminal.DOWNTO);
                 case "else":
-                    return new Token(str, Token.ID.ELSE);
+                    return new Token(str, Terminal.ELSE);
                 case "end":
-                    return new Token(str, Token.ID.END);
+                    return new Token(str, Terminal.END);
                 case "flase":
-                    return new Token(str, Token.ID.FALSE);
+                    return new Token(str, Terminal.FALSE);
                 case "fixed":
-                    return new Token(str, Token.ID.FIXED);
+                    return new Token(str, Terminal.FIXED);
                 case "float":
-                    return new Token(str, Token.ID.FLOAT);
+                    return new Token(str, Terminal.FLOAT);
                 case "for":
-                    return new Token(str, Token.ID.FOR);
+                    return new Token(str, Terminal.FOR);
                 case "function":
-                    return new Token(str, Token.ID.FUNCTION);
+                    return new Token(str, Terminal.FUNCTION);
                 case "if":
-                    return new Token(str, Token.ID.IF);
+                    return new Token(str, Terminal.IF);
                 case "integer":
-                    return new Token(str, Token.ID.INTEGER);
+                    return new Token(str, Terminal.INTEGER);
                 case "mod":
-                    return new Token(str, Token.ID.MOD);
+                    return new Token(str, Terminal.MOD);
                 case "not":
-                    return new Token(str, Token.ID.NOT);
+                    return new Token(str, Terminal.NOT);
                 case "or":
-                    return new Token(str, Token.ID.OR);
+                    return new Token(str, Terminal.OR);
                 case "procedure":
-                    return new Token(str, Token.ID.PROCEDURE);
+                    return new Token(str, Terminal.PROCEDURE);
                 case "program":
-                    return new Token(str, Token.ID.PROGRAM);
+                    return new Token(str, Terminal.PROGRAM);
                 case "read":
-                    return new Token(str, Token.ID.READ);
+                    return new Token(str, Terminal.READ);
                 case "repeat":
-                    return new Token(str, Token.ID.REPEAT);
+                    return new Token(str, Terminal.REPEAT);
                 case "string":
-                    return new Token(str, Token.ID.STRING);
+                    return new Token(str, Terminal.STRING);
                 case "then":
-                    return new Token(str, Token.ID.THEN);
+                    return new Token(str, Terminal.THEN);
                 case "true":
-                    return new Token(str, Token.ID.TRUE);
+                    return new Token(str, Terminal.TRUE);
                 case "to":
-                    return new Token(str, Token.ID.TO);
+                    return new Token(str, Terminal.TO);
                 case "type":
-                    return new Token(str, Token.ID.TYPE);
+                    return new Token(str, Terminal.TYPE);
                 case "until":
-                    return new Token(str, Token.ID.UNTIL);
+                    return new Token(str, Terminal.UNTIL);
                 case "var":
-                    return new Token(str, Token.ID.VAR);
+                    return new Token(str, Terminal.VAR);
                 case "while":
-                    return new Token(str, Token.ID.WHILE);
+                    return new Token(str, Terminal.WHILE);
                 case "write":
-                    return new Token(str, Token.ID.WRITE);
+                    return new Token(str, Terminal.WRITE);
                 case "writeln":
-                    return new Token(str, Token.ID.WRITELN);
+                    return new Token(str, Terminal.WRITELN);
                 default:
-                    return new Token("identifer:" + str, Token.ID.IDENTIFIER);
+                    return new Token("identifer:" + str, Terminal.IDENTIFIER);
             }
         }
         r.nextChar();
@@ -479,10 +480,10 @@ public class FSA {
                 case 2:
                     //  Already accepted 2 + n characters so the next is
                     //  the first one after the token has ended (pc met!)
-                    return new Token(str, Token.ID.STRING_LIT, row, col);
+                    return new Token(str, Terminal.STRING_LIT, row, col);
                 case 3:
                     return new Token("String not closed",
-                            Token.ID.EOF, row, col);
+                            Terminal.EOF, row, col);
             }
         }
         return null;
@@ -521,13 +522,13 @@ public class FSA {
                         break;
                     }
                     //  One character accepted; pc has been met
-                    return new Token(str, Token.ID.COLON, row, col);
+                    return new Token(str, Terminal.COLON, row, col);
                 /*  State 2:
                  Accept :=
                  */
                 case 2:
                     r.nextChar();   //  keep the found token (pc met!)
-                    return new Token(str, Token.ID.ASSIGN, row, col);
+                    return new Token(str, Terminal.ASSIGN, row, col);
                 //  Postcondition: c points to the character after this token
             }
         }
@@ -576,19 +577,19 @@ public class FSA {
                         break;
                     }
                     //  Postcondition: now c is the character after < (pc met!)
-                    return new Token(str, Token.ID.LTHAN, row, col);
+                    return new Token(str, Terminal.LTHAN, row, col);
                 /*  State 2:
                  Accept <=
                  */
                 case 2:
                     r.nextChar();   //  now points after = (pc met!)
-                    return new Token(str, Token.ID.LEQUAL, row, col);
+                    return new Token(str, Terminal.LEQUAL, row, col);
                 /*  State 3:
                  Accept <>
                  */
                 case 3:
                     r.nextChar();   //  now points after = (pc met!)
-                    return new Token(str, Token.ID.NEQUAL, row, col);
+                    return new Token(str, Terminal.NEQUAL, row, col);
             }
         }
         //  This should never happen
@@ -627,14 +628,14 @@ public class FSA {
                         break;
                     }
                     //  Only accepted one character (pc met!)
-                    return new Token(str, Token.ID.GTHAN, row, col);
+                    return new Token(str, Terminal.GTHAN, row, col);
                 /*  State 2
                  c is character after = (pc met!)
 
                  */
                 case 2:
                     r.nextChar();   //  accept the = so the pc is met
-                    return new Token(str, Token.ID.GEQUAL, row, col);
+                    return new Token(str, Terminal.GEQUAL, row, col);
             }
         }
         //  This should never happen;
@@ -645,7 +646,7 @@ public class FSA {
     public static Token TEST_COMMA(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == ',') {
-            return new Token(",", Token.ID.COMMA, row, col);
+            return new Token(",", Terminal.COMMA, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for COMMA FSA");
@@ -655,7 +656,7 @@ public class FSA {
     public static Token TEST_EQUAL(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == '=') {
-            return new Token("=", Token.ID.EQUAL, row, col);
+            return new Token("=", Terminal.EQUAL, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for EQUAL FSA");
@@ -665,7 +666,7 @@ public class FSA {
     public static Token TEST_FLOAT_DIVIDE(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == '/') {
-            return new Token("/", Token.ID.FLOAT_DIVIDE, row, col);
+            return new Token("/", Terminal.FLOAT_DIVIDE, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for FLOAT_DIVIDE FSA");
@@ -675,7 +676,7 @@ public class FSA {
     public static Token TEST_LPAREN(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == '(') {
-            return new Token("(", Token.ID.LPAREN, row, col);
+            return new Token("(", Terminal.LPAREN, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for LPAREN FSA");
@@ -685,7 +686,7 @@ public class FSA {
     public static Token TEST_RPAREN(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == ')') {
-            return new Token(")", Token.ID.RPAREN, row, col);
+            return new Token(")", Terminal.RPAREN, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for RPAREN FSA");
@@ -695,7 +696,7 @@ public class FSA {
     public static Token TEST_MINUS(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == '-') {
-            return new Token("-", Token.ID.MINUS, row, col);
+            return new Token("-", Terminal.MINUS, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for MINUS FSA");
@@ -705,7 +706,7 @@ public class FSA {
     public static Token TEST_PERIOD(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == '.') {
-            return new Token(".", Token.ID.PERIOD, row, col);
+            return new Token(".", Terminal.PERIOD, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for PERIOD FSA");
@@ -715,7 +716,7 @@ public class FSA {
     public static Token TEST_PLUS(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == '+') {
-            return new Token("+", Token.ID.PLUS, row, col);
+            return new Token("+", Terminal.PLUS, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for PLUS FSA");
@@ -725,7 +726,7 @@ public class FSA {
     public static Token TEST_SCOLON(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == ';') {
-            return new Token(";", Token.ID.SCOLON, row, col);
+            return new Token(";", Terminal.SCOLON, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for SCOLON FSA");
@@ -735,7 +736,7 @@ public class FSA {
     public static Token TEST_TIMES(Reader r, int row, int col) {
         char c = r.nextChar();
         if (c == '*') {
-            return new Token("*", Token.ID.TIMES, row, col);
+            return new Token("*", Terminal.TIMES, row, col);
         }
         //  This should never happen
         System.out.println("ERROR: Reached endline for TIMES FSA");

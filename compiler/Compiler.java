@@ -1,6 +1,6 @@
 package compiler;
 
-import tests.Test;
+import util.Test;
 
 public class Compiler {
 
