@@ -11,17 +11,7 @@ public class SymbolTable {
     public void addEntry(Symbol entry) {
         entry.offset = offset;
         entries.put(entry.name, entry);
-        switch (entry.type) {
-            case INTEGER:
-                offset += 4;
-            case FLOAT:
-                offset += 8;
-            case BOOLEAN:
-                offset += 1;
-            case STRING:
-                offset += 1;
-        }
-        
+        offset += SymbolTableHandler.typeSize(entry.type);
     }
     public Symbol getEntry(String name) {
         return entries.get(name);

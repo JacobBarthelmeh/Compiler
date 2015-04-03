@@ -4,6 +4,7 @@ import parser.Parser;
 import compiler.Token;
 import java.io.PrintWriter;
 import scanner.Scanner;
+import semanticanalyzer.SemanticAnalyzer;
 
 public class Test {
 
@@ -19,29 +20,34 @@ public class Test {
     /* output files */
     static String scannerOutC = "c-scanner_test.txt";
     static String parserOutC = "c-parser_test.txt";
+    static String fileOutC = "c_test.mp";
+    
     static String scannerOutB = "b-scanner_test.txt";
     static String parserOutB = "b-parser_test.txt";
+    static String fileOutB = "b_test.mp";
+    
     static String scannerOutA = "a-scanner_test.txt";
     static String parserOutA = "a-parser_test.txt";
+    static String fileOutA = "a_test.mp";
 
     public static void main(String[] args) {
         System.out.println("Running C ranked tests");
 
         /**
          * ******* Scanner ************
-         */
         System.out.print("Scanner Test ....");
         if (scanner_test(scannerInC, scannerOutC) == true) {
             System.out.println("pass");
         } else {
             System.out.println("fail!!!");
         }
+        */
 
         /**
          * ******* Parser ************
          */
         System.out.print("Parser Test ....");
-        if (parser_test(parserInC, parserOutC) == true) {
+        if (parser_test(parserInC, parserOutC, fileOutC) == true) {
             System.out.println("pass");
         } else {
             System.out.println("fail!!!");
@@ -51,19 +57,19 @@ public class Test {
 
         /**
          * ******* Scanner ************
-         */
         System.out.print("Scanner Test ....");
         if (scanner_test(scannerInB, scannerOutB) == true) {
             System.out.println("pass");
         } else {
             System.out.println("fail!!!");
         }
+        */
 
         /**
          * ******* Parser ************
          */
         System.out.print("Parser Test ....");
-        if (parser_test(parserInB, parserOutB) == true) {
+        if (parser_test(parserInB, parserOutB, fileOutB) == true) {
             System.out.println("pass");
         } else {
             System.out.println("fail!!!");
@@ -73,19 +79,20 @@ public class Test {
 
         /**
          * ******* Scanner ************
-         */
+         * 
         System.out.print("Scanner Test ....");
         if (scanner_test(scannerInA, scannerOutA) == true) {
             System.out.println("pass");
         } else {
             System.out.println("fail!!!");
         }
+        */
 
         /**
          * ******* Parser ************
          */
         System.out.print("Parser Test ....");
-        if (parser_test(parserInA, parserOutA) == true) {
+        if (parser_test(parserInA, parserOutA, fileOutA) == true) {
             System.out.println("pass");
         } else {
             System.out.println("fail!!!");
@@ -189,10 +196,11 @@ public class Test {
      *
      * @param fIn name of the input file
      * @param fOut name of the output file for debris such as rule tree
+     * @param file The .MP file to print the machine code to
      * @return true on success, false on fail
      */
-    public static boolean parser_test(String fIn, String fOut) {
-        Parser par = new Parser();
+    public static boolean parser_test(String fIn, String fOut, String file) {
+        Parser par = new Parser(new SemanticAnalyzer(file));
         par.setRuleOutputFile(fOut);
         if (par.parseFile(fIn) == 0) {
             return true;

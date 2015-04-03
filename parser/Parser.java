@@ -9,7 +9,12 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import scanner.Scanner;
-import util.*;
+import semanticanalyzer.SemanticAnalyzer;
+import symboltable.Symbol;
+import util.Type;
+import util.Kind;
+import util.Terminal;
+import util.NonTerminal;
 
 /**
  *
@@ -23,6 +28,7 @@ public class Parser {
     private PrintWriter rFile;
     private String rule_tree_file = "rule_list.csv"; // Contains rules for going from non-terminals to terminals
     private boolean error_flag = false;
+    private SemanticAnalyzer sa;
 
     private int Table[][];
     private String stackTrace = "";
@@ -30,7 +36,7 @@ public class Parser {
     /**
      * read in csv ll1 table
      */
-    public Parser() {
+    public Parser(SemanticAnalyzer sa) {
         try {
             /* java scanner used to read in ll1.csv table */
             java.util.Scanner sc = new java.util.Scanner(new File("ll1.csv"));
@@ -76,6 +82,7 @@ public class Parser {
             System.out.println("Error creating ll1 table from ll1.csv " + e);
         }
         sh = new SymbolTableHandler();
+        this.sa = sa;
     }
 
     /**
@@ -262,6 +269,8 @@ public class Parser {
                 Program(); // nonterminal 2
                 if (l1.getTerminal() == Terminal.EOF) {
                     match();
+                    //  Closes the file to complete write
+                    sa.genHalt();
                 } else {
                     String[] err = {"end of file"};
                     error(err);
@@ -281,6 +290,7 @@ public class Parser {
         switch (getRule(NonTerminal.Program)) {
             case 2:
                 sh.pushTable(); //  Construct the original table
+                sa.genMov("SP", "D0");
                 ProgramHeading(); // nonterminal 3
                 if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
@@ -416,6 +426,7 @@ public class Parser {
                     sh.setType(type);
                     sh.setKind(Kind.VARIABLE);
                     sh.finishEntry();
+                    sa.genAdd("SP", "#" + SymbolTableHandler.typeSize(type), "SP)");
                 }
                 break;
             default:
@@ -572,11 +583,13 @@ public class Parser {
                 OptionalFormalParameterList();
                 ArrayList<Parameter> params = sh.getEntry(name).params;
                 sh.pushTable();
+                sa.genMov("SP", "D" + sh.nestinglevel);
                 for (Parameter p : params) {
                     sh.startEntry();
                     sh.setName(p.name);
                     sh.setType(p.type);
                     sh.finishEntry();
+                    sa.genAdd("SP", "#" + SymbolTableHandler.typeSize(p.type), "SP)");
                 }
                 break;
             default:
@@ -602,11 +615,13 @@ public class Parser {
                 OptionalFormalParameterList();
                 ArrayList<Parameter> params = sh.getEntry(name).params;
                 sh.pushTable();
+                sa.genMov("SP", "D" + sh.nestinglevel);
                 for (Parameter p : params) {
                     sh.startEntry();
                     sh.setName(p.name);
                     sh.setType(p.type);
                     sh.finishEntry();
+                    sa.genAdd("SP", "#" + SymbolTableHandler.typeSize(p.type), "SP)");
                 }
                 break;
             default:
@@ -984,8 +999,8 @@ public class Parser {
                 match();
                 if (l1.getTerminal() == Terminal.LPAREN) {
                     match();
-                    WriteParameter();
-                    WriteParameterTail();
+                    WriteParameter(false);
+                    WriteParameterTail(false);
                     if (l1.getTerminal() == Terminal.RPAREN) {
                         match();
                     } else {
@@ -1002,8 +1017,8 @@ public class Parser {
                 match();
                 if (l1.getTerminal() == Terminal.LPAREN) {
                     match();
-                    WriteParameter();
-                    WriteParameterTail();
+                    WriteParameter(true);
+                    WriteParameterTail(true);
                     if (l1.getTerminal() == Terminal.RPAREN) {
                         match();
                     } else {
@@ -1025,13 +1040,13 @@ public class Parser {
     // Nonterminal 29
     // <WriteParameterTail> --> , <WriteParameter> <WrieteParameterTail> RULE #51
     // <WriteParameterTail> -->  lambda RULE #52
-    private void WriteParameterTail() {
+    private void WriteParameterTail(boolean writingline) {
         stackTrace += "WriteParameterTail\n";
         switch (getRule(NonTerminal.WriteParameterTail)) {
             case 51: //rule 51
                 match();
-                WriteParameter();
-                WriteParameterTail();
+                WriteParameter(writingline);
+                WriteParameterTail(writingline);
                 break;
             case 52://case of e rule 52
                 break;
@@ -1044,11 +1059,18 @@ public class Parser {
 
     // Nonterminal 30
     // <WriteParameter> --> <OrdinalExpression> RULE #53
-    private void WriteParameter() {
+    private void WriteParameter(boolean writingline) {
         stackTrace += "WriteParameter\n";
         switch (getRule(NonTerminal.WriteParameter)) {
             case 53://rule 53
                 OrdinalExpression();
+                //  TODO: How to do this?
+                if(writingline) {
+                    sa.genWriteln("");
+                }
+                else {
+                    sa.genWrite("");
+                }
                 break;
             default:
                 String exp[] = {""};
@@ -1064,10 +1086,12 @@ public class Parser {
         stackTrace += "AssignmentStatement\n";
         switch (getRule(NonTerminal.AssignmentStatement)) {
             case 54: //rule 54
-                VariableIdentifier();
+                String identifier = VariableIdentifier();
                 if (l1.getTerminal() == Terminal.ASSIGN) {
                     match();
                     Expression();
+                    Symbol s = sh.getEntry(identifier);
+                    sa.genPop(s.offset, sh.nestinglevel);
                 } else {
                     String[] err = {"assign"};
                     error(err);
@@ -1550,9 +1574,22 @@ public class Parser {
         stackTrace += "FactorTail\n";
         switch (getRule(NonTerminal.FactorTail)) {
             case 92:
-                MultiplyingOperator();  // RULE 92
+                Terminal t = MultiplyingOperator();  // RULE 92
                 Factor();               // RULE 92
                 FactorTail();           // RULE 92
+                //  todo: HANDLE INT vs FLOAT
+                switch (t) {
+                case TIMES:
+                    sa.genMuls();
+                    break;
+                case DIV:
+                    sa.genDivs();
+                    break;
+                case AND:
+                    sa.genAnds();
+                    break;
+                //  case FLOAT_DIVIDE:
+                }
                 break;
             case 93:
                 break;
@@ -1569,28 +1606,28 @@ public class Parser {
     // <MultiplyingOperator> --> div RULE #96
     // <MultiplyingOperator> --> mod RULE #97
     // <MultiplyingOperator> --> and RULE #98
-    private void MultiplyingOperator() {
+    private Terminal MultiplyingOperator() {
         stackTrace += "MultiplyingOperator\n";
         switch (getRule(NonTerminal.MultiplyingOperator)) {
             case 94:         //  * RULE 94
                 match();
-                break;
+                return Terminal.TIMES;
             case 95:  // / RULE 95
                 match();
-                break;
+                return Terminal.DIV;
             case 96:           // / RULE 96
                 match();
-                break;
+                return Terminal.DIV;
             case 97:           // % RULE 97
                 match();
-                break;
+                return Terminal.MOD;
             case 98:           // and RULE 98
                 match();
-                break;
+                return Terminal.AND;
             default:
                 String exp[] = {"*", "/", "div", "%", "amd"};
                 error(exp);
-                break;
+                return null;
         }
     }
 
@@ -1679,16 +1716,17 @@ public class Parser {
 
     // Nonterminal 57
     // <VariableIdentifier> --> identifier RULE #108
-    private void VariableIdentifier() {
+    private String VariableIdentifier() {
         stackTrace += "VariableIdentifier\n";
         switch (getRule(NonTerminal.VariableIdentifier)) {
             case 108:    // RULE 108
+                String str = l1.getContents();
                 match();
-                break;
+                return str;
             default:
                 String[] exp = {"IDENTIFIER"};
                 error(exp);
-                break;
+                return "";
         }
     }
 

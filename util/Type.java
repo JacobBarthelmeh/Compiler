@@ -8,3 +8,4 @@ public enum Type {
     BOOLEAN,
     NOTYPE
 };
+
