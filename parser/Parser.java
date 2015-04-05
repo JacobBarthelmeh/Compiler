@@ -9,32 +9,34 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import scanner.Scanner;
+import semanticanalyzer.Record;
 import semanticanalyzer.SemanticAnalyzer;
+import semanticanalyzer.SemanticRecord;
 import symboltable.Symbol;
-import util.Type;
-import util.Kind;
-import util.Terminal;
-import util.NonTerminal;
+import util.*;
 
 /**
  *
  * @author team 4
  */
 public class Parser {
+    
     private final SymbolTableHandler sh;
+    private final SemanticAnalyzer sa;
     private Token l1; // look ahead token
     private Token l2; // used for some cases when table is ll2
     private Scanner scanner;
     private PrintWriter rFile;
     private String rule_tree_file = "rule_list.csv"; // Contains rules for going from non-terminals to terminals
     private boolean error_flag = false;
-    private SemanticAnalyzer sa;
-
+    
     private int Table[][];
     private String stackTrace = "";
 
     /**
      * read in csv ll1 table
+     *
+     * @param sa semantic analyzer object
      */
     public Parser(SemanticAnalyzer sa) {
         try {
@@ -74,7 +76,7 @@ public class Parser {
                     // Check the next terminal and continue building the table
                     arr = (removeStr(arr).toCharArray());
                 }
-
+                
                 Table[index] = tmparr; // Builds the ll1 tables current non-terminal line
                 index++; // Iterate to the next non-terminal
             }
@@ -105,7 +107,7 @@ public class Parser {
         for (int i = 0; i < arr.length && arr[i] != ','; i++) {
             s += arr[i];
         }
-
+        
         return s;
     }
 
@@ -152,6 +154,7 @@ public class Parser {
             SystemGoal();
             rFile.close();
             scanner.close();
+            sa.close();
             if (error_flag) {
                 return -1;
             } else {
@@ -159,7 +162,7 @@ public class Parser {
             }
         } catch (Exception e) {
             System.out.println("\nSTACK TRACE of PARSER\n" + stackTrace);
-
+            
             System.err.println("Error parsing file " + in + " in parser " + e);
         }
         return -1;
@@ -241,7 +244,7 @@ public class Parser {
     private int getRule(NonTerminal nt) {
         int index = l1.getTerminal().ordinal(), // The index corresponding to the current look ahead token
                 nonTerminal = nt.ordinal();
-
+        
         if (nonTerminal > Table.length) {
             System.out.println("Error nonTerminal " + nonTerminal + " is not in table");
             System.exit(1);
@@ -426,7 +429,7 @@ public class Parser {
                     sh.setType(type);
                     sh.setKind(Kind.VARIABLE);
                     sh.finishEntry();
-                    sa.genAdd("SP", "#" + SymbolTableHandler.typeSize(type), "SP)");
+                    sa.genSPush(SymbolTableHandler.typeSize(type));
                 }
                 break;
             default:
@@ -477,7 +480,7 @@ public class Parser {
                 } else {
                     String[] err = {"Boolean"};
                     error(err);
-                return Type.NOTYPE;
+                    return Type.NOTYPE;
                 }
             default:
                 String err[] = {"Integer", "Float", "String", "Boolean"};
@@ -589,7 +592,7 @@ public class Parser {
                     sh.setName(p.name);
                     sh.setType(p.type);
                     sh.finishEntry();
-                    sa.genAdd("SP", "#" + SymbolTableHandler.typeSize(p.type), "SP)");
+                    sa.genSPush(SymbolTableHandler.typeSize(p.type));
                 }
                 break;
             default:
@@ -621,7 +624,7 @@ public class Parser {
                     sh.setName(p.name);
                     sh.setType(p.type);
                     sh.finishEntry();
-                    sa.genAdd("SP", "#" + SymbolTableHandler.typeSize(p.type), "SP)");
+                    sa.genSPush(SymbolTableHandler.typeSize(p.type));
                 }
                 break;
             default:
@@ -720,7 +723,7 @@ public class Parser {
                     error(err);
                 }
                 Type type = Type();
-                for (String s : str)  {
+                for (String s : str) {
                     sh.startParameter();
                     sh.setName(s);
                     sh.setType(type);
@@ -754,7 +757,7 @@ public class Parser {
                     error(err);
                 }
                 Type type = Type();
-                for (String s : str)  {
+                for (String s : str) {
                     sh.startParameter();
                     sh.setName(s);
                     sh.setType(type);
@@ -951,7 +954,7 @@ public class Parser {
                 error(exp);
                 break;
         }
-
+        
     }
 
     // Nonterminal 26
@@ -1012,7 +1015,7 @@ public class Parser {
                     error(err);
                 }
                 break;
-
+            
             case 50: //rule 50
                 match();
                 if (l1.getTerminal() == Terminal.LPAREN) {
@@ -1030,7 +1033,7 @@ public class Parser {
                     error(err);
                 }
                 break;
-
+            
             default:
                 String[] err = {"write", "writeln"};
                 error(err);
@@ -1065,10 +1068,9 @@ public class Parser {
             case 53://rule 53
                 OrdinalExpression();
                 //  TODO: How to do this?
-                if(writingline) {
+                if (writingline) {
                     sa.genWriteln("");
-                }
-                else {
+                } else {
                     sa.genWrite("");
                 }
                 break;
@@ -1159,7 +1161,7 @@ public class Parser {
                 String[] err = {"else", "e"};
                 error(err);
                 break;
-
+            
         }
     }
 
@@ -1476,8 +1478,9 @@ public class Parser {
         switch (getRule(NonTerminal.SimpleExpression)) {
             case 82:
                 OptionalSign(); // Rule 82
-                Term();
-                TermTail();
+                Record sa_record = new SemanticRecord();
+                Term(sa_record); // load up sa_record
+                TermTail(sa_record); // pass in sa_record as left hand side
                 break;
             default:
                 String exp[] = {""};
@@ -1489,13 +1492,17 @@ public class Parser {
     // Nonterminal 49
     // <TermTail> --> <AddingOperator> <Term> <TermTail> RULE #83
     // <TermTail> --> lambda RULE #84
-    private void TermTail() {
+    private void TermTail(Record sa_record) {
         stackTrace += "TermTail\n";
         switch (getRule(NonTerminal.TermTail)) {
             case 83:
-                AddingOperator(); // Rule 83
-                Term();           // Rule 84
-                TermTail();       // Rule 85
+                Record right_record = new SemanticRecord();
+                AddingOperator(sa_record); // Rule 83
+                Term(right_record);        // Rule 84
+
+                // have enough information for creating arithmitic operation 
+                Record left_record = sa.genArithS(sa_record, right_record);
+                TermTail(left_record);      // Rule 85
                 break;
             case 84:
                 break;
@@ -1532,17 +1539,20 @@ public class Parser {
     // <AddingOperator> --> + RULE #89
     // <AddingOperator> --> - RULE #90
     // <AddingOperator> --> or RULE #91
-    private void AddingOperator() {
+    private void AddingOperator(Record sa_record) {
         stackTrace += "AddingOperator\n";
         switch (getRule(NonTerminal.AddingOperator)) {
             case 88: // +
                 match();
+                sa_record.setOpp("ADDS");
                 break;
             case 89: // -
                 match();
+                sa_record.setOpp("SUBS");
                 break;
             case 90: // or
                 match();
+                sa_record.setOpp("ORS");
                 break;
             default:
                 String exp[] = {"+", "-", "or"};
@@ -1553,12 +1563,12 @@ public class Parser {
 
     // Nonterminal 52
     // <Term> --> <Factor> <FactorTail> RULE #91
-    private void Term() {
+    private void Term(Record sa_record) {
         stackTrace += "Term\n";
         switch (getRule(NonTerminal.Term)) {
             case 91:
-                Factor();      // RULE 91
-                FactorTail();  // RULE 91
+                Factor(sa_record);      // RULE 91
+                FactorTail(sa_record);  // RULE 91
                 break;
             default:
                 String exp[] = {""};
@@ -1570,26 +1580,15 @@ public class Parser {
     // Nonterminal 53
     // <FactorTail> --> <MultiplyingOperator> <Factor> <FactorTail> RULE #92
     // <FactorTail> --> lambda RULE #93
-    private void FactorTail() {
+    private void FactorTail(Record sa_record) {
         stackTrace += "FactorTail\n";
         switch (getRule(NonTerminal.FactorTail)) {
             case 92:
-                Terminal t = MultiplyingOperator();  // RULE 92
-                Factor();               // RULE 92
-                FactorTail();           // RULE 92
-                //  todo: HANDLE INT vs FLOAT
-                switch (t) {
-                case TIMES:
-                    sa.genMuls();
-                    break;
-                case DIV:
-                    sa.genDivs();
-                    break;
-                case AND:
-                    sa.genAnds();
-                    break;
-                //  case FLOAT_DIVIDE:
-                }
+                Record right_record = new SemanticRecord();
+                MultiplyingOperator(sa_record);  // RULE 92
+                Factor(right_record);               // RULE 92
+                Record left_record = sa.genArithS(sa_record, right_record);
+                FactorTail(left_record);           // RULE 92
                 break;
             case 93:
                 break;
@@ -1606,28 +1605,33 @@ public class Parser {
     // <MultiplyingOperator> --> div RULE #96
     // <MultiplyingOperator> --> mod RULE #97
     // <MultiplyingOperator> --> and RULE #98
-    private Terminal MultiplyingOperator() {
+    private void MultiplyingOperator(Record sa_record) {
         stackTrace += "MultiplyingOperator\n";
         switch (getRule(NonTerminal.MultiplyingOperator)) {
             case 94:         //  * RULE 94
                 match();
-                return Terminal.TIMES;
+                sa_record.setOpp("MULS");
+                break;
             case 95:  // / RULE 95
                 match();
-                return Terminal.DIV;
+                sa_record.setOpp("DIVS");
+                break;
             case 96:           // / RULE 96
                 match();
-                return Terminal.DIV;
+                sa_record.setOpp("DIVF");
+                break;
             case 97:           // % RULE 97
                 match();
-                return Terminal.MOD;
+                sa_record.setOpp("MODS");
+                break;
             case 98:           // and RULE 98
                 match();
-                return Terminal.AND;
+                sa_record.setOpp("ANDS");
+                break;
             default:
                 String exp[] = {"*", "/", "div", "%", "amd"};
                 error(exp);
-                return null;
+                break;
         }
     }
 
@@ -1641,7 +1645,7 @@ public class Parser {
     // <Factor> --> ( <Expression> ) RULE #105
     // <Factor> --> <FunctionIdentifier> <OptionalActualParamterList> RULE #106
     // <Factor> --> <VariableIdentifier> RULE #116
-    private void Factor() {
+    private void Factor(Record sa_record) {
         stackTrace += "Factor\n";
 
         //handle special case in table that branchs when id is not at end of statement
@@ -1652,26 +1656,41 @@ public class Parser {
                 rule = 116;
             }
         }
-
+        
         switch (rule) {
             case 99:
-                match();      //int RULE 99
+                sa_record.setToken(l1);
+                sa_record.setType(Type.INTEGER); //would perfer symbol table
+                match();      //int RULE 99 Int
                 break;
             case 100:
+                sa_record.setToken(l1);
+                sa_record.setType(Type.FLOAT); //would perfer symbol table
                 match();      // RULE 100
                 break;
             case 101:
+                sa_record.setToken(l1);                
+                sa_record.setType(Type.STRING); //would perfer symbol table
                 match();      // RULE 101
                 break;
-            case 102:          // RULE 102
+            case 102:          // RULE 102 True
+                sa_record.setToken(l1);                
+                sa_record.setType(Type.BOOLEAN); //would perfer symbol table
                 match();
                 break;
-            case 103:         // RULE 103
+            case 103:         // RULE 103 False
+                sa_record.setToken(l1);                
+                sa_record.setType(Type.BOOLEAN); //would perfer symbol table
                 match();
                 break;
-            case 104:           // RULE 104
+            case 104:           // not Factor() RULE 104
+                sa_record.setToken(l1);                
                 match();
-                Factor();
+                sa_record.setOpp("NOTS");
+                Factor(sa_record);
+                
+                //negate what is on the stack
+                sa_record = sa.genNot(sa_record);
                 break;
             case 105:        // RULE 105
                 match();
