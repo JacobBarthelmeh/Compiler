@@ -25,7 +25,7 @@ public class SemanticRecord implements Record {
     public Type getType() {
         if (typ == null) {
             if (sym == null) {
-                System.out.println("Error type not set");
+                System.out.println("Error: Type not set.");
             } else {
                 typ = sym.type;
             }

@@ -429,7 +429,7 @@ public class Parser {
                     sh.setType(type);
                     sh.setKind(Kind.VARIABLE);
                     sh.finishEntry();
-                    sa.genSPush(SymbolTableHandler.typeSize(type));
+                    sa.genStackPush(SymbolTableHandler.typeSize(type));
                 }
                 break;
             default:
@@ -592,7 +592,7 @@ public class Parser {
                     sh.setName(p.name);
                     sh.setType(p.type);
                     sh.finishEntry();
-                    sa.genSPush(SymbolTableHandler.typeSize(p.type));
+                    sa.genStackPush(SymbolTableHandler.typeSize(p.type));
                 }
                 break;
             default:
@@ -624,7 +624,7 @@ public class Parser {
                     sh.setName(p.name);
                     sh.setType(p.type);
                     sh.finishEntry();
-                    sa.genSPush(SymbolTableHandler.typeSize(p.type));
+                    sa.genStackPush(SymbolTableHandler.typeSize(p.type));
                 }
                 break;
             default:

@@ -5,7 +5,7 @@ import util.Writer;
 
 public class SemanticAnalyzer {
 
-    static int LabelCounter = 0;
+    static int labelCounter = 0;
 
     /**
      * Close the file code is being written to
@@ -39,12 +39,12 @@ public class SemanticAnalyzer {
         w.writeLine("POP " + offset + "(D" + nesting + ")");
     }
 
-    public void genWrite(String args) {
-
+    public void genWrite(String arg) {
+        w.writeLine("WRT " + arg);
     }
 
-    public void genWriteln(String args) {
-
+    public void genWriteln(String arg) {
+        w.writeLine("WRTLN " + arg);
     }
 
     /**
@@ -74,14 +74,8 @@ public class SemanticAnalyzer {
         w.close();
     }
 
-    public SemanticAnalyzer(String filename) {
-        w = new Writer(filename);
-    }
-
-    private final Writer w;
-
     /**
-     * Used for generating arithmitic such as ADD, SUB, MUL
+     * Used for generating arithmetic such as ADD, SUB, MUL
      *
      * @param left_record left hand side of operation
      * @param right_record right hand side of operation
@@ -95,7 +89,7 @@ public class SemanticAnalyzer {
     }
 
     /**
-     * Used for generating arithmitic such as ADDS, SUBS, MULS, ORS
+     * Used for generating arithmetic such as ADDS, SUBS, MULS, ORS
      *
      * @param left_record left hand side of operation
      * @param right_record right hand side of operation
@@ -147,8 +141,48 @@ public class SemanticAnalyzer {
      * Push the stack pointer
      * @param in amount to push it ie 4 for an int
      */
-    public void genSPush(int in) {
+    public void genStackPush(int in) {
         w.writeLine("ADD SP #" + in + " SP");
     }
 
+    public void genAssign(int offset, int nesting) {
+        w.writeLine("POP " + offset + "(D" + nesting + ")");
+    }
+    
+    public void genLabel(int label) {
+        w.writeLine("L" + label);
+    }
+    
+    public SemanticAnalyzer(String filename) {
+        w = new Writer(filename);
+    }
+
+    private final Writer w;
+    
+    public void o (opp) {
+        if (haveleft) {
+            setopp;
+        }
+        else {
+            error no left opp;
+        }
+    }
+    
+    public void a (Symbol s) {
+        if (haveleft) {
+            if (!haveright) {
+                settoright;
+                haveright=true;
+            }
+            else {
+                gen push;
+                gen push;
+                gen opp;
+            }
+        }
+        else {
+            settoleft;
+            haveleft=true;
+        }
+    }
 }
