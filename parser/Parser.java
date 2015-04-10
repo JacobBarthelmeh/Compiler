@@ -20,7 +20,7 @@ import util.*;
  * @author team 4
  */
 public class Parser {
-    
+
     private final SymbolTableHandler sh;
     private final SemanticAnalyzer sa;
     private Token l1; // look ahead token
@@ -29,9 +29,10 @@ public class Parser {
     private PrintWriter rFile;
     private String rule_tree_file = "rule_list.csv"; // Contains rules for going from non-terminals to terminals
     private boolean error_flag = false;
-    
+
     private int Table[][];
     private String stackTrace = "";
+    public boolean debug;
 
     /**
      * read in csv ll1 table
@@ -76,7 +77,7 @@ public class Parser {
                     // Check the next terminal and continue building the table
                     arr = (removeStr(arr).toCharArray());
                 }
-                
+
                 Table[index] = tmparr; // Builds the ll1 tables current non-terminal line
                 index++; // Iterate to the next non-terminal
             }
@@ -107,7 +108,7 @@ public class Parser {
         for (int i = 0; i < arr.length && arr[i] != ','; i++) {
             s += arr[i];
         }
-        
+
         return s;
     }
 
@@ -162,7 +163,7 @@ public class Parser {
             }
         } catch (Exception e) {
             System.out.println("\nSTACK TRACE of PARSER\n" + stackTrace);
-            
+
             System.err.println("Error parsing file " + in + " in parser " + e);
         }
         return -1;
@@ -244,7 +245,7 @@ public class Parser {
     private int getRule(NonTerminal nt) {
         int index = l1.getTerminal().ordinal(), // The index corresponding to the current look ahead token
                 nonTerminal = nt.ordinal();
-        
+
         if (nonTerminal > Table.length) {
             System.out.println("Error nonTerminal " + nonTerminal + " is not in table");
             System.exit(1);
@@ -346,6 +347,9 @@ public class Parser {
                 VariableDeclarationPart();
                 ProcedureAndFunctionDeclarationPart();
                 StatementPart();
+                if (debug) {
+                    System.out.println(sh);
+                }
                 sh.popTable();
                 break;
             default:
@@ -954,7 +958,7 @@ public class Parser {
                 error(exp);
                 break;
         }
-        
+
     }
 
     // Nonterminal 26
@@ -1015,7 +1019,7 @@ public class Parser {
                     error(err);
                 }
                 break;
-            
+
             case 50: //rule 50
                 match();
                 if (l1.getTerminal() == Terminal.LPAREN) {
@@ -1033,7 +1037,7 @@ public class Parser {
                     error(err);
                 }
                 break;
-            
+
             default:
                 String[] err = {"write", "writeln"};
                 error(err);
@@ -1091,9 +1095,14 @@ public class Parser {
                 String identifier = VariableIdentifier();
                 if (l1.getTerminal() == Terminal.ASSIGN) {
                     match();
+                    
+                    Record src = new SemanticRecord();
                     Expression();
+                    
+                    Record dest = new SemanticRecord();
                     Symbol s = sh.getEntry(identifier);
-                    sa.genPop(s.offset, sh.nestinglevel);
+                    dest.setSymbol(s, sh.nestinglevel);
+                    sa.genAssign(src, dest);
                 } else {
                     String[] err = {"assign"};
                     error(err);
@@ -1161,7 +1170,7 @@ public class Parser {
                 String[] err = {"else", "e"};
                 error(err);
                 break;
-            
+
         }
     }
 
@@ -1629,7 +1638,7 @@ public class Parser {
                 sa_record.setOpp("ANDS");
                 break;
             default:
-                String exp[] = {"*", "/", "div", "%", "amd"};
+                String exp[] = {"*", "/", "div", "%", "and"};
                 error(exp);
                 break;
         }
@@ -1656,7 +1665,7 @@ public class Parser {
                 rule = 116;
             }
         }
-        
+
         switch (rule) {
             case 99:
                 sa_record.setToken(l1);
@@ -1669,26 +1678,26 @@ public class Parser {
                 match();      // RULE 100
                 break;
             case 101:
-                sa_record.setToken(l1);                
+                sa_record.setToken(l1);
                 sa_record.setType(Type.STRING); //would perfer symbol table
                 match();      // RULE 101
                 break;
             case 102:          // RULE 102 True
-                sa_record.setToken(l1);                
+                sa_record.setToken(l1);
                 sa_record.setType(Type.BOOLEAN); //would perfer symbol table
                 match();
                 break;
             case 103:         // RULE 103 False
-                sa_record.setToken(l1);                
+                sa_record.setToken(l1);
                 sa_record.setType(Type.BOOLEAN); //would perfer symbol table
                 match();
                 break;
             case 104:           // not Factor() RULE 104
-                sa_record.setToken(l1);                
+                sa_record.setToken(l1);
                 match();
                 sa_record.setOpp("NOTS");
                 Factor(sa_record);
-                
+
                 //negate what is on the stack
                 sa_record = sa.genNot(sa_record);
                 break;

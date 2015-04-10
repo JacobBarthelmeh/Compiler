@@ -25,7 +25,7 @@ public class SemanticRecord implements Record {
     public Type getType() {
         if (typ == null) {
             if (sym == null) {
-                System.out.println("Error: Type not set.");
+                System.out.println("Error: Type not set.\n" + this);
             } else {
                 typ = sym.type;
             }
@@ -36,8 +36,9 @@ public class SemanticRecord implements Record {
     @Override
     public String getRegister() {
         if (sym == null || nest == null) {
-            System.out.println("Error with get register call\n"
-                    + "Either sym or nest is null");
+            return null;
+            //System.out.println("Error with get register call\n"
+            //        + "Either sym or nest is null");
         }
         return sym.offset + "(D" + nest + ")";
     }
@@ -60,14 +61,36 @@ public class SemanticRecord implements Record {
 
     @Override
     public String getOpp() {
-        if (opp == null) {
-            System.out.println("Error opperation was not set!!!");
-        }
         return opp;
     }
 
     @Override
     public void setType(Type in) {
         typ = in;
+    }
+
+    @Override
+    public String toString() {
+        String s = "Semantic Record:\n\tType : ";
+        if (typ != null) {
+            s += typ;
+        }
+        s += "\n";
+        s += "\tOpp  : ";
+        if (getOpp() != null) {
+            s += getOpp();
+        }
+        s += "\n";
+        s += "\tRegs : ";
+        if (getRegister() != null) {
+            s += getRegister();
+        }
+        s += "\n";
+        s += "\tTokn : ";
+        if (token != null) {
+            s += token.getContents() + " @ line " + token.getLine() + " col " + token.getCol();
+        }
+        s += "\n";
+        return s;
     }
 }

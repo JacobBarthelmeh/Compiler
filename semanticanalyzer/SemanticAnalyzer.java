@@ -139,50 +139,70 @@ public class SemanticAnalyzer {
 
     /**
      * Push the stack pointer
+     *
      * @param in amount to push it ie 4 for an int
      */
     public void genStackPush(int in) {
         w.writeLine("ADD SP #" + in + " SP");
     }
 
-    public void genAssign(int offset, int nesting) {
-        w.writeLine("POP " + offset + "(D" + nesting + ")");
+    /**
+     * The genAssign function determins if working with the stack or not by
+     * testing if the src record has a location. If no location stored than just
+     * the type is used and it is assumed the value is at the top of the stack
+     *
+     * example from hypertextbook
+     * <statement> ⟶ <ident> := <expression> #gen_assign(ident_rec,
+     * expression_rec) ;
+     *
+     * @param src record containing source type
+     * @param dest destination location for value
+     */
+    public void genAssign(Record src, Record dest) {
+        if (dest.getRegister() == null) {
+            System.out.println("Error in genAssign : dest has no getRegister set!");
+        }
+        if (src.getRegister() == null) {
+            w.writeLine("POP " + dest.getRegister());
+        } else {
+            w.writeLine("MOV " + src.getRegister() + " " + dest.getRegister());
+        }
     }
-    
-    public void genLabel(int label) {
-        w.writeLine("L" + label);
+
+    public void genLabel() {
+        w.writeLine("L" + labelCounter++);
     }
-    
+
     public SemanticAnalyzer(String filename) {
         w = new Writer(filename);
     }
 
     private final Writer w;
-    
-    public void o (opp) {
-        if (haveleft) {
-            setopp;
-        }
-        else {
-            error no left opp;
-        }
-    }
-    
-    public void a (Symbol s) {
-        if (haveleft) {
-            if (!haveright) {
-                settoright;
-                haveright=true;
-            }
-            else {
-                gen push;
-                gen push;
-                gen opp;
-            }
-        }
-        else {
-            settoleft;
-            haveleft=true;
-        }
-    }
+
+//    public void o (opp) {
+//        if (haveleft) {
+//            setopp;
+//        }
+//        else {
+//            error no left opp;
+//        }
+//    }
+//    
+//    public void a (Symbol s) {
+//        if (haveleft) {
+//            if (!haveright) {
+//                settoright;
+//                haveright=true;
+//            }
+//            else {
+//                gen push;
+//                gen push;
+//                gen opp;
+//            }
+//        }
+//        else {
+//            settoleft;
+//            haveleft=true;
+//        }
+//    }
 }

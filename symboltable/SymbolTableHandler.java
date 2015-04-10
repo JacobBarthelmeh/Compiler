@@ -112,7 +112,7 @@ public class SymbolTableHandler {
     @Override
     public String toString() {
         String str = "Symbol Table list:";
-        for (int i = nestinglevel; -1 < nestinglevel; i++) {
+        for (int i = 0; i < nestinglevel; i++) {
             str += "Nesting level " + i + ":\n";
             str += tables[i].toString();
         }
