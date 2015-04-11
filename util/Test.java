@@ -5,6 +5,7 @@ import compiler.Token;
 import java.io.PrintWriter;
 import scanner.Scanner;
 import semanticanalyzer.SemanticAnalyzer;
+import symboltable.SymbolTableHandler;
 
 public class Test {
 
@@ -186,7 +187,7 @@ public class Test {
      * @return true on success, false on fail
      */
     public static boolean parser_test(String fIn, String fOut, String file) {
-        Parser par = new Parser(new SemanticAnalyzer(file));
+        Parser par = new Parser(new SemanticAnalyzer(file, new SymbolTableHandler()));
         par.debug = true;
         par.setRuleOutputFile(fOut);
         if (par.parseFile(fIn) == 0) {

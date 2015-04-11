@@ -8,10 +8,11 @@ public class SymbolTable {
         entries = new HashMap();
         offset = 0;
     }
-    public void addEntry(Symbol entry) {
+    public void addEntry(Symbol entry, int nestinglevel) {
         entry.offset = offset;
+        entry.nestinglevel = nestinglevel;
         entries.put(entry.name, entry);
-        offset += SymbolTableHandler.typeSize(entry.type);
+        offset += 1;
     }
     public Symbol getEntry(String name) {
         return entries.get(name);
@@ -21,7 +22,7 @@ public class SymbolTable {
         String str = " Name | Type | Kind | Offset\n";
         for (Entry<String, Symbol> entry : entries.entrySet()) {
             Symbol e = entry.getValue();
-            str += e + "\n";
+            str += e.toString() + "\n";
         }
         return str;
     }

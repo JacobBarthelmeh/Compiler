@@ -3,19 +3,6 @@ import java.util.ArrayList;
 import util.Type;
 import util.Kind;
 public class SymbolTableHandler {
-    public static int typeSize(Type t) {
-        switch (t) {
-            case INTEGER:
-                return 4;
-            case FLOAT:
-                return 8;
-            case BOOLEAN:
-            case STRING:
-                return 1;
-            default:
-                return 1;
-        }
-    }
     private Symbol entry;
     private boolean isParam;
     private Parameter param;
@@ -34,7 +21,7 @@ public class SymbolTableHandler {
         if (entry == null) {
             throw new RuntimeException("Cannot finalize a null entry.");
         }
-        tables[nestinglevel].addEntry(entry);
+        tables[nestinglevel].addEntry(entry, nestinglevel);
         entry = null;
     }
     public void startParameter() {

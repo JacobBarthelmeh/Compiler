@@ -84,8 +84,8 @@ public class Parser {
         } catch (IOException e) {
             System.out.println("Error creating ll1 table from ll1.csv " + e);
         }
-        sh = new SymbolTableHandler();
         this.sa = sa;
+        this.sh = sa.sh;
     }
 
     /**
@@ -348,7 +348,7 @@ public class Parser {
                 ProcedureAndFunctionDeclarationPart();
                 StatementPart();
                 if (debug) {
-                    System.out.println(sh);
+                    System.out.println(sh.toString());
                 }
                 sh.popTable();
                 break;
@@ -433,7 +433,7 @@ public class Parser {
                     sh.setType(type);
                     sh.setKind(Kind.VARIABLE);
                     sh.finishEntry();
-                    sa.genStackPush(SymbolTableHandler.typeSize(type));
+                    sa.genStackPush();
                 }
                 break;
             default:
@@ -596,7 +596,7 @@ public class Parser {
                     sh.setName(p.name);
                     sh.setType(p.type);
                     sh.finishEntry();
-                    sa.genStackPush(SymbolTableHandler.typeSize(p.type));
+                    sa.genStackPush();
                 }
                 break;
             default:
@@ -628,7 +628,7 @@ public class Parser {
                     sh.setName(p.name);
                     sh.setType(p.type);
                     sh.finishEntry();
-                    sa.genStackPush(SymbolTableHandler.typeSize(p.type));
+                    sa.genStackPush();
                 }
                 break;
             default:
@@ -1047,13 +1047,13 @@ public class Parser {
     // Nonterminal 29
     // <WriteParameterTail> --> , <WriteParameter> <WrieteParameterTail> RULE #51
     // <WriteParameterTail> -->  lambda RULE #52
-    private void WriteParameterTail(boolean writingline) {
+    private void WriteParameterTail() {
         stackTrace += "WriteParameterTail\n";
         switch (getRule(NonTerminal.WriteParameterTail)) {
             case 51: //rule 51
                 match();
-                WriteParameter(writingline);
-                WriteParameterTail(writingline);
+                WriteParameter();
+                WriteParameterTail();
                 break;
             case 52://case of e rule 52
                 break;
@@ -1066,17 +1066,12 @@ public class Parser {
 
     // Nonterminal 30
     // <WriteParameter> --> <OrdinalExpression> RULE #53
-    private void WriteParameter(boolean writingline) {
+    private void WriteParameter() {
         stackTrace += "WriteParameter\n";
         switch (getRule(NonTerminal.WriteParameter)) {
             case 53://rule 53
                 OrdinalExpression();
-                //  TODO: How to do this?
-                if (writingline) {
-                    sa.genWriteln("");
-                } else {
-                    sa.genWrite("");
-                }
+                //  sa.write(); //  write the terminal
                 break;
             default:
                 String exp[] = {""};

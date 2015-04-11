@@ -7,7 +7,7 @@ public class Symbol {
     public Type type;
     public Kind kind;
     public ArrayList<Parameter> params;
-    public int offset;
+    public int offset, nestinglevel;
     public Symbol(String lexeme) {
         name = lexeme;
     }

@@ -17,20 +17,22 @@ public class SemanticRecord implements Record {
 
     Token token;
     Symbol sym;
-    Type typ;
+    Type type;
     Integer nest;
     String opp;
 
+    public String code;
+    
     @Override
     public Type getType() {
-        if (typ == null) {
+        if (type == null) {
             if (sym == null) {
                 System.out.println("Error: Type not set.\n" + this);
             } else {
-                typ = sym.type;
+                type = sym.type;
             }
         }
-        return typ;
+        return type;
     }
 
     @Override
@@ -66,14 +68,14 @@ public class SemanticRecord implements Record {
 
     @Override
     public void setType(Type in) {
-        typ = in;
+        type = in;
     }
 
     @Override
     public String toString() {
         String s = "Semantic Record:\n\tType : ";
-        if (typ != null) {
-            s += typ;
+        if (type != null) {
+            s += type;
         }
         s += "\n";
         s += "\tOpp  : ";
