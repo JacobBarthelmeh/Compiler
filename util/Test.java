@@ -1,5 +1,4 @@
 package util;
-
 import parser.Parser;
 import compiler.Token;
 import java.io.PrintWriter;
@@ -17,7 +16,6 @@ public class Test {
     static String scannerInA = "a-testfile.mp";
     static String parserInA = "a-testfile.mp";
 
-
     /* output files */
     static String scannerOutC = "c-scanner_test.txt";
     static String parserOutC = "c-parser_test.txt";
@@ -32,63 +30,37 @@ public class Test {
     static String fileOutA = "a_test.mp";
 
     public static void main(String[] args) {
+        //  C RANKED TESTS
         System.out.println("Running C ranked tests");
-
-        /**
-         * ******* Scanner ************ System.out.print("Scanner Test ....");
-         * if (scanner_test(scannerInC, scannerOutC) == true) {
-         * System.out.println("pass"); } else { System.out.println("fail!!!"); }
-         */
-        /**
-         * ******* Parser ************
-         */
-        System.out.print("Parser Test ....");
         if (parser_test(parserInC, parserOutC, fileOutC) == true) {
             System.out.println("pass");
         } else {
             System.out.println("fail!!!");
         }
-
+        /*
+        //  B RANKED TESTS
         System.out.println("Running B ranked tests");
-
-        /**
-         * ******* Scanner ************ System.out.print("Scanner Test ....");
-         * if (scanner_test(scannerInB, scannerOutB) == true) {
-         * System.out.println("pass"); } else { System.out.println("fail!!!"); }
-         */
-        /**
-         * ******* Parser ************
-         */
-        System.out.print("Parser Test ....");
         if (parser_test(parserInB, parserOutB, fileOutB) == true) {
             System.out.println("pass");
         } else {
             System.out.println("fail!!!");
         }
 
+        //  A RANKED TESTS
         System.out.println("Running A ranked tests");
-
-        /**
-         * ******* Scanner ************
-         *
-         * System.out.print("Scanner Test ...."); if (scanner_test(scannerInA,
-         * scannerOutA) == true) { System.out.println("pass"); } else {
-         * System.out.println("fail!!!"); }
-         */
-        /**
-         * ******* Parser ************
-         */
-        System.out.print("Parser Test ....");
         if (parser_test(parserInA, parserOutA, fileOutA) == true) {
             System.out.println("pass");
         } else {
             System.out.println("fail!!!");
         }
+        */
     }
 
     /**
      * run a test on the scanner and leave fOut as debris to analyze
      *
+     * @param fIn
+     * @param fOut
      * @return true on success, false on fail
      */
     public static boolean scanner_test(String fIn, String fOut) {
@@ -190,10 +162,6 @@ public class Test {
         Parser par = new Parser(new SemanticAnalyzer(file, new SymbolTableHandler()));
         par.debug = true;
         par.setRuleOutputFile(fOut);
-        if (par.parseFile(fIn) == 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return par.parseFile(fIn) == 0;
     }
 }

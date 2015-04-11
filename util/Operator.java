@@ -8,7 +8,10 @@ public enum Operator {
     //  MULTIPLICATION LEVEL OPERATORS
     MULTIPLICATION(1, "MULS"),
     DIVISION(1, "DIVS"),
+    MODULO(1, "MODS"),
+    NEGATION(1, "NEGS"),
     AND(1, "ANDS"),
+    NOT(1, "NOTS"),
     
     //  COMPARISON LEVEL OPERATORS
     EQUAL(2, "CMPEQS"),

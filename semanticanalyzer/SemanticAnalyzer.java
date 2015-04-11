@@ -8,6 +8,7 @@ import util.Writer;
 
 public class SemanticAnalyzer {
     static int labelCounter = 0;
+    boolean noerrors = true;
     
     //  Initialization time conflict - just set it public
     public SymbolTableHandler sh;
@@ -31,6 +32,16 @@ public class SemanticAnalyzer {
         expressions.peek().receiveVariable(t);
     }
     /**
+     * Allow the parser to pass a variable in
+     * @param t The token containing the variable
+     */
+    public void receiveOperator(Token t) {
+        if (!expressions.peek().receiveOperator(t)) {
+            noerrors = false;
+            System.err.println("at line " + t.getLine() + " col " + t.getCol());
+        }
+    }
+    /**
      * Signal the Semantic Analyzer that it should prepare to handle an expression
      */
     public void startExpression() {
@@ -38,11 +49,15 @@ public class SemanticAnalyzer {
     }
     /**
      * Signal the Semantic Analyzer that the expression has been completed
+     * @param t The token that triggered the end of expression
      */
-    public void endExpression() {
+    public void endExpression(Token t) {
         ExpressionMaker expression = expressions.peek();
         while (!expression.values.empty()) {
-            expression.finishArithmetic();
+            if (!expression.finishArithmetic(t)) {
+                noerrors = false;
+            }
+            expression.finishArithmetic(t);
         }
         expressions.pop();
     }
@@ -71,8 +86,30 @@ public class SemanticAnalyzer {
      * @param t The token containing the destination to read into
      */
     public void read(Token t) {
-        Symbol s = sh.getEntry(t.getContents());
-        w.writeLine("RD " + s.offset + "(D" + s.nestinglevel + ")");
+        try {
+            Symbol s = sh.getEntry(t.getContents());
+            switch (s.type) {
+                case FLOAT:
+                    w.writeLine("RDF " + s.offset + "(D" + s.nestinglevel + ")");
+                    break;
+                case INTEGER:
+                    w.writeLine("RD " + s.offset + "(D" + s.nestinglevel + ")");
+                    break;
+                case STRING:
+                    w.writeLine("RDS " + s.offset + "(D" + s.nestinglevel + ")");
+                    break;
+                default:
+                    System.err.println("Read Error: Input variable must be of type Float, Integer, or String. Found "
+                            + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
+                    System.err.println("Was expecting a variable name");
+                    break;
+            }
+        }
+        catch (RuntimeException e) {
+            System.err.println("Read Error: found " + t.getContents()
+                    + " at line " + t.getLine() + " col " + t.getCol());
+            System.err.println("Was expecting a variable name");
+        }
     }
     
     //  WRITING
@@ -121,20 +158,6 @@ public class SemanticAnalyzer {
     public void function() {
     }
     public void procedure() {
-    }
-
-    
-    //  Let the parser tell the SA it found some stuff
-    //  The SA should handle the logic
-    public void receiveOperator(Token t) {
-    }
-    public void receieveBoolean(Token t) {
-    }
-    public void receiveString(Token t) {
-    }
-    public void receieveFloat(Token t) {
-    }
-    public void receiveInteger(Token t) {
     }
     
     /**

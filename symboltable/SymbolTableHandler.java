@@ -46,7 +46,7 @@ public class SymbolTableHandler {
         }
         else {
             if (tables[nestinglevel].getEntry(name) != null) {
-                throw new RuntimeException("Entry with lexeme " + name + " already exists for this nesting level.");
+                throw new RuntimeException("Entry with lexeme '" + name + "' already exists for this nesting level.");
             }
             entry.name = name;
         }
@@ -79,6 +79,8 @@ public class SymbolTableHandler {
         tables[nestinglevel] = new SymbolTable();
     }
     public void popTable() {
+        System.out.println("Pop reached. Status before printing:");
+        System.out.println(toString());
         if (entry != null) {
             throw new RuntimeException("Cannot pop table while making a symbol.");
         }
@@ -94,13 +96,13 @@ public class SymbolTableHandler {
                 return e;
             }
         }
-        throw new RuntimeException("Could not find " + lexeme + " in any symbol table.");
+        throw new RuntimeException("Could not find '" + lexeme + "' in any symbol table.");
     }    
     @Override
     public String toString() {
-        String str = "Symbol Table list:";
-        for (int i = 0; i < nestinglevel; i++) {
-            str += "Nesting level " + i + ":\n";
+        String str = "Number of tables: " + (nestinglevel + 1);
+        for (int i = 0; i < nestinglevel + 1; i++) {
+            str += "\nNesting level " + i + ":\n";
             str += tables[i].toString();
         }
         return str;

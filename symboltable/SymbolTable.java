@@ -19,7 +19,7 @@ public class SymbolTable {
     }
     @Override
     public String toString() {
-        String str = " Name | Type | Kind | Offset\n";
+        String str = " Name | Type | Kind | Offset | Nesting | Params\n";
         for (Entry<String, Symbol> entry : entries.entrySet()) {
             Symbol e = entry.getValue();
             str += e.toString() + "\n";

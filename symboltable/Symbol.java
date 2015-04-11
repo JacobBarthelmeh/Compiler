@@ -14,8 +14,10 @@ public class Symbol {
     
     @Override
     public String toString() {
-        return  type + " | " +
-                kind + " | " + 
+        return  name + " | " +
+                type + " | " +
+                kind + " | " +
+                nestinglevel + " | " + 
                 (params == null ? "" : params.toString());
     }
 }

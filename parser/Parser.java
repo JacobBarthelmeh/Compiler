@@ -1,5 +1,4 @@
 package parser;
-
 import compiler.Token;
 import symboltable.Parameter;
 import symboltable.SymbolTableHandler;
@@ -12,255 +11,9 @@ import scanner.Scanner;
 import semanticanalyzer.SemanticAnalyzer;
 import util.*;
 
-/**
- *
- * @author team 4
- */
 public class Parser {
-
-    private final SymbolTableHandler sh;
-    private final SemanticAnalyzer sa;
-    private Token l1; // look ahead token
-    private Token l2; // used for some cases when table is ll2
-    private Scanner scanner;
-    private PrintWriter rFile;
-    private String rule_tree_file = "rule_list.csv"; // Contains rules for going from non-terminals to terminals
-    private boolean error_flag = false;
-
-    private int Table[][];
-    private String stackTrace = "";
-    public boolean debug;
-
-    /**
-     * read in csv ll1 table
-     *
-     * @param sa semantic analyzer object
-     */
-    public Parser(SemanticAnalyzer sa) {
-        try {
-            /* java scanner used to read in ll1.csv table */
-            java.util.Scanner sc = new java.util.Scanner(new File("ll1.csv"));
-            sc.nextLine();
-            // Table is of size 63 because there are 63 elements in the
-            // enumeration 'NonTerminal'
-            Table = new int[63][];
-            int index = 0; // Iterator for adding elements into table
-            // Begin reading the csv file containing the ll1 table
-            while (sc.hasNext()) {
-                String str = sc.nextLine(); // Read in line from ll1 table
-                char[] arr = str.toCharArray(); // Convert to character array for manipulation
-                // ll1 table is formatted <line_number><comma><rules commas etc.>
-                // so two removeStr calls are necessary. The first does away with the line
-                // number and initial comma, the second does away with the non-terminals name
-                // which was captured above in the enumeration.
-                // EG "2,Program ,,42," would go to "Program ,,42," after the first call
-                // and after the second call it would go to ",,42,"
-                arr = (removeStr(arr).toCharArray());
-                arr = (removeStr(arr).toCharArray());
-                int[] tmparr = new int[52];
-                for (int i = 0; i < 52; i++) {
-                    // Looks at the current line from the csv table and returns either
-                    // an empty string meaning that the non-terminal is not associated
-                    // with the current terminal, or returns an integer in the form
-                    // of a string which indicates that the non-terminal is associated
-                    // with the current terminal by way of whatever rule indicated
-                    // by the returned integer.
-                    String current = nextStr(arr);
-                    // Fills the temporary array. -1 indicates the non-terminal cannot
-                    // get to the terminal, while any other integer indicates the
-                    // non-terminal can go to the terminal by way of the whatever
-                    // integer rule.
-                    tmparr[i] = (current.equals("")) ? -1 : Integer.parseInt(current);
-                    // Check the next terminal and continue building the table
-                    arr = (removeStr(arr).toCharArray());
-                }
-
-                Table[index] = tmparr; // Builds the ll1 tables current non-terminal line
-                index++; // Iterate to the next non-terminal
-            }
-        } catch (IOException e) {
-            System.out.println("Error creating ll1 table from ll1.csv " + e);
-        }
-        this.sa = sa;
-        this.sh = sa.sh;
-    }
-
-    /**
-     *
-     * @param arr character array generated from a line of the csv ll1 table
-     * @return A substring of the character array containing the elements
-     * ranging from char[0] up to the first ',' character
-     *
-     * Because of the order in which this method and the removeStr method below
-     * are called, only character arrays such as ",,,3,,4,53,,," will be passed
-     * in, meaning that the string returned will either be empty, or it will be
-     * an integer represented in string form.
-     */
-    private String nextStr(char[] arr) {
-        // Substring to be returned
-        String s = "";
-
-        // Finds an integer and returns it in the form of a string or finds
-        // a ',' and returns an empty string.
-        for (int i = 0; i < arr.length && arr[i] != ','; i++) {
-            s += arr[i];
-        }
-
-        return s;
-    }
-
-    /**
-     * Removes
-     *
-     * @param arr a character array from one line of the ll1 csv table
-     * @return a substring built from the passed parameter containing the
-     * characters from one character beyond the first comma to the end of the
-     * array
-     */
-    private String removeStr(char[] arr) {
-        String s = "";
-        int i = 0; // Iterator variable
-        // Takes a char array from the CSV ll1 table and iterates through
-        // the array until the end of the array is reached, or a comma
-        // is reached
-        while (i < arr.length && arr[i] != ',') {
-            i++;
-        }
-        i++; /* move over comma */
-
-        // Generates a substring built from the original character array
-        // The substring contains the original character array except
-        // for the first character up to the first ',' character.
-        // If the array has no commas, the substring will be blank
-        // EG "asdfasdfasdf,hello world" would return the substring "hello world"
-        for (; i < arr.length; i++) {
-            s += arr[i];
-        }
-        return s;
-    }
-
-    /**
-     * Set a file to parse
-     *
-     * @param in file to be parsed
-     * @return 0 on success
-     */
-    public int parseFile(String in) {
-        try {
-            scanner = new Scanner(in);
-            l1 = scanner.nextToken();
-            SystemGoal();
-            rFile.close();
-            scanner.close();
-            sa.close();
-            if (error_flag) {
-                return -1;
-            } else {
-                return 0;
-            }
-        } catch (Exception e) {
-            System.out.println("\nSTACK TRACE of PARSER\n" + stackTrace);
-
-            System.err.println("Error parsing file " + in + " in parser " + e);
-        }
-        return -1;
-    }
-
-    // Prints the rule taken
-    private int ruleFile(int rule) {
-        if (rFile == null) {
-            try {
-                rFile = new PrintWriter(rule_tree_file);
-                rFile.println("Rules Taken");
-            } catch (Exception e) {
-                System.out.println("Unable to make file " + rule_tree_file);
-                return 1;
-            }
-        }
-        rFile.println(rule);
-        return 0;
-    }
-
-    /**
-     * Used to set the output file for the rule tree created when parsing
-     *
-     * @param in name of file or directory
-     */
-    public void setRuleOutputFile(String in) {
-        this.rule_tree_file = in;
-    }
-
-    /**
-     * If match was found consume it and look ahead
-     */
-    private void match() {
-        if (l1 == null) {
-            System.err.println("Invalid input to parser match function.");
-            System.exit(1);
-        }
-        if (l2 == null) {
-            l1 = scanner.nextToken();
-        } else {
-            l1 = l2;
-            l2 = null;
-        }
-        if (l1 == null) {
-            System.err.println("Scanner gave the parser a null token");
-            System.exit(1);
-        }
-    }
-
-    /**
-     * handle error print out
-     *
-     * @param err token that caused the error
-     * @param expected array of expected tokens
-     */
-    private void error(String[] expected) {
-        if (expected == null) {
-            System.err.println("Improper input to parser error function.");
-        }
-        error_flag = true;
-        System.err.println("Error found " + l1.getContents() + " "
-                + l1.getTerminal() + " at line " + l1.getLine() + " col " + l1.getCol());
-        System.err.print("Was expecting ");
-        System.err.print(Arrays.toString(expected));
-        System.err.println("");
-
-        /* possibly a system exit here? */
-        System.out.println(stackTrace);
-        rFile.close();
-        System.exit(0);
-    }
-
-    /**
-     * Get the rule to execute
-     *
-     * @param rule The current rule
-     * @return The rule to execute
-     */
-    private int getRule(NonTerminal nt) {
-        int index = l1.getTerminal().ordinal(), // The index corresponding to the current look ahead token
-                nonTerminal = nt.ordinal();
-
-        if (nonTerminal > Table.length) {
-            System.out.println("Error nonTerminal " + nonTerminal + " is not in table");
-            System.exit(1);
-        }
-        if (index > Table[nonTerminal].length) {
-            System.out.println("Error token " + index + "  " + l1.getTerminal() + " not in table ");
-            System.out.println(" " + Table[nonTerminal].length);
-            System.exit(1);
-        }
-        int rule = Table[nonTerminal][index]; // integer corresponding to rule taken
-        ruleFile(rule); // write the rule taken
-        return rule;
-    }
-
-    //*************************************************************************
     // ll(1) table rules
     // See Complete-LL(1)-Table-2015-03-10.xlsx for information
-    // Nonterminals 1-39
     // Nonterminal 1
     // <SystemGoal> --> <Program> EOF RULE #1
     private void SystemGoal() {
@@ -344,9 +97,6 @@ public class Parser {
                 VariableDeclarationPart();
                 ProcedureAndFunctionDeclarationPart();
                 StatementPart();
-                if (debug) {
-                    System.out.println(sh.toString());
-                }
                 sh.popTable();
                 break;
             default:
@@ -1411,7 +1161,7 @@ public class Parser {
                 sa.startExpression();
                 SimpleExpression(); //rule 73
                 OptionalRelationalPart(); //rule 73
-                sa.endExpression();
+                sa.endExpression(l1);
                 break;
             default:
                 String exp[] = {""};
@@ -1855,4 +1605,239 @@ public class Parser {
                 return str;
         }
     }
+    
+    
+    private final SymbolTableHandler sh;
+    private final SemanticAnalyzer sa;
+    private Token l1; // look ahead token
+    private Token l2; // used for some cases when table is ll2
+    private Scanner scanner;
+    private PrintWriter rFile;
+    private String rule_tree_file = "rule_list.csv"; // Contains rules for going from non-terminals to terminals
+    private boolean error_flag = false;
+
+    private int Table[][];
+    private String stackTrace = "";
+    public boolean debug;
+
+    /**
+     * read in csv ll1 table
+     *
+     * @param sa semantic analyzer object
+     */
+    public Parser(SemanticAnalyzer sa) {
+        try {
+            /* java scanner used to read in ll1.csv table */
+            java.util.Scanner sc = new java.util.Scanner(new File("ll1.csv"));
+            sc.nextLine();
+            // Table is of size 63 because there are 63 elements in the
+            // enumeration 'NonTerminal'
+            Table = new int[63][];
+            int index = 0; // Iterator for adding elements into table
+            // Begin reading the csv file containing the ll1 table
+            while (sc.hasNext()) {
+                String str = sc.nextLine(); // Read in line from ll1 table
+                char[] arr = str.toCharArray(); // Convert to character array for manipulation
+                // ll1 table is formatted <line_number><comma><rules commas etc.>
+                // so two removeStr calls are necessary. The first does away with the line
+                // number and initial comma, the second does away with the non-terminals name
+                // which was captured above in the enumeration.
+                // EG "2,Program ,,42," would go to "Program ,,42," after the first call
+                // and after the second call it would go to ",,42,"
+                arr = (removeStr(arr).toCharArray());
+                arr = (removeStr(arr).toCharArray());
+                int[] tmparr = new int[52];
+                for (int i = 0; i < 52; i++) {
+                    // Looks at the current line from the csv table and returns either
+                    // an empty string meaning that the non-terminal is not associated
+                    // with the current terminal, or returns an integer in the form
+                    // of a string which indicates that the non-terminal is associated
+                    // with the current terminal by way of whatever rule indicated
+                    // by the returned integer.
+                    String current = nextStr(arr);
+                    // Fills the temporary array. -1 indicates the non-terminal cannot
+                    // get to the terminal, while any other integer indicates the
+                    // non-terminal can go to the terminal by way of the whatever
+                    // integer rule.
+                    tmparr[i] = (current.equals("")) ? -1 : Integer.parseInt(current);
+                    // Check the next terminal and continue building the table
+                    arr = (removeStr(arr).toCharArray());
+                }
+
+                Table[index] = tmparr; // Builds the ll1 tables current non-terminal line
+                index++; // Iterate to the next non-terminal
+            }
+        } catch (IOException e) {
+            System.out.println("Error creating ll1 table from ll1.csv " + e);
+        }
+        this.sa = sa;
+        this.sh = sa.sh;
+    }
+
+    /**
+     *
+     * @param arr character array generated from a line of the csv ll1 table
+     * @return A substring of the character array containing the elements
+     * ranging from char[0] up to the first ',' character
+     *
+     * Because of the order in which this method and the removeStr method below
+     * are called, only character arrays such as ",,,3,,4,53,,," will be passed
+     * in, meaning that the string returned will either be empty, or it will be
+     * an integer represented in string form.
+     */
+    private String nextStr(char[] arr) {
+        // Substring to be returned
+        String s = "";
+
+        // Finds an integer and returns it in the form of a string or finds
+        // a ',' and returns an empty string.
+        for (int i = 0; i < arr.length && arr[i] != ','; i++) {
+            s += arr[i];
+        }
+
+        return s;
+    }
+
+    /**
+     * Removes
+     *
+     * @param arr a character array from one line of the ll1 csv table
+     * @return a substring built from the passed parameter containing the
+     * characters from one character beyond the first comma to the end of the
+     * array
+     */
+    private String removeStr(char[] arr) {
+        String s = "";
+        int i = 0; // Iterator variable
+        // Takes a char array from the CSV ll1 table and iterates through
+        // the array until the end of the array is reached, or a comma
+        // is reached
+        while (i < arr.length && arr[i] != ',') {
+            i++;
+        }
+        i++; /* move over comma */
+
+        // Generates a substring built from the original character array
+        // The substring contains the original character array except
+        // for the first character up to the first ',' character.
+        // If the array has no commas, the substring will be blank
+        // EG "asdfasdfasdf,hello world" would return the substring "hello world"
+        for (; i < arr.length; i++) {
+            s += arr[i];
+        }
+        return s;
+    }
+
+    /**
+     * Set a file to parse
+     *
+     * @param in file to be parsed
+     * @return 0 on success
+     */
+    public int parseFile(String in) {
+        scanner = new Scanner(in);
+        l1 = scanner.nextToken();
+        SystemGoal();
+        rFile.close();
+        scanner.close();
+        sa.close();
+        if (error_flag) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+
+    // Prints the rule taken
+    private int ruleFile(int rule) {
+        if (rFile == null) {
+            try {
+                rFile = new PrintWriter(rule_tree_file);
+                rFile.println("Rules Taken");
+            } catch (Exception e) {
+                System.out.println("Unable to make file " + rule_tree_file);
+                return 1;
+            }
+        }
+        rFile.println(rule);
+        return 0;
+    }
+
+    /**
+     * Used to set the output file for the rule tree created when parsing
+     *
+     * @param in name of file or directory
+     */
+    public void setRuleOutputFile(String in) {
+        this.rule_tree_file = in;
+    }
+
+    /**
+     * If match was found consume it and look ahead
+     */
+    private void match() {
+        if (l1 == null) {
+            System.err.println("Invalid input to parser match function.");
+            System.exit(1);
+        }
+        if (l2 == null) {
+            l1 = scanner.nextToken();
+        } else {
+            l1 = l2;
+            l2 = null;
+        }
+        if (l1 == null) {
+            System.err.println("Scanner gave the parser a null token");
+            System.exit(1);
+        }
+    }
+
+    /**
+     * handle error print out
+     *
+     * @param err token that caused the error
+     * @param expected array of expected tokens
+     */
+    private void error(String[] expected) {
+        if (expected == null) {
+            System.err.println("Improper input to parser error function.");
+        }
+        error_flag = true;
+        System.err.println("Parse Error: found " + l1.getContents() + " "
+                + l1.getTerminal() + " at line " + l1.getLine() + " col " + l1.getCol());
+        System.err.print("Was expecting ");
+        System.err.print(Arrays.toString(expected));
+        System.err.println("");
+
+        /* possibly a system exit here? */
+        System.out.println(stackTrace);
+        rFile.close();
+        System.exit(0);
+    }
+
+    /**
+     * Get the rule to execute
+     *
+     * @param rule The current rule
+     * @return The rule to execute
+     */
+    private int getRule(NonTerminal nt) {
+        int index = l1.getTerminal().ordinal(), // The index corresponding to the current look ahead token
+                nonTerminal = nt.ordinal();
+
+        if (nonTerminal > Table.length) {
+            System.out.println("Error nonTerminal " + nonTerminal + " is not in table");
+            System.exit(1);
+        }
+        if (index > Table[nonTerminal].length) {
+            System.out.println("Error token " + index + "  " + l1.getTerminal() + " not in table ");
+            System.out.println(" " + Table[nonTerminal].length);
+            System.exit(1);
+        }
+        int rule = Table[nonTerminal][index]; // integer corresponding to rule taken
+        ruleFile(rule); // write the rule taken
+        return rule;
+    }
+
 }
+

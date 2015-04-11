@@ -31,7 +31,7 @@ public class ExpressionMaker {
         sr.code = s.offset + "(D" + s.nestinglevel + ")";
         values.push(sr);
     }
-    public void receiveOperator(Token t) {
+    public boolean receiveOperator(Token t) {
         Operator o;
         switch (t.getTerminal()) {
             case PLUS:
@@ -43,8 +43,11 @@ public class ExpressionMaker {
             case TIMES:
                 o = Operator.MULTIPLICATION;
                 break;
-            case DIV:
+            case DIV: case FLOAT_DIVIDE:
                 o = Operator.DIVISION;
+                break;
+            case MOD:
+                o = Operator.MODULO;
                 break;
             case EQUAL:
                 o = Operator.EQUAL;
@@ -71,27 +74,71 @@ public class ExpressionMaker {
         }
         Operator previous = operators.empty() ? null : operators.peek();
         
+        boolean good = true;
         //  Before pushing the new operator, make sure it isn't smaller than the
         //  previous one.
         if (previous != null && o != null) {
             if (o.precedence() < previous.precedence()) {
-                finishArithmetic();
+                good = finishArithmetic(t);
             }
         }
         
         //  Now operator can be pushed
         operators.push(o);
+        return good;
     }
-    public void finishArithmetic() {
+    public boolean finishArithmetic(Token t) {
+        if (values.isEmpty()) {
+            System.err.println("Not enough values on stack "
+                            + "at line " + t.getLine() + " col " + t.getCol());
+            return false;
+        }
         SemanticRecord b = values.pop();
         //  There was only one value on the stack
         if (values.empty()) {
             w.writeLine("PUSH " + b.code);
-            return;
+            return true;
+        }
+        
+        if (operators.isEmpty()) {
+            System.err.println("Not enough operators for stack "
+                            + "at line " + t.getLine() + " col " + t.getCol());
+            return false;
+        }
+        Operator o = operators.pop();
+        if (o == Operator.NOT) {
+            if (b.type != Type.BOOLEAN) {
+                System.err.println("Expression Error: Applying Boolean operation on a non-Boolean value "
+                            + "at line " + t.getLine() + " col " + t.getCol());
+                return false;
+            }
+            w.writeLine("PUSH " + b.code);
+            w.writeLine("NOTS");
+            return true;
         }
         
         SemanticRecord a = values.pop();
-        Operator o = operators.pop();
+        
+        switch (o) {
+            case ADDITION: case SUBTRACTION: case MULTIPLICATION: case DIVISION:
+            case NEGATION: case MODULO: case LEQUAL: case LTHAN: case GEQUAL:
+            case GTHAN:
+                if (a.type != Type.INTEGER && a.type != Type.FLOAT
+                        || b.type != Type.INTEGER && b.type != Type.FLOAT) {
+                    System.err.println("Expression Error: Applying numerical operation on non-numeric a value "
+                            + "at line " + t.getLine() + " col " + t.getCol());
+
+                    return false;
+                }
+                break;
+            case AND: case OR:
+                if (a.type != Type.BOOLEAN || b.type != Type.BOOLEAN) {
+                    System.err.println("Expression Error: Applying a Boolean operation on a non-Boolean value "
+                            + "at line " + t.getLine() + " col " + t.getCol());
+                    return false;
+                }
+                break;
+        }
         
         boolean useFloat = a.type == Type.FLOAT || b.type == Type.FLOAT;
         w.writeLine("PUSH " + a.code);
@@ -103,5 +150,6 @@ public class ExpressionMaker {
             w.writeLine("CASTSF");
         }
         w.writeLine(o.code() + (useFloat ? "F" : ""));
+        return true;
     }
 }
