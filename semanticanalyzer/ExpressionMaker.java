@@ -49,6 +49,9 @@ public class ExpressionMaker {
             case EQUAL:
                 o = Operator.EQUAL;
                 break;
+            case NEQUAL:
+                o = Operator.NEQUAL;
+                break;
             case GEQUAL:
                 o = Operator.GEQUAL;
                 break;
@@ -99,38 +102,6 @@ public class ExpressionMaker {
         if (b.type == Type.INTEGER && a.type == Type.FLOAT) {
             w.writeLine("CASTSF");
         }
-        genOperator(o, useFloat);
-    }
-    
-    public void genOperator(Operator o, boolean useFloat) {
-        switch(o) {
-            case ADDITION:
-                w.writeLine("ADDS" + (useFloat ? "F" : ""));
-                break;
-            case SUBTRACTION:
-                w.writeLine("SUBS" + (useFloat ? "F" : ""));
-                break;
-            case MULTIPLICATION:
-                w.writeLine("MULS" + (useFloat ? "F" : ""));
-                break;
-            case DIVISION:
-                w.writeLine("DIVS" + (useFloat ? "F" : ""));
-                break;
-            case EQUAL:
-                w.writeLine("CMPEQS");
-                break;
-            case GEQUAL:
-                w.writeLine("CMPGEQS");
-                break;
-            case LEQUAL:
-                w.writeLine("CMPLEQS");
-                break;
-            case GTHAN:
-                w.writeLine("CMPGTS");
-                break;
-            case LTHAN:
-                w.writeLine("CMPLTS");
-                break;
-        }
+        w.writeLine(o.code() + (useFloat ? "F" : ""));
     }
 }

@@ -89,7 +89,20 @@ public class SemanticAnalyzer {
      * @param t The Token containing the desired write value
      */
     public void write(Token t) {
-        //  Determine whether to write a literal or a variable
+        String code = "#" + t.getContents();
+        switch (t.getTerminal()) {
+            case IDENTIFIER:
+                Symbol s = sh.getEntry(t.getContents());
+                code = s.offset + "(D" + s.nestinglevel + ")";
+                break;
+                //  Handle other types
+        }
+        if (line) {
+            w.writeLine("WRTLN " + code);
+        }
+        else {
+            w.writeLine("WRT " + code);
+        }
     }
     
     
