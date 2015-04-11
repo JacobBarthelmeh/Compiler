@@ -1282,6 +1282,7 @@ public class Parser {
                 match();
                 break;
             case 86: // -
+                sa.receiveNegation(l1);
                 match();
                 break;
             case 87: // e
@@ -1440,7 +1441,9 @@ public class Parser {
                 sa.receiveLiteral(t);
                 break;
             case 104:           // not Factor() RULE 104
+                t = l1;
                 match();
+                sa.receiveOperator(t);
                 Factor();
                 break;
             case 105:        // RULE 105
@@ -1734,18 +1737,14 @@ public class Parser {
      * @param in file to be parsed
      * @return 0 on success
      */
-    public int parseFile(String in) {
+    public boolean parseFile(String in) {
         scanner = new Scanner(in);
         l1 = scanner.nextToken();
         SystemGoal();
         rFile.close();
         scanner.close();
         sa.close();
-        if (error_flag) {
-            return -1;
-        } else {
-            return 0;
-        }
+        return error_flag;
     }
 
     // Prints the rule taken

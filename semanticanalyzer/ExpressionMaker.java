@@ -11,25 +11,40 @@ public class ExpressionMaker {
     public ExpressionMaker(SymbolTableHandler sh, Writer w) {
         this.sh = sh;
         this.w = w;
-        values = new Stack();
+        types = new Stack();
         operators = new Stack();
     }
     SymbolTableHandler sh;
     Writer w;
-    Stack<SemanticRecord> values;
+    Stack<Type> types;
     Stack<Operator> operators;
     
+    private Type getType(Token t) {
+        switch (t.getTerminal()) {
+            case INTEGER_LIT:
+                return Type.INTEGER;
+            case STRING_LIT:
+                return Type.STRING;
+            case FLOAT_LIT:
+                return Type.FLOAT;
+            case TRUE: case FALSE:
+                return Type.BOOLEAN;
+            default:
+                System.err.println("Failed to match type. Found "
+                        + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
+                return Type.NOTYPE;
+        }
+    }
     //  C LEVEl
     public void receiveLiteral(Token t) {
-        SemanticRecord sr = new SemanticRecord();
-        sr.code = "#" + t.getContents();
-        values.push(sr);
+        w.writeLine("PUSH #" + t.getContents());
+        types.push(getType(t));
     }
     public void receiveVariable(Token t) {
         SemanticRecord sr = new SemanticRecord();
         Symbol s = sh.getEntry(t.getContents());
-        sr.code = s.offset + "(D" + s.nestinglevel + ")";
-        values.push(sr);
+        w.writeLine("PUSH " + s.offset + "(D" + s.nestinglevel + ")");
+        types.push(getType(t));
     }
     public boolean receiveOperator(Token t) {
         Operator o;
@@ -87,16 +102,18 @@ public class ExpressionMaker {
         operators.push(o);
         return good;
     }
+    public void receiveNegation(Token t) {
+        operators.push(Operator.NEGATION);
+    }
     public boolean finishArithmetic(Token t) {
-        if (values.isEmpty()) {
-            System.err.println("Not enough values on stack "
+        if (types.isEmpty()) {
+            System.err.println("Not enough types on stack "
                             + "at line " + t.getLine() + " col " + t.getCol());
             return false;
         }
-        SemanticRecord b = values.pop();
-        //  There was only one value on the stack
-        if (values.empty()) {
-            w.writeLine("PUSH " + b.code);
+        Type b = types.pop();
+        //  There was only one value on the stack so it must be resolved
+        if (types.empty()) {
             return true;
         }
         
@@ -105,26 +122,45 @@ public class ExpressionMaker {
                             + "at line " + t.getLine() + " col " + t.getCol());
             return false;
         }
+        
         Operator o = operators.pop();
         if (o == Operator.NOT) {
-            if (b.type != Type.BOOLEAN) {
+            if (b != Type.BOOLEAN) {
                 System.err.println("Expression Error: Applying Boolean operation on a non-Boolean value "
                             + "at line " + t.getLine() + " col " + t.getCol());
                 return false;
             }
-            w.writeLine("PUSH " + b.code);
             w.writeLine("NOTS");
+            //  Return a type boolean
+            types.push(b);
+            return true;
+        }
+        else if (o == Operator.NEGATION) {
+            switch (b) {
+                case INTEGER:
+                    w.writeLine("NEGS");
+                    types.push(b);
+                    break;
+                case FLOAT:
+                    w.writeLine("NEGSF");
+                    types.push(b);
+                    break;
+                default:
+                    System.err.println("Expression Error: Applying numeric operation on a nonnumeric value "
+                                + "at line " + t.getLine() + " col " + t.getCol());
+                    return false;
+            }
             return true;
         }
         
-        SemanticRecord a = values.pop();
+        Type a = types.pop();
         
         switch (o) {
             case ADDITION: case SUBTRACTION: case MULTIPLICATION: case DIVISION:
             case NEGATION: case MODULO: case LEQUAL: case LTHAN: case GEQUAL:
             case GTHAN:
-                if (a.type != Type.INTEGER && a.type != Type.FLOAT
-                        || b.type != Type.INTEGER && b.type != Type.FLOAT) {
+                if (a != Type.INTEGER && a != Type.FLOAT
+                        || b != Type.INTEGER && b != Type.FLOAT) {
                     System.err.println("Expression Error: Applying numerical operation on non-numeric a value "
                             + "at line " + t.getLine() + " col " + t.getCol());
 
@@ -132,7 +168,7 @@ public class ExpressionMaker {
                 }
                 break;
             case AND: case OR:
-                if (a.type != Type.BOOLEAN || b.type != Type.BOOLEAN) {
+                if (a != Type.BOOLEAN || b != Type.BOOLEAN) {
                     System.err.println("Expression Error: Applying a Boolean operation on a non-Boolean value "
                             + "at line " + t.getLine() + " col " + t.getCol());
                     return false;
@@ -140,16 +176,29 @@ public class ExpressionMaker {
                 break;
         }
         
-        boolean useFloat = a.type == Type.FLOAT || b.type == Type.FLOAT;
-        w.writeLine("PUSH " + a.code);
-        if (a.type == Type.INTEGER && b.type == Type.FLOAT) {
+        boolean useFloat = a == Type.FLOAT || b == Type.FLOAT;
+        
+        if (a == Type.INTEGER && b == Type.FLOAT) {
+            //  The casting hack
+            w.writeLine("SUB SP 1 SP");
             w.writeLine("CASTSF");
+            w.writeLine("ADD SP 1 SP");
         }
-        w.writeLine("PUSH " + a.code);
-        if (b.type == Type.INTEGER && a.type == Type.FLOAT) {
+        
+        if (b == Type.INTEGER && a == Type.FLOAT) {
             w.writeLine("CASTSF");
         }
         w.writeLine(o.code() + (useFloat ? "F" : ""));
+        
+        //  If they are mismatched then use float
+        if (useFloat) {
+            types.push(Type.FLOAT);
+        }
+        
+        //  Otherwise they match so it doesn't matter which is pushed
+        else {
+            types.push(b);
+        }
         return true;
     }
 }

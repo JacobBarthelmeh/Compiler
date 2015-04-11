@@ -8,7 +8,7 @@ import util.Writer;
 
 public class SemanticAnalyzer {
     static int labelCounter = 0;
-    boolean noerrors = true;
+    public boolean noerrors = true;
     
     //  Initialization time conflict - just set it public
     public SymbolTableHandler sh;
@@ -41,6 +41,10 @@ public class SemanticAnalyzer {
             System.err.println("at line " + t.getLine() + " col " + t.getCol());
         }
     }
+    public void receiveNegation(Token t) {
+        expressions.peek().receiveNegation(t);
+    }
+
     /**
      * Signal the Semantic Analyzer that it should prepare to handle an expression
      */
@@ -53,7 +57,7 @@ public class SemanticAnalyzer {
      */
     public void endExpression(Token t) {
         ExpressionMaker expression = expressions.peek();
-        while (!expression.values.empty()) {
+        while (!expression.types.empty()) {
             if (!expression.finishArithmetic(t)) {
                 noerrors = false;
             }
