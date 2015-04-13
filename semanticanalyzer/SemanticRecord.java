@@ -8,10 +8,11 @@ public class SemanticRecord implements Record {
     Token token;
     Symbol sym;
     Type type;
-    Integer nest;
     String opp;
 
-    public String code;
+    public String code() {
+        return sym.offset + "(D" + sym.nestinglevel + ")";
+    }
     
     @Override
     public Type getType() {

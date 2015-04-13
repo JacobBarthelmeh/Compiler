@@ -1,4 +1,5 @@
 package semanticanalyzer;
+import compiler.Compiler;
 import compiler.Token;
 import java.util.Stack;
 import symboltable.Symbol;
@@ -9,6 +10,7 @@ import util.Writer;
 public class SemanticAnalyzer {
     static int labelCounter = 0;
     public boolean noerrors = true;
+    Stack<Type> types;
     
     //  Initialization time conflict - just set it public
     public SymbolTableHandler sh;
@@ -16,19 +18,132 @@ public class SemanticAnalyzer {
     //  C LEVEL: EXPRESSIONS, ASSIGNMENTS, READS, WRITES
     
     //  HANDLING EXPRESSIONS
-    Stack <ExpressionMaker> expressions;
+//    Stack <ExpressionMaker> expressions;
+    public void genPush(SemanticRecord record) {
+        w.writeLine("PUSH " + record.code());
+    }
+    public void error(String err) {
+        if (Compiler.DEBUG){
+            System.err.println(err);
+        }
+    }
+    /**
+     * Handles casting arithmetic properly to float if necessary
+     * @param left The left operand
+     * @param right The right operand
+     * @return Whether the result is dealing with floating point arithmetic
+     */
+    public boolean handleArithCasts(SemanticRecord left, SemanticRecord right) {
+        //  Error checking on the left side
+        if (left.sym.type != Type.INTEGER && left.sym.type != Type.FLOAT) {
+            Token t = left.token;
+            error("Left operand is incompatible with arithmetic functions. "
+            + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
+            noerrors = false;
+            return false;
+        }
+        //  Error checking on the right side
+        if (right.sym.type != Type.INTEGER && right.sym.type != Type.FLOAT) {
+            Token t = right.token;
+            error("Right operand is incompatible with arithmetic functions. "
+            + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
+            noerrors = false;
+            return false;
+        }
+        //  Cast the left one properly
+        if (left.sym.type == Type.INTEGER && right.sym.type == Type.FLOAT) {
+            w.writeLine("SUB SP 1 SP");
+            w.writeLine("CASTSF");
+            w.writeLine("ADD SP 1 SP");
+            return true;
+        }
+        //  Cast the right one properly
+        else if (left.sym.type == Type.FLOAT && right.sym.type == Type.INTEGER) {
+            w.writeLine("CASTSF");
+            return true;
+        }
+        return left.sym.type == Type.FLOAT || right.sym.type == Type.FLOAT;
+    }
+    /**
+     * Generate an addition statement given two operands
+     * @param left The left operand
+     * @param right The right operand
+     * @return Whether the addition was performed using floating point arithmetic
+     */
+    public boolean genAdds(SemanticRecord left, SemanticRecord right) {
+        if (handleArithCasts(left, right)) {
+            w.writeLine("ADDSF");
+            return true;
+        }
+        else {
+            w.writeLine("ADDS");
+            return false;
+        }
+    }
+    /**
+     * Generate a subtraction statement given two operands
+     * @param left The left operand
+     * @param right The right operand
+     * @return Whether the subtraction was performed using floating point arithmetic
+     */
+    public boolean genSubs(SemanticRecord left, SemanticRecord right) {
+        if (handleArithCasts(left, right)) {
+            w.writeLine("SUBSF");
+            return true;
+        }
+        else {
+            w.writeLine("SUBS");
+            return false;
+        }
+    }
+    /**
+     * Generate a multiplication statement given two operands
+     * @param left The left operand
+     * @param right The right operand
+     * @return Whether the multiplication was performed using floating point arithmetic
+     */
+    public boolean genMuls(SemanticRecord left, SemanticRecord right) {
+        if (handleArithCasts(left, right)) {
+            w.writeLine("MULSF");
+            return true;
+        }
+        else {
+            w.writeLine("MULS");
+            return false;
+        }
+    }
+    /**
+     * Generate a division statement given two operands
+     * @param left The left operand
+     * @param right The right operand
+     * @return Whether the division was performed using floating point arithmetic
+     */
+    public boolean genDivs(SemanticRecord left, SemanticRecord right) {
+        if (handleArithCasts(left, right)) {
+            w.writeLine("DIVSF");
+            return true;
+        }
+        else {
+            w.writeLine("DIVS");
+            return false;
+        }
+    }
+    
+    public boolean genPush(SemanticRecord rec) {
+        w.writeLine("PUSH " + rec.code());
+    }
     /**
      * Allow the parser to pass a literal in
      * @param t The token containing the literal
      */
-    public void receiveLiteral(Token t) {
+    public void receiveLiteral(SemanticRecord record) {
         expressions.peek().receiveLiteral(t);
     }
     /**
      * Allow the parser to pass a variable in
      * @param t The token containing the variable
      */
-    public void receiveVariable(Token t) {
+    public void receiveVariable(SemanticRecord record) {
         expressions.peek().receiveVariable(t);
     }
     /**
@@ -280,7 +395,6 @@ public class SemanticAnalyzer {
 
     public SemanticAnalyzer(String filename, SymbolTableHandler sh) {
         w = new Writer(filename);
-        expressions = new Stack();
         this.sh = sh;
     }
 

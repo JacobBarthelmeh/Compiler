@@ -1621,8 +1621,6 @@ public class Parser {
 
     private int Table[][];
     private String stackTrace = "";
-    public boolean debug;
-
     /**
      * read in csv ll1 table
      *

@@ -160,7 +160,6 @@ public class Test {
      */
     public static boolean parser_test(String fIn, String fOut, String file) {
         Parser par = new Parser(new SemanticAnalyzer(file, new SymbolTableHandler()));
-        par.debug = true;
         par.setRuleOutputFile(fOut);
         return par.parseFile(fIn);
     }

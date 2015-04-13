@@ -17,6 +17,7 @@ public class Symbol {
         return  name + " | " +
                 type + " | " +
                 kind + " | " +
+                offset + " | " + 
                 nestinglevel + " | " + 
                 (params == null ? "" : params.toString());
     }
