@@ -1,4 +1,5 @@
 package semanticanalyzer;
+
 import compiler.Compiler;
 import compiler.Token;
 import java.util.Stack;
@@ -9,25 +10,26 @@ import util.Type;
 import util.Writer;
 
 public class SemanticAnalyzer {
+
     public static SemanticRecord SP = new SemanticRecord(null, null, "SP", "", "", Type.NOTYPE);
-    
+
     static int labelCounter = 0;
     public boolean noerrors = true;
     Stack<Type> types;
-    
+
     //  Initialization time conflict - just set it public
     public SymbolTableHandler sh;
-    
-    
+
     //  GENERAL NECESSARY FUNCTIONS
     public void error(String err) {
-        if (Compiler.DEBUG){
+        if (Compiler.DEBUG) {
             System.err.println(err);
         }
     }
-    
+
     /**
      * Push something to the stack
+     *
      * @param rec What to push onto the stack
      */
     public void genPush(SemanticRecord rec) {
@@ -43,23 +45,23 @@ public class SemanticAnalyzer {
     }
 
     /**
-     * Drop a label 
+     * Drop a label
+     *
      * @param label The label
      */
     public void genLabel(int label) {
         w.writeLine("L" + label + ":");
     }
-    
+
     public void genMove(String from, String to) {
         w.writeLine("MOV " + from + " " + to);
     }
-    
-    
+
     //  C LEVEL: EXPRESSIONS, ASSIGNMENTS, READS, WRITES
-    
     //  HANDLING EXPRESSIONS
     /**
      * Handles casting arithmetic properly to float if necessary
+     *
      * @param left The left operand
      * @param right The right operand
      * @return Whether the result is dealing with floating point arithmetic
@@ -69,7 +71,7 @@ public class SemanticAnalyzer {
         if (left.type != Type.INTEGER && left.type != Type.FLOAT) {
             Token t = left.token;
             error("Left operand is incompatible with arithmetic functions. "
-            + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
+                    + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
             noerrors = false;
             return false;
         }
@@ -77,7 +79,7 @@ public class SemanticAnalyzer {
         if (right.type != Type.INTEGER && right.type != Type.FLOAT) {
             Token t = right.token;
             error("Right operand is incompatible with arithmetic functions. "
-            + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
+                    + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
             noerrors = false;
             return false;
         }
@@ -87,17 +89,17 @@ public class SemanticAnalyzer {
             w.writeLine("CASTSF");
             w.writeLine("ADD SP #1 SP");
             return true;
-        }
-        //  Cast the right one properly
+        } //  Cast the right one properly
         else if (left.type == Type.FLOAT && right.type == Type.INTEGER) {
             w.writeLine("CASTSF");
             return true;
         }
         return left.type == Type.FLOAT || right.type == Type.FLOAT;
     }
-    
+
     /**
      * Generate an arithmetic operation given two operands
+     *
      * @param left The left operand
      * @param opp The operator
      * @param right The right operand
@@ -107,14 +109,15 @@ public class SemanticAnalyzer {
         if (handleArithCasts(left, right)) {
             w.writeLine(opp.code + "F");
             return true;
-        }
-        else {
+        } else {
             w.writeLine(opp.code);
             return false;
         }
     }
+
     /**
      * Generate a logical operation given two operands
+     *
      * @param left The left operand
      * @param opp The operator
      * @param right The right operand
@@ -123,50 +126,53 @@ public class SemanticAnalyzer {
         if (left.type != Type.BOOLEAN) {
             Token t = left.token;
             error("Left operand is incompatible with arithmetic functions. "
-            + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
+                    + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
             noerrors = false;
             return;
         }
         if (right.type != Type.BOOLEAN) {
             Token t = right.token;
             error("Right operand is incompatible with arithmetic functions. "
-            + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
+                    + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
             noerrors = false;
             return;
         }
         w.writeLine(opp.code);
-    }        
+    }
+
     public void genNots() {
         w.writeLine("NOTS");
     }
+
     /**
      * The record that is being negated.
+     *
      * @param rec The integer or float record to negate
      */
     public void genNegation(SemanticRecord rec) {
         if (rec.type == Type.INTEGER) {
             w.writeLine("NEGS");
-        }
-        else if (rec.type == Type.FLOAT) {
+        } else if (rec.type == Type.FLOAT) {
             w.writeLine("NEGSF");
-        }
-        else {
+        } else {
             error("Cannot negate a non-numeric value.");
         }
     }
-    
+
     //  ASSIGNMENT
     /**
-     * Signal the Semantic 
+     * Signal the Semantic
+     *
      * @param rec The location to assign to
      */
     public void genAssignment(SemanticRecord rec) {
         w.writeLine("POP " + rec.code);
     }
-    
+
     //  READING
     /**
      * Signal the Semantic Analyzer that a genRead shall begin
+     *
      * @param rec The record containing the destination to read into
      */
     public void genRead(SemanticRecord rec) {
@@ -190,26 +196,29 @@ public class SemanticAnalyzer {
                     break;
             }
             w.writeLine(str + " " + rec.code);
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             Token t = rec.token;
             System.err.println("Read Error: found " + t.getContents()
                     + " at line " + t.getLine() + " col " + t.getCol());
             System.err.println("Was expecting a variable name");
         }
     }
-    
+
     //  WRITING
     boolean line;
+
     /**
      * Signal the Semantic Analyzer that a write shall begin
+     *
      * @param line Whether to writeln
      */
     public void startwrite(boolean line) {
-        line = true;
+        this.line = line;
     }
+
     /**
      * Signal the Semantic Analyzer to write
+     *
      * @param t The Token containing the desired write value
      */
     public void write(Token t) {
@@ -219,34 +228,35 @@ public class SemanticAnalyzer {
                 Symbol s = sh.getEntry(t.getContents());
                 code = s.offset + "(D" + s.nestinglevel + ")";
                 break;
-                //  Handle other types
+            //  Handle other types
         }
         if (line) {
             w.writeLine("WRTLNS");
-        }
-        else {
+        } else {
             w.writeLine("WRTS");
         }
     }
-    
-    
-    
+
     //  B LEVEL
     //  Prepare conditional branching
     public void ifstatement() {
     }
+
     public void whilestatement() {
     }
+
     public void forstatement() {
     }
-    
+
     //  A LEVEL
     //  Prepare nesting level stuff
     public void function() {
     }
+
     public void procedure() {
     }
-        /**
+
+    /**
      * Push the stack pointer
      */
     public void genStackPush() {
