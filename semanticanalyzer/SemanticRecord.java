@@ -63,7 +63,7 @@ public class SemanticRecord {
                 type = Type.FLOAT;
                 break;
             case STRING_LIT:
-                code = "#\"" + token.getContents() + "\"";
+                code = "#" + token.getContents();
                 type = Type.STRING;
                 break;
             case TRUE:

@@ -20,10 +20,17 @@ begin
 	testint := 3 * 8 + 4;
 	testint2 := 3 + 4 / 5;
 	testint := 7 + (testint2 + 3) * 2 + 1;
+
+	{test of casts}
+	testint := 3 + testfloat * 5;
 	
 	{test of booleans}
 	testbool := true;
 	testbool := not testbool;
 	testbool := false;
+
+
+	{ test of write extended}
+	write('testbool', testbool, 'testint', testint, 'testfloat', testfloat);
 	
 end.

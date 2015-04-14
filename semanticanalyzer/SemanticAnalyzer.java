@@ -83,9 +83,9 @@ public class SemanticAnalyzer {
         }
         //  Cast the left one properly
         if (left.type == Type.INTEGER && right.type == Type.FLOAT) {
-            w.writeLine("SUB SP 1 SP");
+            w.writeLine("SUB SP #1 SP");
             w.writeLine("CASTSF");
-            w.writeLine("ADD SP 1 SP");
+            w.writeLine("ADD SP #1 SP");
             return true;
         }
         //  Cast the right one properly
@@ -222,10 +222,10 @@ public class SemanticAnalyzer {
                 //  Handle other types
         }
         if (line) {
-            w.writeLine("WRTLN " + code);
+            w.writeLine("WRTLNS");
         }
         else {
-            w.writeLine("WRT " + code);
+            w.writeLine("WRTS");
         }
     }
     
