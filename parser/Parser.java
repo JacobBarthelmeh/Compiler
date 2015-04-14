@@ -11,6 +11,7 @@ import java.util.Arrays;
 import scanner.Scanner;
 import semanticanalyzer.SemanticAnalyzer;
 import semanticanalyzer.SemanticRecord;
+import symboltable.Symbol;
 import util.*;
 
 public class Parser {
@@ -1360,7 +1361,7 @@ public class Parser {
             case 93:
                 return left;
             default:
-                String exp[] = {""};
+                String exp[] = {"operator", "end of expression"};
                 error(exp);
                 return left;
         }
@@ -1463,12 +1464,16 @@ public class Parser {
                 }
                 return r;
             case 106:   // RULE 106
-                r = new SemanticRecord(l1, sh.getEntry(l1.getContents()));
-                sa.genPush(r);
-                FunctionIdentifier();
-                OptionalActualParameterList();
-                match();
-                return r;
+                Symbol entry = sh.getEntry(l1.getContents());
+                if (entry.kind == Kind.FUNCTION) {
+                    r = new SemanticRecord(l1, entry);
+                    sa.genPush(r);
+                    FunctionIdentifier();
+                    OptionalActualParameterList();
+                    match();
+                    return r;
+                }
+                //  Fall through. It wasn't a function, so it should be an identifier.
             case 116:  // RULE 116
                 r = new SemanticRecord(l1, sh.getEntry(l1.getContents()));
                 sa.genPush(r);
@@ -1624,7 +1629,7 @@ public class Parser {
     private Scanner scanner;
     private PrintWriter rFile;
     private String rule_tree_file = "rule_list.csv"; // Contains rules for going from non-terminals to terminals
-    private boolean error_flag = false;
+    private boolean noerrors = true;
 
     private int Table[][];
     private String stackTrace = "";
@@ -1748,7 +1753,7 @@ public class Parser {
         SystemGoal();
         rFile.close();
         scanner.close();
-        return error_flag;
+        return noerrors;
     }
 
     // Prints the rule taken
@@ -1805,7 +1810,7 @@ public class Parser {
         if (expected == null) {
             System.err.println("Improper input to parser error function.");
         }
-        error_flag = true;
+        noerrors = false;
         System.err.println("Parse Error: found " + l1.getContents() + " "
                 + l1.getTerminal() + " at line " + l1.getLine() + " col " + l1.getCol());
         System.err.print("Was expecting ");

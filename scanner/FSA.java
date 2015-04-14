@@ -271,7 +271,7 @@ public class FSA {
             case "downto": return new Token(str, Terminal.DOWNTO, row, col);
             case "else": return new Token(str, Terminal.ELSE, row, col);
             case "end": return new Token(str, Terminal.END, row, col);
-            case "flase": return new Token(str, Terminal.FALSE, row, col);
+            case "false": return new Token(str, Terminal.FALSE, row, col);
             case "fixed": return new Token(str, Terminal.FIXED, row, col);
             case "float": return new Token(str, Terminal.FLOAT, row, col);
             case "for": return new Token(str, Terminal.FOR, row, col);
