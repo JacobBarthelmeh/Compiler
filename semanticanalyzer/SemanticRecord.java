@@ -3,87 +3,77 @@ import compiler.Token;
 import symboltable.Symbol;
 import util.Type;
 
-public class SemanticRecord implements Record {
+public class SemanticRecord {
+    
 
-    Token token;
-    Symbol sym;
-    Type type;
-    String opp;
-
-    public String code() {
-        return sym.offset + "(D" + sym.nestinglevel + ")";
+    public Token token;
+    public Symbol symbol;
+    public String code;
+    public Type type;
+    
+    // why is this needed?
+    public String opp;
+    public String register;
+    
+    /**
+     * Generate everything in one initialize
+     * @param token
+     * @param symbol
+     * @param code
+     * @param opp
+     * @param register
+     * @param type 
+     */
+    public SemanticRecord(Token token, Symbol symbol, String code, String opp,
+            String register, Type type) {
+        this.token = token;
+        this.symbol = symbol;
+        this.code = code;
+        this.opp = opp;
+        this.register = register;
+        this.type = type;
     }
     
-    @Override
-    public Type getType() {
-        if (type == null) {
-            if (sym == null) {
-                System.out.println("Error: Type not set.\n" + this);
-            } else {
-                type = sym.type;
-            }
+    /**
+     * Allow the record to generate its own contents
+     * @param token
+     * @param symbol 
+     */
+    public SemanticRecord(Token token, Symbol symbol) {
+        this.token = token;
+        this.symbol = symbol;
+        if (symbol == null) {
+            type = Type.NOTYPE;
         }
-        return type;
-    }
-
-    @Override
-    public String getRegister() {
-        if (sym == null || nest == null) {
-            return null;
-            //System.out.println("Error with get register call\n"
-            //        + "Either sym or nest is null");
+        else {
+            type = symbol.type;
         }
-        return sym.offset + "(D" + nest + ")";
+        switch(token.getTerminal()) {
+            case IDENTIFIER:
+                code = symbol.offset + "(D" + symbol.nestinglevel + ")";
+                break;
+            case INTEGER_LIT: case FLOAT_LIT:
+                code = "#" + token.getContents();
+                break;
+            case STRING_LIT:
+                code = "#\"" + token.getContents() + "\"";
+                break;
+            default:
+                code = "";
+                break;
+        }
+        
+        opp = "";
+        register = "";
     }
 
-    @Override
-    public void setToken(Token in) {
-        token = in;
-    }
-
-    @Override
-    public void setSymbol(Symbol s, int nesting) {
-        sym = s;
-        nest = nesting;
-    }
-
-    @Override
-    public void setOpp(String in) {
-        opp = in;
-    }
-
-    @Override
-    public String getOpp() {
-        return opp;
-    }
-
-    @Override
-    public void setType(Type in) {
-        type = in;
-    }
 
     @Override
     public String toString() {
-        String s = "Semantic Record:\n\tType : ";
-        if (type != null) {
-            s += type;
-        }
-        s += "\n";
-        s += "\tOpp  : ";
-        if (getOpp() != null) {
-            s += getOpp();
-        }
-        s += "\n";
-        s += "\tRegs : ";
-        if (getRegister() != null) {
-            s += getRegister();
-        }
-        s += "\n";
-        s += "\tTokn : ";
-        if (token != null) {
-            s += token.getContents() + " @ line " + token.getLine() + " col " + token.getCol();
-        }
-        s += "\n";
-        return s;
+        return "Semantic Record:" +
+                "\nType: " + type +
+                "\nOpp: " + opp +
+                "\nRegister: " + register +
+                "\nToken: " + token.toString();
     }
 }

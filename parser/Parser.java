@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import scanner.Scanner;
 import semanticanalyzer.SemanticAnalyzer;
+import semanticanalyzer.SemanticRecord;
 import util.*;
 
 public class Parser {
@@ -44,7 +45,7 @@ public class Parser {
         switch (getRule(NonTerminal.Program)) {
             case 2:
                 sh.pushTable(); //  Construct the original table
-                sa.genMov("SP", "D0");  //  Must initialize D0
+                sa.genMove("SP", "D0");  //  Must initialize D0
                 ProgramHeading(); // nonterminal 3
                 if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
@@ -337,7 +338,7 @@ public class Parser {
                 OptionalFormalParameterList();
                 ArrayList<Parameter> params = sh.getEntry(name).params;
                 sh.pushTable();
-                sa.genMov("SP", "D" + sh.nestinglevel);
+                sa.genMove("SP", "D" + sh.nestinglevel);
                 for (Parameter p : params) {
                     sh.startEntry();
                     sh.setName(p.name);
@@ -369,7 +370,7 @@ public class Parser {
                 OptionalFormalParameterList();
                 ArrayList<Parameter> params = sh.getEntry(name).params;
                 sh.pushTable();
-                sa.genMov("SP", "D" + sh.nestinglevel);
+                sa.genMove("SP", "D" + sh.nestinglevel);
                 for (Parameter p : params) {
                     sh.startEntry();
                     sh.setName(p.name);
@@ -674,7 +675,7 @@ public class Parser {
     }
 
     // Nonterminal 25
-    // <ReadStatement> --> read ( <ReadParameter> <ReadParameterTail> ) RULE #45
+    // <ReadStatement> --> genRead ( <ReadParameter> <ReadParameterTail> ) RULE #45
     private void ReadStatement() {
         stackTrace += "ReadStatement\n";
         switch (getRule(NonTerminal.ReadStatement)) {
@@ -736,7 +737,7 @@ public class Parser {
             case 48://rule 48
                 Token t = l1;
                 VariableIdentifier();
-                sa.read(t);
+                sa.genRead(new SemanticRecord(t, sh.getEntry(t.getContents())));
                 break;
             default:
                 String exp[] = {""};
@@ -843,10 +844,9 @@ public class Parser {
                 Token t = l1;
                 VariableIdentifier();
                 if (l1.getTerminal() == Terminal.ASSIGN) {
-                    sa.startAssign(t);
                     match();
                     Expression();
-                    sa.endAssign();
+                    sa.genAssignment(new SemanticRecord(t, sh.getEntry(t.getContents())));
                 } else {
                     String[] err = {"assign"};
                     error(err);
@@ -1158,10 +1158,8 @@ public class Parser {
         stackTrace += "Expression\n";
         switch (getRule(NonTerminal.Expression)) {
             case 73:
-                sa.startExpression();
                 SimpleExpression(); //rule 73
                 OptionalRelationalPart(); //rule 73
-                sa.endExpression(l1);
                 break;
             default:
                 String exp[] = {""};
@@ -1622,13 +1620,13 @@ public class Parser {
     private int Table[][];
     private String stackTrace = "";
     /**
-     * read in csv ll1 table
+     * genRead in csv ll1 table
      *
      * @param sa semantic analyzer object
      */
     public Parser(SemanticAnalyzer sa) {
         try {
-            /* java scanner used to read in ll1.csv table */
+            /* java scanner used to genRead in ll1.csv table */
             java.util.Scanner sc = new java.util.Scanner(new File("ll1.csv"));
             sc.nextLine();
             // Table is of size 63 because there are 63 elements in the

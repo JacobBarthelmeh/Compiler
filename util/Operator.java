@@ -22,15 +22,9 @@ public enum Operator {
     GTHAN(2, "CMPGTS");
     
     Operator(int p, String code) {
-        this.p = p;
+        this.precedence = p;
         this.code = code;
     }
-    int p;
-    String code;
-    public int precedence() {
-        return p;
-    }
-    public String code() {
-        return code;
-    }
+    public int precedence;
+    public String code;
 }
