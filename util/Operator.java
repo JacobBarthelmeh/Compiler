@@ -19,7 +19,9 @@ public enum Operator {
     GEQUAL(2, "CMPGEQS"),
     LEQUAL(2, "CMPLEQS"),
     LTHAN(2, "CMPLTS"),
-    GTHAN(2, "CMPGTS");
+    GTHAN(2, "CMPGTS"),
+    
+    NOOP(-1, "NOOP");
     
     Operator(int p, String code) {
         this.precedence = p;

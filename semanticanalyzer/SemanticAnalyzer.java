@@ -66,7 +66,7 @@ public class SemanticAnalyzer {
      */
     public boolean handleArithCasts(SemanticRecord left, SemanticRecord right) {
         //  Error checking on the left side
-        if (left.symbol.type != Type.INTEGER && left.symbol.type != Type.FLOAT) {
+        if (left.type != Type.INTEGER && left.type != Type.FLOAT) {
             Token t = left.token;
             error("Left operand is incompatible with arithmetic functions. "
             + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
@@ -74,7 +74,7 @@ public class SemanticAnalyzer {
             return false;
         }
         //  Error checking on the right side
-        if (right.symbol.type != Type.INTEGER && right.symbol.type != Type.FLOAT) {
+        if (right.type != Type.INTEGER && right.type != Type.FLOAT) {
             Token t = right.token;
             error("Right operand is incompatible with arithmetic functions. "
             + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
@@ -82,18 +82,18 @@ public class SemanticAnalyzer {
             return false;
         }
         //  Cast the left one properly
-        if (left.symbol.type == Type.INTEGER && right.symbol.type == Type.FLOAT) {
+        if (left.type == Type.INTEGER && right.type == Type.FLOAT) {
             w.writeLine("SUB SP 1 SP");
             w.writeLine("CASTSF");
             w.writeLine("ADD SP 1 SP");
             return true;
         }
         //  Cast the right one properly
-        else if (left.symbol.type == Type.FLOAT && right.symbol.type == Type.INTEGER) {
+        else if (left.type == Type.FLOAT && right.type == Type.INTEGER) {
             w.writeLine("CASTSF");
             return true;
         }
-        return left.symbol.type == Type.FLOAT || right.symbol.type == Type.FLOAT;
+        return left.type == Type.FLOAT || right.type == Type.FLOAT;
     }
     
     /**
@@ -136,6 +136,9 @@ public class SemanticAnalyzer {
         }
         w.writeLine(opp.code);
     }        
+    public void genNots() {
+        w.writeLine("NOTS");
+    }
     /**
      * The record that is being negated.
      * @param rec The integer or float record to negate

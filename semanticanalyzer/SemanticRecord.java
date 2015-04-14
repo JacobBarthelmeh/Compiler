@@ -9,6 +9,8 @@ public class SemanticRecord {
     public Token token;
     public Symbol symbol;
     public String code;
+    
+    //  Can be found from symbol, but not all records have symbols
     public Type type;
     
     // why is this needed?
@@ -52,11 +54,25 @@ public class SemanticRecord {
             case IDENTIFIER:
                 code = symbol.offset + "(D" + symbol.nestinglevel + ")";
                 break;
-            case INTEGER_LIT: case FLOAT_LIT:
+            case INTEGER_LIT:
                 code = "#" + token.getContents();
+                type = Type.INTEGER;
+                break;
+            case FLOAT_LIT:
+                code = "#" + token.getContents();
+                type = Type.FLOAT;
                 break;
             case STRING_LIT:
                 code = "#\"" + token.getContents() + "\"";
+                type = Type.STRING;
+                break;
+            case TRUE:
+                code = "#1";
+                type = Type.BOOLEAN;
+                break;
+            case FALSE:
+                code = "#0";
+                type = Type.BOOLEAN;
                 break;
             default:
                 code = "";
