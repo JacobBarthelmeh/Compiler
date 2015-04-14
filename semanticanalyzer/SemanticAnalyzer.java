@@ -189,7 +189,7 @@ public class SemanticAnalyzer {
                     System.err.println("Was expecting a variable name");
                     break;
             }
-            w.writeLine(str + rec.code);
+            w.writeLine(str + " " + rec.code);
         }
         catch (RuntimeException e) {
             Token t = rec.token;

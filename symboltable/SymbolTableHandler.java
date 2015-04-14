@@ -1,4 +1,5 @@
 package symboltable;
+import compiler.Compiler;
 import java.util.ArrayList;
 import util.Type;
 import util.Kind;
@@ -79,8 +80,10 @@ public class SymbolTableHandler {
         tables[nestinglevel] = new SymbolTable();
     }
     public void popTable() {
-        System.out.println("Pop reached. Status before printing:");
-        System.out.println(toString());
+        if (Compiler.DEBUG) {
+            System.out.println("Pop reached. Status before printing:");
+            System.out.println(toString());
+        }
         if (entry != null) {
             throw new RuntimeException("Cannot pop table while making a symbol.");
         }

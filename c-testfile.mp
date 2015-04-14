@@ -15,11 +15,11 @@ begin
 	testfloat := 20.2 div 3.4;
 	
 	testfloat := 32.22E-121;
-	testfloat2 := testint * 4.5 ;
+	testfloat2 := testfloat * 4.5 ;
 	
 	testint := 3 * 8 + 4;
 	testint2 := 3 + 4 / 5;
-	testint := 7 + testint2;
+	testint := 7 + (testint2 + 3) * 2 + 1;
 	
 	{test of booleans}
 	testbool := true;
