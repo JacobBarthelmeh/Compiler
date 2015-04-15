@@ -247,10 +247,28 @@ public class SemanticAnalyzer {
         w.writeLine("BRFS L" + l);
     }
     public void genForInitialize(SemanticRecord control, SemanticRecord initial) {
-        
+        //  It should only ever be an integer... right?
+        if (initial.type == Type.INTEGER) {
+            w.writeLine("POP " + control.code);
+        }
+        else if (initial.type == Type.FLOAT) {
+            w.writeLine("CASTSI");
+            w.writeLine("POP " + control.code);
+        }
+        else {
+            error("Cannot construct a non-numeric iterator");
+        }
     }
     public void genForAlter(SemanticRecord control, boolean to) {
-        
+        if (to) {
+            //  increment
+            w.writeLine("ADD " + control.code + " #1 " + control.code);
+        }
+        //  Downto
+        else {
+            //  decrement
+            w.writeLine("SUB " + control.code + " #1 " + control.code);
+        }
     }
     public void genForTest(SemanticRecord control, SemanticRecord end) {
         
