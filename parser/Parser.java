@@ -26,7 +26,7 @@ public class Parser {
                 Program(); // nonterminal 2
                 if (l1.getTerminal() == Terminal.EOF) {
                     match();
-                    //  Closes the file to complete write
+                    //  Closes the file to complete genWrite_S
                     sa.genHalt();
                 } else {
                     String[] err = {"end of file"};
@@ -749,7 +749,7 @@ public class Parser {
     }
 
     // Nonterminal 28
-    // <WriteStatement> --> write  ( <WriteParameter> <WriteParameterTail> ) RULE #49
+    // <WriteStatement> --> genWrite_S  ( <WriteParameter> <WriteParameterTail> ) RULE #49
     // <WriteStatement> --> writeln ( <WriteParameter> <WriteParameterTail> ) RULE #50
     private void WriteStatement() {
         stackTrace += "WriteStatment\n";
@@ -758,7 +758,7 @@ public class Parser {
                 match();
                 if (l1.getTerminal() == Terminal.LPAREN) {
                     match();
-                    sa.startwrite(false);
+                    sa.startWrite(false);
                     WriteParameter();
                     WriteParameterTail();
                     if (l1.getTerminal() == Terminal.RPAREN) {
@@ -777,7 +777,7 @@ public class Parser {
                 match();
                 if (l1.getTerminal() == Terminal.LPAREN) {
                     match();
-                    sa.startwrite(true);
+                    sa.startWrite(true);
                     WriteParameter();
                     WriteParameterTail();
                     if (l1.getTerminal() == Terminal.RPAREN) {
@@ -826,8 +826,8 @@ public class Parser {
             case 53://rule 53
                 Token t = l1;
                 OrdinalExpression();
-                sa.write(t);
-                //  sa.write(); //  write the terminal
+                sa.genWrite_S(t);
+                //  sa.genWrite_S(); //  genWrite_S the terminal
                 break;
             default:
                 String exp[] = {""};
@@ -847,8 +847,8 @@ public class Parser {
                 VariableIdentifier();
                 if (l1.getTerminal() == Terminal.ASSIGN) {
                     match();
-                    Expression();
-                    sa.genAssignment(new SemanticRecord(t, sh.getEntry(t.getContents())));
+                    SemanticRecord returnstuff = Expression();
+                    sa.genAssignment(new SemanticRecord(t, sh.getEntry(t.getContents())), returnstuff);
                 } else {
                     String[] err = {"assign"};
                     error(err);
@@ -879,11 +879,17 @@ public class Parser {
             case 56: //rule 56
                 if (l1.getTerminal() == Terminal.IF) {
                     match();
+                    int toFalse = sa.newLabel(),
+                        toEnd = sa.newLabel();
                     BooleanExpression();
+                    sa.genBranchFalse_S(toFalse);
                     if (l1.getTerminal() == Terminal.THEN) {
                         match();
                         Statement();
+                        sa.genBranch(toEnd);
+                        sa.putLabel(toFalse);
                         OptionalElsePart();
+                        sa.putLabel(toEnd);
                     } else {
                         String[] err = {"then"};
                         error(err);
@@ -955,11 +961,17 @@ public class Parser {
         switch (getRule(NonTerminal.WhileStatement)) {
             case 60://rule 60
                 if (l1.getTerminal() == Terminal.WHILE) {
+                    int loop = sa.newLabel(),
+                        exit = sa.newLabel();
                     match();
+                    sa.putLabel(loop);
                     BooleanExpression();
+                    sa.genBranchFalse_S(exit);
                     if (l1.getTerminal() == Terminal.DO) {
                         match();
                         Statement();
+                        sa.genBranch(loop);
+                        sa.putLabel(exit);
                     } else {
                         String[] err = {"do"};
                         error(err);
@@ -984,15 +996,25 @@ public class Parser {
             case 61://rule 61
                 if (l1.getTerminal() == Terminal.FOR) {
                     match();
-                    ControlVariable();
+                    int loop = sa.newLabel(),
+                        exit = sa.newLabel();
+                    SemanticRecord control = ControlVariable();
                     if (l1.getTerminal() == Terminal.ASSIGN) {
                         match();
-                        InitialValue();
-                        StepValue();
-                        FinalValue();
+                        SemanticRecord initialvalue = InitialValue();                        
+                        //  Either to or downto
+                        boolean to = StepValue();
+                        SemanticRecord finalvalue = FinalValue();
+                        sa.genForInitialize(control, initialvalue);
+                        sa.putLabel(loop);                        
+                        sa.genForTest(control, finalvalue);
+                        sa.genBranchFalse_S(exit);
                         if (l1.getTerminal() == Terminal.DO) {
                             match();
                             Statement();
+                            sa.genForAlter(control, to);
+                            sa.genBranch(loop);
+                            sa.putLabel(exit);
                         } else {
                             String[] err = {"do"};
                             error(err);
@@ -1015,65 +1037,64 @@ public class Parser {
 
     // Nonterminal 37
     // <ControlVariable> --> <VariableIdentifier> RULE #62
-    private void ControlVariable() {
+    private SemanticRecord ControlVariable() {
         stackTrace += "ControlVariable\n";
         switch (getRule(NonTerminal.ControlVariable)) {
             case 62://rule 62
+                Token t = l1;
                 VariableIdentifier();
-                break;
+                return new SemanticRecord(t, sh.getEntry(t.getContents()));
             default:
                 String exp[] = {""};
                 error(exp);
-                break;
+                return null;
         }
     }
 
     // Nonterminal 38
     // <InitialValue> --> <OrdinalExpression> RULE #63
-    private void InitialValue() {
+    private SemanticRecord InitialValue() {
         stackTrace += "InitialValue\n";
         switch (getRule(NonTerminal.InitialValue)) {
             case 63://rule 63
-                OrdinalExpression();
-                break;
+                return OrdinalExpression();
             default:
                 String exp[] = {""};
                 error(exp);
-                break;
+                return null;
         }
     }
 
     // Nonterminal 39
     // <StepValue> --> to RULE #64
     // <StepValue> --> downto RULE #65
-    private void StepValue() {
+    private boolean StepValue() {
         stackTrace += "StepValue\n";
         switch (getRule(NonTerminal.StepValue)) {
             case 64: //rule 64
                 match();
-                break;
+                return true;
             case 65: //rule 65
                 match();
-                break;
+                return false;
             default:
                 String[] err = {"to", "downto"};
                 error(err);
-                break;
+                return true;
         }
     }
 
     // Nonterminal 40
     // <FinalValue> --> <OrdinalExpression> RULE #66
-    private void FinalValue() {
+    private SemanticRecord FinalValue() {
         stackTrace += "FinalValue\n";
         switch (getRule(NonTerminal.FinalValue)) {
             case 66://rule 66
-                OrdinalExpression();
-                break;
+                return OrdinalExpression();
             default:
                 String exp[] = {""};
                 error(exp);
-                break;
+                return null;
         }
     }
 
@@ -1178,7 +1199,7 @@ public class Parser {
             case 74:
                 Operator opp = RelationalOperator(); //rule 74
                 SemanticRecord right = SimpleExpression(); //rule 74
-                sa.genArithOperator(left, opp, right);
+                sa.genArithOperator_S(left, opp, right);
                 return new SemanticRecord(right.token, right.symbol, "", "", "", Type.BOOLEAN);
             case 75://rule 75
                 return left;
@@ -1235,7 +1256,7 @@ public class Parser {
                 boolean positive = OptionalSign(); // Rule 82
                 SemanticRecord left = Term();
                 if (!positive) {
-                    sa.genNegation(left);
+                    sa.genNegation_S(left);
                 }
                 return TermTail(left);
             default:
@@ -1256,11 +1277,11 @@ public class Parser {
                 SemanticRecord right = Term();
                 SemanticRecord sum;
                 if (opp == Operator.OR) {
-                    sa.genArithOperator(left, opp, right);
+                    sa.genArithOperator_S(left, opp, right);
                     sum = left;
                 }
                 else {
-                    boolean floating = sa.genArithOperator(left, opp, right);
+                    boolean floating = sa.genArithOperator_S(left, opp, right);
                     sum = new SemanticRecord(right.token, null, "", "", "",
                             floating ? Type.FLOAT : Type.INTEGER);
                 }
@@ -1347,11 +1368,11 @@ public class Parser {
                 SemanticRecord right = Factor();
                 SemanticRecord product;
                 if (opp == Operator.AND) {
-                    sa.genLogicalOperator(left, opp, right);
+                    sa.genLogicalOperator_S(left, opp, right);
                     product = right;
                 }
                 else {
-                    boolean floating = sa.genArithOperator(left, opp, right);
+                    boolean floating = sa.genArithOperator_S(left, opp, right);
                     product = new SemanticRecord(
                         right.token, right.symbol, "", "", "",
                             //  Need to handle whether it was casted
@@ -1449,7 +1470,7 @@ public class Parser {
             case 104:           // not Factor() RULE 104
                 match();
                 r = Factor();
-                sa.genNots();
+                sa.genNot_S();
                 return r;
             case 105:        // RULE 105
                 match();
@@ -1566,16 +1587,15 @@ public class Parser {
 
     // Nonterminal 61
     // <OrdinalExpression> --> <Expression> RULE #113
-    private void OrdinalExpression() {
+    private SemanticRecord OrdinalExpression() {
         stackTrace += "OrdinalExpression\n";
         switch (getRule(NonTerminal.OrdinalExpression)) {
             case 112:    // RULE 112
-                Expression();
-                break;
+                return Expression();
             default:
                 String[] exp = {"expression"};
                 error(exp);
-                break;
+                return null;
         }
     }
 
@@ -1845,7 +1865,7 @@ public class Parser {
             System.exit(1);
         }
         int rule = Table[nonTerminal][index]; // integer corresponding to rule taken
-        ruleFile(rule); // write the rule taken
+        ruleFile(rule); // genWrite_S the rule taken
         return rule;
     }
 

@@ -25,6 +25,7 @@ public class SemanticAnalyzer {
         if (Compiler.DEBUG) {
             System.err.println(err);
         }
+        noerrors = false;
     }
 
     /**
@@ -42,15 +43,6 @@ public class SemanticAnalyzer {
     public void genHalt() {
         w.writeLine("HLT");
         w.close();
-    }
-
-    /**
-     * Drop a label
-     *
-     * @param label The label
-     */
-    public void genLabel(int label) {
-        w.writeLine("L" + label + ":");
     }
 
     public void genMove(String from, String to) {
@@ -72,7 +64,6 @@ public class SemanticAnalyzer {
             Token t = left.token;
             error("Left operand is incompatible with arithmetic functions. "
                     + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
-            noerrors = false;
             return false;
         }
         //  Error checking on the right side
@@ -80,7 +71,6 @@ public class SemanticAnalyzer {
             Token t = right.token;
             error("Right operand is incompatible with arithmetic functions. "
                     + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
-            noerrors = false;
             return false;
         }
         //  Cast the left one properly
@@ -105,7 +95,7 @@ public class SemanticAnalyzer {
      * @param right The right operand
      * @return Whether floating point arithmetic was used
      */
-    public boolean genArithOperator(SemanticRecord left, Operator opp, SemanticRecord right) {
+    public boolean genArithOperator_S(SemanticRecord left, Operator opp, SemanticRecord right) {
         if (handleArithCasts(left, right)) {
             w.writeLine(opp.code + "F");
             return true;
@@ -122,25 +112,23 @@ public class SemanticAnalyzer {
      * @param opp The operator
      * @param right The right operand
      */
-    public void genLogicalOperator(SemanticRecord left, Operator opp, SemanticRecord right) {
+    public void genLogicalOperator_S(SemanticRecord left, Operator opp, SemanticRecord right) {
         if (left.type != Type.BOOLEAN) {
             Token t = left.token;
             error("Left operand is incompatible with arithmetic functions. "
                     + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
-            noerrors = false;
             return;
         }
         if (right.type != Type.BOOLEAN) {
             Token t = right.token;
             error("Right operand is incompatible with arithmetic functions. "
                     + t.getContents() + " at line " + t.getLine() + " col " + t.getCol());
-            noerrors = false;
             return;
         }
         w.writeLine(opp.code);
     }
 
-    public void genNots() {
+    public void genNot_S() {
         w.writeLine("NOTS");
     }
 
@@ -149,7 +137,7 @@ public class SemanticAnalyzer {
      *
      * @param rec The integer or float record to negate
      */
-    public void genNegation(SemanticRecord rec) {
+    public void genNegation_S(SemanticRecord rec) {
         if (rec.type == Type.INTEGER) {
             w.writeLine("NEGS");
         } else if (rec.type == Type.FLOAT) {
@@ -163,10 +151,16 @@ public class SemanticAnalyzer {
     /**
      * Signal the Semantic
      *
-     * @param rec The location to assign to
+     * @param into The location to assign to
+     * @param from Where to find the value's type
      */
-    public void genAssignment(SemanticRecord rec) {
-        w.writeLine("POP " + rec.code);
+    public void genAssignment(SemanticRecord into, SemanticRecord from) {
+        //  Handle the casting problem
+        //  Results in loss of data accuracy at runtime
+        if (into.type == Type.INTEGER && from.type == Type.FLOAT) {
+            w.writeLine("CASTSI");
+        }
+        w.writeLine("POP " + into.code);
     }
 
     //  READING
@@ -208,20 +202,20 @@ public class SemanticAnalyzer {
     boolean line;
 
     /**
-     * Signal the Semantic Analyzer that a write shall begin
+     * Signal the Semantic Analyzer that a genWrite_S shall begin
      *
      * @param line Whether to writeln
      */
-    public void startwrite(boolean line) {
+    public void startWrite(boolean line) {
         this.line = line;
     }
 
     /**
-     * Signal the Semantic Analyzer to write
+     * Signal the Semantic Analyzer to genWrite_S
      *
-     * @param t The Token containing the desired write value
+     * @param t The Token containing the desired genWrite_S value
      */
-    public void write(Token t) {
+    public void genWrite_S(Token t) {
         String code = "#" + t.getContents();
         switch (t.getTerminal()) {
             case IDENTIFIER:
@@ -239,14 +233,29 @@ public class SemanticAnalyzer {
 
     //  B LEVEL
     //  Prepare conditional branching
-    public void ifstatement() {
+    public static int LABEL_COUNTER;
+    public int newLabel() {
+        return LABEL_COUNTER++;
+    }
+    public void putLabel(int l) {
+        w.writeLine("L" + l + ":");
+    }
+    public void genBranch(int l) {
+        w.writeLine("BR L" + l);
+    }
+    public void genBranchFalse_S(int l) {
+        w.writeLine("BRFS L" + l);
+    }
+    public void genForInitialize(SemanticRecord control, SemanticRecord initial) {
+        
+    }
+    public void genForAlter(SemanticRecord control, boolean to) {
+        
+    }
+    public void genForTest(SemanticRecord control, SemanticRecord end) {
+        
     }
 
-    public void whilestatement() {
-    }
-
-    public void forstatement() {
-    }
 
     //  A LEVEL
     //  Prepare nesting level stuff
