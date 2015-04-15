@@ -1003,16 +1003,16 @@ public class Parser {
                         match();
                         SemanticRecord initialvalue = InitialValue();                        
                         //  Either to or downto
-                        boolean to = StepValue();
+                        boolean increment = StepValue();
                         SemanticRecord finalvalue = FinalValue();
                         sa.genForInitialize(control, initialvalue);
-                        sa.putLabel(loop);                        
-                        sa.genForTest(control, finalvalue);
+                        sa.putLabel(loop);
+                        sa.genForTest(control, increment, finalvalue);
                         sa.genBranchFalse_S(exit);
                         if (l1.getTerminal() == Terminal.DO) {
                             match();
                             Statement();
-                            sa.genForAlter(control, to);
+                            sa.genForAlter(control, increment);
                             sa.genBranch(loop);
                             sa.putLabel(exit);
                         } else {

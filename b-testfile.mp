@@ -28,4 +28,8 @@ begin
     for in := 0 to 5 do begin
         writeln(in)
     end;
+
+    for in := 10 downto 5 do begin
+        writeln(in)
+    end;
 end.

@@ -259,19 +259,28 @@ public class SemanticAnalyzer {
             error("Cannot construct a non-numeric iterator");
         }
     }
-    public void genForAlter(SemanticRecord control, boolean to) {
-        if (to) {
+    public void genForAlter(SemanticRecord control, boolean increment) {
+        //  to
+        if (increment) {
             //  increment
             w.writeLine("ADD " + control.code + " #1 " + control.code);
         }
-        //  Downto
+        //  downto
         else {
             //  decrement
             w.writeLine("SUB " + control.code + " #1 " + control.code);
         }
     }
-    public void genForTest(SemanticRecord control, SemanticRecord end) {
-        
+    public void genForTest(SemanticRecord control, boolean increment, SemanticRecord end) {
+        w.writeLine("PUSH " + control.code);
+        w.writeLine("PUSH " + end.code);
+        if (increment) {
+            w.writeLine("CMPLTS");
+        }
+        else {
+            w.writeLine("CMPGTS");
+            
+        }
     }
 
 
