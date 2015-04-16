@@ -2,7 +2,9 @@ package semanticanalyzer;
 
 import compiler.Compiler;
 import compiler.Token;
+import java.util.ArrayList;
 import java.util.Stack;
+import symboltable.Parameter;
 import symboltable.Symbol;
 import symboltable.SymbolTableHandler;
 import util.Operator;
@@ -288,11 +290,41 @@ public class SemanticAnalyzer {
     }
 
     //  A LEVEL
-    //  Prepare nesting level stuff
-    public void function() {
+    //  Functions and Procedures
+    public static int nest = 0;
+    public void genProcedureParameters(Symbol procedure, ArrayList<SemanticRecord> params) {
+        Parameter p;
+        SemanticRecord r;
+        //  Prepare the next nesting level
+        w.writeLine("MOV SP D" + nest++);
+        for (int i = 0; i < params.size(); i++) {
+            //  Type check
+            try {
+                p = procedure.params.get(i);
+                r = params.get(i);
+            }
+            catch (IndexOutOfBoundsException e) {
+                error("Procedure input is not the same size as the parameter list for "
+                    + procedure.name);
+                break;
+            }
+            if (r.type != p.type) {
+                error("Procedure input is not the same type as the parameter declaration "
+                    + procedure.name);
+                break;
+            }
+            
+            //  push
+            //  Does not care about in vs inout - todo?
+            w.writeLine("PUSH " + r.code);
+        }
     }
-    
-    public void procedure() {
+    public void genProcedureBranch(Symbol procedure) {
+        w.writeLine("CALL " /* the label for the procedure */);
+    }
+    public void genReturn() {
+        nest--;
+        w.writeLine("RET");
     }
 
     /**

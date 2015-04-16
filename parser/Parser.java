@@ -103,7 +103,7 @@ public class Parser {
                 sh.popTable();
                 break;
             default:
-                String[] err = {""};
+                String[] err = {"var"};
                 error(err);
         }
     }
@@ -1106,8 +1106,11 @@ public class Parser {
         stackTrace += "ProcedureStatment\n";
         switch (getRule(NonTerminal.ProcedureStatement)) {
             case 67://rule 67
-                ProcedureIdentifier();
-                OptionalActualParameterList();
+                String id = ProcedureIdentifier();
+                Symbol procedure = sh.getEntry(id);
+                ArrayList<SemanticRecord> params = OptionalActualParameterList();
+                sa.genProcedureParameters(procedure, params);
+                sa.genProcedureBranch(procedure);
                 break;
             default:
                 String exp[] = {""};
@@ -1119,39 +1122,40 @@ public class Parser {
     // Nonterminal 42
     // <OptionalActualParameterList> --> ( <ActualParameter> <ActualParameterTail> ) RULE #68
     // <OptionalActualParameterList> --> lambda RULE #69
-    private void OptionalActualParameterList() {
+    private ArrayList<SemanticRecord> OptionalActualParameterList() {
         stackTrace += "OptionalActualParameterList\n";
         switch (getRule(NonTerminal.OptionalActualParameterList)) {
             case 68: //rule 68
                 match();
-                ActualParameter();
-                ActualParameterTail();
+                ArrayList<SemanticRecord> params = new ArrayList();
+                params.add(ActualParameter());
+                ActualParameterTail(params);
                 if (l1.getTerminal() == Terminal.RPAREN) {
                     match();
                 } else {
                     String[] err = {")"};
                     error(err);
                 }
-                break;
+                return params;
             case 69://rule 69 switch on e
-                break;
+                return new ArrayList();
             default:
                 String[] err = {"("};
                 error(err);
-                break;
+                return null;
         }
     }
 
     // Nonterminal 43
     // <ActualParameterTail> --> , <ActualParameter> <ActualParameterTail> RULE #70
     // <ActualParameterTail> --> lambda RULE #71
-    private void ActualParameterTail() {
+    private void ActualParameterTail(ArrayList<SemanticRecord> params) {
         stackTrace += "ActualParameterTail\n";
         switch (getRule(NonTerminal.ActualParameterTail)) {
             case 70: //rule 70
                 match();
-                ActualParameter();
-                ActualParameterTail();
+                params.add(ActualParameter());
+                ActualParameterTail(params);
                 break;
             case 71: //e
                 break;
@@ -1164,16 +1168,15 @@ public class Parser {
 
     // Nonterminal 44
     // <ActualParameter> --> <OrdinalExpression> RULE #72
-    private void ActualParameter() {
+    private SemanticRecord ActualParameter() {
         stackTrace += "ActualParameter\n";
         switch (getRule(NonTerminal.ActualParameter)) {
             case 72:
-                OrdinalExpression();//rule 72
-                break;
+                return OrdinalExpression();//rule 72
             default:
                 String exp[] = {""};
                 error(exp);
-                break;
+                return null;
         }
     }
 

@@ -1,11 +1,14 @@
 package symboltable;
 
+import util.Kind;
 import util.Type;
 public class Parameter {
     public String name;
     public Type type;
-    public Parameter(String name, Type type){
+    public Kind kind;
+    public Parameter(String name, Type type, Kind kind){
         this.name = name;
         this.type = type;
+        this.kind = kind;
     }
 }

@@ -32,9 +32,12 @@ public class SymbolTableHandler {
         if (entry == null) {
             throw new RuntimeException("Parameters cannot be added to null entry.");
         }
-        param = new Parameter("DEFAULT", Type.NOTYPE);
+        param = new Parameter("DEFAULT", Type.NOTYPE, Kind.NOKIND);
     }
     public void finishParameter() {
+        if (param.kind == Kind.NOKIND || param.type == Type.NOTYPE) {
+            throw new RuntimeException("Parameter needs a kind and a type");
+        }
         isParam = false;
         entry.params.add(param);
     }
@@ -67,7 +70,12 @@ public class SymbolTableHandler {
         if (entry == null) {
             throw new RuntimeException("Kind cannot be set to null entry.");
         }
-        entry.kind = kind;
+        if (isParam) {
+            param.kind = kind;
+        }
+        else {
+            entry.kind = kind;
+        }
     }
     public void pushTable() {
         if (entry != null) {
