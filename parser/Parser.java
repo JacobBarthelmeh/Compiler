@@ -481,6 +481,7 @@ public class Parser {
                     sh.startParameter();
                     sh.setName(s);
                     sh.setType(type);
+                    sh.setKind(Kind.INPARAMETER);
                     sh.finishParameter();
                 }
                 break;
@@ -515,6 +516,7 @@ public class Parser {
                     sh.startParameter();
                     sh.setName(s);
                     sh.setType(type);
+                    sh.setKind(Kind.INOUTPARAMETER);
                     sh.finishParameter();
                 }
                 break;

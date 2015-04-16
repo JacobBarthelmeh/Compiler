@@ -20,7 +20,8 @@ begin
     in2 := 5;
 
     while (in < in2) do begin
-        in := in + 1
+        writeln(in);
+        in := in + 1;
     end;
 
     writeln(in, in2);

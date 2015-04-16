@@ -38,7 +38,6 @@ public class Test {
         } else {
             System.out.println("fail!!!");
         }
-        */
         //  B RANKED TESTS
         System.out.println("Running B ranked tests");
         if (parser_test(parserInB, parserOutB, fileOutB)) {
@@ -46,8 +45,8 @@ public class Test {
         } else {
             System.out.println("fail!!!");
         }
+        */
         
-        /*
         //  A RANKED TESTS
         System.out.println("Running A ranked tests");
         if (parser_test(parserInA, parserOutA, fileOutA)) {
@@ -55,7 +54,6 @@ public class Test {
         } else {
             System.out.println("fail!!!");
         }
-        */
     }
 
     /**
