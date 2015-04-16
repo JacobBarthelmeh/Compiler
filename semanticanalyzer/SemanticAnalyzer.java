@@ -10,9 +10,9 @@ import util.Type;
 import util.Writer;
 
 public class SemanticAnalyzer {
-
+    
     public static SemanticRecord SP = new SemanticRecord(null, null, "SP", "", "", Type.NOTYPE);
-
+    
     static int labelCounter = 0;
     public boolean noerrors = true;
     Stack<Type> types;
@@ -44,7 +44,7 @@ public class SemanticAnalyzer {
         w.writeLine("HLT");
         w.close();
     }
-
+    
     public void genMove(String from, String to) {
         w.writeLine("MOV " + from + " " + to);
     }
@@ -127,7 +127,7 @@ public class SemanticAnalyzer {
         }
         w.writeLine(opp.code);
     }
-
+    
     public void genNot_S() {
         w.writeLine("NOTS");
     }
@@ -234,61 +234,64 @@ public class SemanticAnalyzer {
     //  B LEVEL
     //  Prepare conditional branching
     public static int LABEL_COUNTER;
+
     public int newLabel() {
         return LABEL_COUNTER++;
     }
+
     public void putLabel(int l) {
         w.writeLine("L" + l + ":");
     }
+
     public void genBranch(int l) {
         w.writeLine("BR L" + l);
     }
+
     public void genBranchFalse_S(int l) {
         w.writeLine("BRFS L" + l);
     }
+
     public void genForInitialize(SemanticRecord control, SemanticRecord initial) {
         //  It should only ever be an integer... right?
+        w.writeLine("PUSH " + initial.code);
         if (initial.type == Type.INTEGER) {
             w.writeLine("POP " + control.code);
-        }
-        else if (initial.type == Type.FLOAT) {
+        } else if (initial.type == Type.FLOAT) {
             w.writeLine("CASTSI");
             w.writeLine("POP " + control.code);
-        }
-        else {
+        } else {
             error("Cannot construct a non-numeric iterator");
         }
     }
+
     public void genForAlter(SemanticRecord control, boolean increment) {
         //  to
         if (increment) {
             //  increment
             w.writeLine("ADD " + control.code + " #1 " + control.code);
-        }
-        //  downto
+        } //  downto
         else {
             //  decrement
             w.writeLine("SUB " + control.code + " #1 " + control.code);
         }
     }
+
     public void genForTest(SemanticRecord control, boolean increment, SemanticRecord end) {
         w.writeLine("PUSH " + control.code);
         w.writeLine("PUSH " + end.code);
         if (increment) {
             w.writeLine("CMPLTS");
-        }
-        else {
+        } else {
             w.writeLine("CMPGTS");
             
         }
     }
 
-
     //  A LEVEL
     //  Prepare nesting level stuff
     public void function() {
     }
-
+    
     public void procedure() {
     }
 
@@ -298,11 +301,11 @@ public class SemanticAnalyzer {
     public void genStackPush() {
         w.writeLine("ADD SP #1 SP");
     }
-
+    
     public SemanticAnalyzer(String filename, SymbolTableHandler sh) {
         w = new Writer(filename);
         this.sh = sh;
     }
-
+    
     private final Writer w;
 }
