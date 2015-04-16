@@ -98,7 +98,12 @@ public class Parser {
         switch (getRule(NonTerminal.Block)) {
             case 4:
                 VariableDeclarationPart();
+                int label = sa.newLabel();
+                //  Jump over the procedures and declarations... for now
+                sa.genBranch(label);
                 ProcedureAndFunctionDeclarationPart();
+                //  Go right to the statements
+                sa.putLabel(label);
                 StatementPart();
                 sh.popTable();
                 break;

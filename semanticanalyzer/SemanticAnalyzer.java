@@ -3,6 +3,7 @@ package semanticanalyzer;
 import compiler.Compiler;
 import compiler.Token;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Stack;
 import symboltable.Parameter;
 import symboltable.Symbol;
@@ -12,10 +13,11 @@ import util.Type;
 import util.Writer;
 
 public class SemanticAnalyzer {
+    HashMap<String, Integer> procedures, functions;
     
     public static SemanticRecord SP = new SemanticRecord(null, null, "SP", "", "", Type.NOTYPE);
     
-    static int labelCounter = 0;
+    static int LABEL_COUNTER = 0;
     public boolean noerrors = true;
     Stack<Type> types;
 
@@ -234,9 +236,7 @@ public class SemanticAnalyzer {
     }
 
     //  B LEVEL
-    //  Prepare conditional branching
-    public static int LABEL_COUNTER;
-
+    //  Prepare conditional branchinG
     public int newLabel() {
         return LABEL_COUNTER++;
     }
@@ -292,6 +292,11 @@ public class SemanticAnalyzer {
     //  A LEVEL
     //  Functions and Procedures
     public static int nest = 0;
+    
+    public void genProcedureLabel(Symbol procedure) {
+        w.writeLine("L" + LABEL_COUNTER + ":");
+        procedures.put(procedure.name, LABEL_COUNTER++);
+    }
     public void genProcedureParameters(Symbol procedure, ArrayList<SemanticRecord> params) {
         Parameter p;
         SemanticRecord r;
@@ -320,7 +325,42 @@ public class SemanticAnalyzer {
         }
     }
     public void genProcedureBranch(Symbol procedure) {
-        w.writeLine("CALL " /* the label for the procedure */);
+        w.writeLine("CALL L" + procedures.get(procedure.name));
+    }
+    
+    public void genFunctionLabel(Symbol function) {
+        w.writeLine("L" + LABEL_COUNTER + ":");
+        functions.put(function.name, LABEL_COUNTER++);
+    }
+    public void genFunctionParameters(Symbol function, ArrayList<SemanticRecord> params) {
+        Parameter p;
+        SemanticRecord r;
+        //  Prepare the next nesting level
+        w.writeLine("MOV SP D" + nest++);
+        for (int i = 0; i < params.size(); i++) {
+            //  Type check
+            try {
+                p = function.params.get(i);
+                r = params.get(i);
+            }
+            catch (IndexOutOfBoundsException e) {
+                error("Function input is not the same size as the parameter list for "
+                    + function.name);
+                break;
+            }
+            if (r.type != p.type) {
+                error("Function input is not the same type as the parameter declaration "
+                    + function.name);
+                break;
+            }
+            
+            //  push
+            //  Does not care about in vs inout - todo?
+            w.writeLine("PUSH " + r.code);
+        }
+    }
+    public void genFunctionBranch(Symbol function) {
+        w.writeLine("CALL L" + functions.get(function.name));
     }
     public void genReturn() {
         nest--;
@@ -337,6 +377,8 @@ public class SemanticAnalyzer {
     public SemanticAnalyzer(String filename, SymbolTableHandler sh) {
         w = new Writer(filename);
         this.sh = sh;
+        procedures = new HashMap<>();
+        functions = new HashMap<>();
     }
     
     private final Writer w;
