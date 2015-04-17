@@ -356,6 +356,12 @@ public class Parser {
                     sh.startEntry();
                     sh.setName(p.name);
                     sh.setType(p.type);
+                    if (p.kind == Kind.INPARAMETER) {
+                        sh.setKind(Kind.INVARIABLE);
+                    }
+                    else {
+                        sh.setKind(Kind.INOUTVARIABLE);
+                    }
                     sh.finishEntry();
                     sa.genStackPush();
                 }
@@ -393,6 +399,12 @@ public class Parser {
                     sh.startEntry();
                     sh.setName(p.name);
                     sh.setType(p.type);
+                    if (p.kind == Kind.INPARAMETER) {
+                        sh.setKind(Kind.INVARIABLE);
+                    }
+                    else {
+                        sh.setKind(Kind.INOUTVARIABLE);
+                    }
                     sh.finishEntry();
                     sa.genStackPush();
                 }

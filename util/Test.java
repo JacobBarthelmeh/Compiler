@@ -46,12 +46,12 @@ public class Test {
         }
         
         //  A RANKED TESTS
-//        System.out.println("Running A ranked tests");
-//        if (parser_test(parserInA, parserOutA, fileOutA)) {
-//            System.out.println("pass");
-//        } else {
-//            System.out.println("fail!!!");
-//        }
+        System.out.println("Running A ranked tests");
+        if (parser_test(parserInA, parserOutA, fileOutA)) {
+            System.out.println("pass");
+        } else {
+            System.out.println("fail!!!");
+        }
     }
 
     /**
