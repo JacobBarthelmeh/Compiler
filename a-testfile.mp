@@ -9,9 +9,10 @@ program foo;
             x := in;
         end;
     
-        function yoda(force: float);
+        function yoda(force: float) : float;
         begin
             writeln(force);
+            yoda := force + 1
         end;
             
 begin
@@ -22,5 +23,5 @@ begin
 
     testfloat := 5.5;
 
-    yoda(testfloat);
+    writeln(yoda(testfloat));
 end.

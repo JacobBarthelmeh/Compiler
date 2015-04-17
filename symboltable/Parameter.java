@@ -11,4 +11,7 @@ public class Parameter {
         this.type = type;
         this.kind = kind;
     }
+    public String toString() {
+        return "(" + name + ":" + type + "," + kind + ")";
+    }
 }

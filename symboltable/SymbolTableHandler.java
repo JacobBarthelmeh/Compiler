@@ -33,10 +33,14 @@ public class SymbolTableHandler {
             throw new RuntimeException("Parameters cannot be added to null entry.");
         }
         param = new Parameter("DEFAULT", Type.NOTYPE, Kind.NOKIND);
+        isParam= true;
     }
     public void finishParameter() {
-        if (param.kind == Kind.NOKIND || param.type == Type.NOTYPE) {
-            throw new RuntimeException("Parameter needs a kind and a type");
+        if (param.kind == Kind.NOKIND) {
+            throw new RuntimeException("Parameter needs a kind.");
+        }
+        if (param.type == Type.NOTYPE) {
+            throw new RuntimeException("Parameter needs a type.");
         }
         isParam = false;
         entry.params.add(param);
@@ -98,6 +102,10 @@ public class SymbolTableHandler {
         if (nestinglevel == -1) {
             throw new RuntimeException("Can't pop the global table!");
         }
+        if (Compiler.DEBUG) {
+            System.out.println("Pop reached! Table status:");
+            System.out.println(toString());
+        }
         nestinglevel--;
     }
     public Symbol getEntry(String lexeme) {
@@ -106,6 +114,9 @@ public class SymbolTableHandler {
             if (e != null) {
                 return e;
             }
+        }
+        if (Compiler.DEBUG) {
+            System.out.println(toString());
         }
         throw new RuntimeException("Could not find '" + lexeme + "' in any symbol table.");
     }    

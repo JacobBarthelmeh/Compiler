@@ -342,7 +342,12 @@ public class Parser {
                     error(err);
                 }
                 String name = ProcedureIdentifier();
+                sh.startEntry();
+                sh.setName(name);
+                sh.setType(Type.NOTYPE);
+                sh.setKind(Kind.PROCEDURE);
                 OptionalFormalParameterList();
+                sh.finishEntry();
                 ArrayList<Parameter> params = sh.getEntry(name).params;
                 sh.pushTable();
                 sa.genMove("SP", "D" + sh.nestinglevel);
@@ -374,8 +379,13 @@ public class Parser {
                     error(err);
                 }
                 String name = FunctionIdentifier();
+                sh.startEntry();
+                sh.setName(name);
+                sh.setKind(Kind.FUNCTION);
                 OptionalFormalParameterList();
-                ArrayList<Parameter> params = sh.getEntry(name).params;
+                sh.finishEntry();
+                Symbol entry = sh.getEntry(name);
+                ArrayList<Parameter> params = entry.params;
                 sh.pushTable();
                 sa.genMove("SP", "D" + sh.nestinglevel);
                 for (Parameter p : params) {
@@ -385,6 +395,14 @@ public class Parser {
                     sh.finishEntry();
                     sa.genStackPush();
                 }
+                if (l1.getTerminal() == Terminal.COLON) {
+                    match();
+                } else {
+                    String[] err = {":"};
+                    error(err);
+                }
+                Type t = Type();
+                entry.type = t;
                 break;
             default:
                 String[] err = {"function"};
