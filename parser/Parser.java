@@ -1,4 +1,5 @@
 package parser;
+
 import compiler.Compiler;
 import compiler.Token;
 import symboltable.Parameter;
@@ -15,10 +16,12 @@ import symboltable.Symbol;
 import util.*;
 
 public class Parser {
+
     // ll(1) table rules
     // See Complete-LL(1)-Table-2015-03-10.xlsx for information
     // Nonterminal 1
     // <SystemGoal> --> <Program> EOF RULE #1
+
     private void SystemGoal() {
         stackTrace += "SystemGoal\n";
         switch (getRule(NonTerminal.SystemGoal)) {
@@ -358,8 +361,7 @@ public class Parser {
                     sh.setType(p.type);
                     if (p.kind == Kind.INPARAMETER) {
                         sh.setKind(Kind.INVARIABLE);
-                    }
-                    else {
+                    } else {
                         sh.setKind(Kind.INOUTVARIABLE);
                     }
                     sh.finishEntry();
@@ -401,8 +403,7 @@ public class Parser {
                     sh.setType(p.type);
                     if (p.kind == Kind.INPARAMETER) {
                         sh.setKind(Kind.INVARIABLE);
-                    }
-                    else {
+                    } else {
                         sh.setKind(Kind.INOUTVARIABLE);
                     }
                     sh.finishEntry();
@@ -659,7 +660,14 @@ public class Parser {
     // Statement --> <ProcedureStatement> RULE #43
     private void Statement() {
         stackTrace += "Statement\n";
-        switch (getRule(NonTerminal.Statement)) {
+        int rule = getRule(NonTerminal.Statement);
+        if (rule == 38) {
+            l2 = scanner.nextToken();
+            if (l2.getTerminal() != Terminal.ASSIGN) {
+                rule = 43;
+            }
+        }
+        switch (rule) {
             case 34:
                 EmptyStatement();
                 break;
@@ -918,7 +926,7 @@ public class Parser {
                 if (l1.getTerminal() == Terminal.IF) {
                     match();
                     int toFalse = sa.newLabel(),
-                        toEnd = sa.newLabel();
+                            toEnd = sa.newLabel();
                     BooleanExpression();
                     sa.genBranchFalse_S(toFalse);
                     if (l1.getTerminal() == Terminal.THEN) {
@@ -1000,7 +1008,7 @@ public class Parser {
             case 60://rule 60
                 if (l1.getTerminal() == Terminal.WHILE) {
                     int loop = sa.newLabel(),
-                        exit = sa.newLabel();
+                            exit = sa.newLabel();
                     match();
                     sa.putLabel(loop);
                     BooleanExpression();
@@ -1035,11 +1043,11 @@ public class Parser {
                 if (l1.getTerminal() == Terminal.FOR) {
                     match();
                     int loop = sa.newLabel(),
-                        exit = sa.newLabel();
+                            exit = sa.newLabel();
                     SemanticRecord control = ControlVariable();
                     if (l1.getTerminal() == Terminal.ASSIGN) {
                         match();
-                        SemanticRecord initialvalue = InitialValue();                        
+                        SemanticRecord initialvalue = InitialValue();
                         //  Either to or downto
                         boolean increment = StepValue();
                         SemanticRecord finalvalue = FinalValue();
@@ -1320,8 +1328,7 @@ public class Parser {
                 if (opp == Operator.OR) {
                     sa.genArithOperator_S(left, opp, right);
                     sum = left;
-                }
-                else {
+                } else {
                     boolean floating = sa.genArithOperator_S(left, opp, right);
                     sum = new SemanticRecord(right.token, null, "", "", "",
                             floating ? Type.FLOAT : Type.INTEGER);
@@ -1411,11 +1418,10 @@ public class Parser {
                 if (opp == Operator.AND) {
                     sa.genLogicalOperator_S(left, opp, right);
                     product = right;
-                }
-                else {
+                } else {
                     boolean floating = sa.genArithOperator_S(left, opp, right);
                     product = new SemanticRecord(
-                        right.token, right.symbol, "", "", "",
+                            right.token, right.symbol, "", "", "",
                             //  Need to handle whether it was casted
                             floating ? Type.FLOAT : Type.INTEGER);
                 }
@@ -1477,7 +1483,7 @@ public class Parser {
         int rule = getRule(NonTerminal.Factor);
         if (rule == 106) {
             l2 = scanner.nextToken();
-            if (l2.getTerminal() != Terminal.SCOLON) {
+            if (l2.getTerminal() != Terminal.SCOLON && l2.getTerminal() != Terminal.LPAREN) {
                 rule = 116;
             }
         }
@@ -1535,7 +1541,7 @@ public class Parser {
                     match();
                     return r;
                 }
-                //  Fall through. It wasn't a function, so it should be an identifier.
+            //  Fall through. It wasn't a function, so it should be an identifier.
             case 116:  // RULE 116
                 r = new SemanticRecord(l1, sh.getEntry(l1.getContents()));
                 sa.genPush(r);
@@ -1681,8 +1687,7 @@ public class Parser {
                 return str;
         }
     }
-    
-    
+
     private final SymbolTableHandler sh;
     private final SemanticAnalyzer sa;
     private Token l1; // look ahead token
@@ -1694,6 +1699,7 @@ public class Parser {
 
     private int Table[][];
     private String stackTrace = "";
+
     /**
      * genRead in csv ll1 table
      *
@@ -1907,9 +1913,8 @@ public class Parser {
         }
         int rule = Table[nonTerminal][index]; // integer corresponding to rule taken
         ruleFile(rule); // genWrite_S the rule taken
-        rFile.print(","+nt+"\n"); //print terminal taken
+        rFile.print("," + nt + "\n"); //print terminal taken
         return rule;
     }
 
 }
-
