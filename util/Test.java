@@ -30,7 +30,6 @@ public class Test {
     static String fileOutA = "a_test.mp";
 
     public static void main(String[] args) {
-        /*
         //  C RANKED TESTS
         System.out.println("Running C ranked tests");
         if (parser_test(parserInC, parserOutC, fileOutC)) {
@@ -45,15 +44,14 @@ public class Test {
         } else {
             System.out.println("fail!!!");
         }
-        */
         
         //  A RANKED TESTS
-        System.out.println("Running A ranked tests");
-        if (parser_test(parserInA, parserOutA, fileOutA)) {
-            System.out.println("pass");
-        } else {
-            System.out.println("fail!!!");
-        }
+//        System.out.println("Running A ranked tests");
+//        if (parser_test(parserInA, parserOutA, fileOutA)) {
+//            System.out.println("pass");
+//        } else {
+//            System.out.println("fail!!!");
+//        }
     }
 
     /**

@@ -204,7 +204,8 @@ public class Parser {
     // <Type> --> Boolean RULE #13
     private Type Type() {
         stackTrace += "Type\n";
-        switch (getRule(NonTerminal.Type)) {
+        int rule = getRule(NonTerminal.Type);
+        switch (rule) {
             case 10:
                 if (l1.getTerminal() == Terminal.INTEGER) {
                     match();
@@ -1809,13 +1810,13 @@ public class Parser {
         if (rFile == null) {
             try {
                 rFile = new PrintWriter(rule_tree_file);
-                rFile.println("Rules Taken");
+                rFile.println("Rules Taken,Token,Non-Terminal");
             } catch (Exception e) {
                 System.out.println("Unable to make file " + rule_tree_file);
                 return 1;
             }
         }
-        rFile.println(rule);
+        rFile.print(rule + "," + l1);
         return 0;
     }
 
@@ -1894,6 +1895,7 @@ public class Parser {
         }
         int rule = Table[nonTerminal][index]; // integer corresponding to rule taken
         ruleFile(rule); // genWrite_S the rule taken
+        rFile.print(","+nt+"\n"); //print terminal taken
         return rule;
     }
 
