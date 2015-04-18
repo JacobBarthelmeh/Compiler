@@ -1483,7 +1483,7 @@ public class Parser {
         int rule = getRule(NonTerminal.Factor);
         if (rule == 106) {
             l2 = scanner.nextToken();
-            if (l2.getTerminal() != Terminal.SCOLON && l2.getTerminal() != Terminal.LPAREN) {
+            if (l2.getTerminal() != Terminal.LPAREN) {
                 rule = 116;
             }
         }
@@ -1538,7 +1538,6 @@ public class Parser {
                     sa.genPush(r);
                     FunctionIdentifier();
                     OptionalActualParameterList();
-                    match();
                     return r;
                 }
             //  Fall through. It wasn't a function, so it should be an identifier.
