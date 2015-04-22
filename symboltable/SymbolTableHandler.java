@@ -92,10 +92,6 @@ public class SymbolTableHandler {
         tables[nestinglevel] = new SymbolTable();
     }
     public void popTable() {
-        if (Compiler.DEBUG) {
-            System.out.println("Pop reached. Status before printing:");
-            System.out.println(toString());
-        }
         if (entry != null) {
             throw new RuntimeException("Cannot pop table while making a symbol.");
         }
@@ -103,7 +99,7 @@ public class SymbolTableHandler {
             throw new RuntimeException("Can't pop the global table!");
         }
         if (Compiler.DEBUG) {
-            System.out.println("Pop reached! Table status:");
+            System.out.println("Pop reached! Table status before printing:");
             System.out.println(toString());
         }
         nestinglevel--;
