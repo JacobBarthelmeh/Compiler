@@ -291,7 +291,8 @@ public class Parser {
                     String[] err = {";"};
                     error(err);
                 }
-                sh.pushTable();
+                Block();
+                sa.genReturn();
                 if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
@@ -319,13 +320,14 @@ public class Parser {
                     String[] err = {";"};
                     error(err);
                 }
-                sh.pushTable();
+                Block();
+                sa.genReturn();
                 if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
                     String[] err = {";"};
                     error(err);
-                }
+                }                
                 break;
             default:
                 String[] err = {";"};
@@ -353,9 +355,10 @@ public class Parser {
                 sh.setKind(Kind.PROCEDURE);
                 OptionalFormalParameterList();
                 sh.finishEntry();
+                Symbol entry = sh.getEntry(name);
+                sa.genProcedureLabel(entry);
                 ArrayList<Parameter> params = sh.getEntry(name).params;
                 sh.pushTable();
-                sa.genMove("SP", "D" + sh.nestinglevel);
                 for (Parameter p : params) {
                     sh.startEntry();
                     sh.setName(p.name);
@@ -366,7 +369,6 @@ public class Parser {
                         sh.setKind(Kind.INOUTVARIABLE);
                     }
                     sh.finishEntry();
-                    sa.genStackPush();
                 }
                 break;
             default:
@@ -395,9 +397,9 @@ public class Parser {
                 OptionalFormalParameterList();
                 sh.finishEntry();
                 Symbol entry = sh.getEntry(name);
+                sa.genFunctionLabel(entry);
                 ArrayList<Parameter> params = entry.params;
                 sh.pushTable();
-                sa.genMove("SP", "D" + sh.nestinglevel);
                 for (Parameter p : params) {
                     sh.startEntry();
                     sh.setName(p.name);
@@ -408,7 +410,6 @@ public class Parser {
                         sh.setKind(Kind.INOUTVARIABLE);
                     }
                     sh.finishEntry();
-                    sa.genStackPush();
                 }
                 if (l1.getTerminal() == Terminal.COLON) {
                     match();
@@ -1155,6 +1156,7 @@ public class Parser {
                 Symbol procedure = sh.getEntry(id);
                 ArrayList<SemanticRecord> params = OptionalActualParameterList();
                 sa.prepareCall(procedure, params);
+                sa.comeFromCall(procedure, params);
                 break;
             default:
                 String exp[] = {""};
@@ -1326,7 +1328,7 @@ public class Parser {
                 SemanticRecord right = Term();
                 SemanticRecord sum;
                 if (opp == Operator.OR) {
-                    sa.genArithOperator_S(left, opp, right);
+                    sa.genLogicalOperator_S(left, opp, right);
                     sum = left;
                 } else {
                     boolean floating = sa.genArithOperator_S(left, opp, right);
@@ -1536,8 +1538,10 @@ public class Parser {
                 if (entry.kind == Kind.FUNCTION) {
                     r = new SemanticRecord(l1, entry);
                     sa.genPush(r);
-                    FunctionIdentifier();
-                    OptionalActualParameterList();
+                    Symbol function = sh.getEntry(FunctionIdentifier());
+                    ArrayList<SemanticRecord> params = OptionalActualParameterList();
+                    sa.prepareCall(function, params);
+                    sa.comeFromCall(function, params);
                     return r;
                 }
             //  Fall through. It wasn't a function, so it should be an identifier.

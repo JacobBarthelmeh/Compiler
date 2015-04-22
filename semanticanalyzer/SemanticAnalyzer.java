@@ -369,8 +369,8 @@ public class SemanticAnalyzer {
         //  Restore previous nesting level
         w.writeLine("POP D" + callLocation.nestinglevel);
     }
-    public void popToReturnLocation(Symbol function) {
-        
+    public void genReturn() {
+        w.writeLine("RET");
     }
 
 

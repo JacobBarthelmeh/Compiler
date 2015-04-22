@@ -24,28 +24,40 @@ public class Test {
     static String fileOutA = "a_output.mp";
 
     public static void main(String[] args) {
+        /*
         //  C RANKED TESTS
-//        System.out.println("Running C ranked tests");
-//        if (parser_test(inputC, parserOutC, fileOutC)) {
-//            System.out.println("pass");
-//        } else {
-//            System.out.println("fail!!!");
-//        }
+        System.out.println("Running C ranked tests");
+        if (parser_test(inputC, parserOutC, fileOutC)) {
+            System.out.println("pass");
+        } else {
+            System.out.println("fail!!!");
+        }
         //  B RANKED TESTS
         System.out.println("Running B ranked tests");
-        if (parser_test("src/Test_Program_1.mp", parserOutB, fileOutB)) {
+        if (parser_test(inputB, parserOutB, fileOutB)) {
             System.out.println("pass");
         } else {
             System.out.println("fail!!!");
         }
         
         //  A RANKED TESTS
-//        System.out.println("Running A ranked tests");
-//        if (parser_test(inputA, parserOutA, fileOutA)) {
-//           System.out.println("pass");
-//        } else {
-//            System.out.println("fail!!!");
-//        }
+        System.out.println("Running A ranked tests");
+        if (parser_test(inputA, parserOutA, fileOutA)) {
+           System.out.println("pass");
+        } else {
+            System.out.println("fail!!!");
+        }
+        */
+        String
+            testLoc = "src/Test_Program_1.mp",
+            parseOutput = "testprogram1parse.txt",
+            outputLoc = "Test_Program_1.mm";
+        System.out.println("Running " + testLoc);
+        if (parser_test("src/a-testfile.mp", parseOutput, outputLoc)) {
+           System.out.println("pass");
+        } else {
+            System.out.println("fail!!!");
+        }
     }
 
     /**
