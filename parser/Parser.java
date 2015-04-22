@@ -100,7 +100,8 @@ public class Parser {
         stackTrace += "Block\n";
         switch (getRule(NonTerminal.Block)) {
             case 4:
-                VariableDeclarationPart();
+                ArrayList<Symbol> locals = new ArrayList<>();
+                VariableDeclarationPart(locals);
                 int label = sa.newLabel();
                 //  Jump over the procedures and declarations... for now
                 sa.genBranch(label);
@@ -108,6 +109,7 @@ public class Parser {
                 //  Go right to the statements
                 sa.putLabel(label);
                 StatementPart();
+                sa.removeLocals(locals);
                 sh.popTable();
                 break;
             default:
@@ -119,7 +121,7 @@ public class Parser {
     // Nonterminal 5
     // <VariableDeclarationPart> --> <VariableDeclaration> ; <VariableDeclarationTail> RULE #5
     // <VariableDeclarationPart> --> lambda RULE #6
-    private void VariableDeclarationPart() {
+    private void VariableDeclarationPart(ArrayList<Symbol> locals) {
         stackTrace += "VariableDeclarationPart\n";
         switch (getRule(NonTerminal.VariableDeclarationPart)) {
             case 5:
@@ -129,14 +131,14 @@ public class Parser {
                     String[] err = {"var"};
                     error(err);
                 }
-                VariableDeclaration();
+                VariableDeclaration(locals);
                 if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
                     String[] err = {";"};
                     error(err);
                 }
-                VariableDeclarationTail();
+                VariableDeclarationTail(locals);
                 break;
             case 6:
                 break;
@@ -149,18 +151,18 @@ public class Parser {
     // Nonterminal 6
     // <VariableDeclarationTail> --> <VariableDeclaration> ; <VariableDeclarationTail> RULE #7
     // <VariableDeclarationTail> --> lambda RULE #8
-    private void VariableDeclarationTail() {
+    private void VariableDeclarationTail(ArrayList<Symbol> locals) {
         stackTrace += "VariableDeclarationTail\n";
         switch (getRule(NonTerminal.VariableDeclarationTail)) {
             case 7:
-                VariableDeclaration();
+                VariableDeclaration(locals);
                 if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
                     String[] err = {";"};
                     error(err);
                 }
-                VariableDeclarationTail();
+                VariableDeclarationTail(locals);
                 break;
             case 8:
                 break;
@@ -173,7 +175,7 @@ public class Parser {
 
     // Nonterminal 7
     // VariableDeclaration> --> <IdentifierList> : <Type> RULE #9
-    private void VariableDeclaration() {
+    private void VariableDeclaration(ArrayList<Symbol> locals) {
         stackTrace += "VariableDeclaration\n";
         switch (getRule(NonTerminal.VariableDeclaration)) {
             case 9:
@@ -191,6 +193,7 @@ public class Parser {
                     sh.setType(type);
                     sh.setKind(Kind.VARIABLE);
                     sh.finishEntry();
+                    locals.add(sh.getEntry(s));
                     sa.genStackPush();
                 }
                 break;
@@ -207,8 +210,7 @@ public class Parser {
     // <Type> --> Boolean RULE #13
     private Type Type() {
         stackTrace += "Type\n";
-        int rule = getRule(NonTerminal.Type);
-        switch (rule) {
+        switch (getRule(NonTerminal.Type)) {
             case 10:
                 if (l1.getTerminal() == Terminal.INTEGER) {
                     match();
@@ -289,7 +291,7 @@ public class Parser {
                     String[] err = {";"};
                     error(err);
                 }
-                Block();
+                sh.pushTable();
                 if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
@@ -318,7 +320,6 @@ public class Parser {
                     error(err);
                 }
                 sh.pushTable();
-                Block();
                 if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
@@ -1153,8 +1154,7 @@ public class Parser {
                 String id = ProcedureIdentifier();
                 Symbol procedure = sh.getEntry(id);
                 ArrayList<SemanticRecord> params = OptionalActualParameterList();
-                sa.genProcedureParameters(procedure, params);
-                sa.genProcedureBranch(procedure);
+                sa.prepareCall(procedure, params);
                 break;
             default:
                 String exp[] = {""};

@@ -33,7 +33,7 @@ public class Test {
 //        }
         //  B RANKED TESTS
         System.out.println("Running B ranked tests");
-        if (parser_test(inputB, parserOutB, fileOutB)) {
+        if (parser_test("src/Test_Program_1.mp", parserOutB, fileOutB)) {
             System.out.println("pass");
         } else {
             System.out.println("fail!!!");

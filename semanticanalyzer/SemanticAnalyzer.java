@@ -8,6 +8,7 @@ import java.util.Stack;
 import symboltable.Parameter;
 import symboltable.Symbol;
 import symboltable.SymbolTableHandler;
+import util.Kind;
 import util.Operator;
 import util.Type;
 import util.Writer;
@@ -291,81 +292,87 @@ public class SemanticAnalyzer {
 
     //  A LEVEL
     //  Functions and Procedures
-    public static int nest = 0;
-    
     public void genProcedureLabel(Symbol procedure) {
         w.writeLine("L" + LABEL_COUNTER + ":");
         procedures.put(procedure.name, LABEL_COUNTER++);
     }
-    public void genProcedureParameters(Symbol procedure, ArrayList<SemanticRecord> params) {
-        Parameter p;
-        SemanticRecord r;
-        //  Prepare the next nesting level
-        w.writeLine("MOV SP D" + nest++);
-        for (int i = 0; i < params.size(); i++) {
-            //  Type check
-            try {
-                p = procedure.params.get(i);
-                r = params.get(i);
-            }
-            catch (IndexOutOfBoundsException e) {
-                error("Procedure input is not the same size as the parameter list for "
-                    + procedure.name);
-                break;
-            }
-            if (r.type != p.type) {
-                error("Procedure input is not the same type as the parameter declaration "
-                    + procedure.name);
-                break;
-            }
-            
-            //  push
-            //  Does not care about in vs inout - todo?
-            w.writeLine("PUSH " + r.code);
-        }
-    }
-    public void genProcedureBranch(Symbol procedure) {
-        w.writeLine("CALL L" + procedures.get(procedure.name));
-    }
-    
     public void genFunctionLabel(Symbol function) {
         w.writeLine("L" + LABEL_COUNTER + ":");
         functions.put(function.name, LABEL_COUNTER++);
     }
-    public void genFunctionParameters(Symbol function, ArrayList<SemanticRecord> params) {
-        Parameter p;
-        SemanticRecord r;
+    public void removeLocals(ArrayList<Symbol> locals) {
+        w.writeLine("SUB SP " + locals.size() + " SP");
+    }
+    public void prepareCall(Symbol callLocation, ArrayList<SemanticRecord> actual) {
+        ArrayList<Parameter> formal = callLocation.params;
+        Parameter f;
+        SemanticRecord a;
+        
+        //  Function need one slot just UNDER the new location for return value
+        //  There is also no need to pop this because it will be on top of the
+        //  stack when the stack call has finished.
+        if (callLocation.kind == Kind.FUNCTION) {
+            w.writeLine("ADD SP #1 SP");
+        }
+        
+        //  Preserve the old nesting level
+        w.writeLine("PUSH D" + callLocation.nestinglevel);
+        
         //  Prepare the next nesting level
-        w.writeLine("MOV SP D" + nest++);
-        for (int i = 0; i < params.size(); i++) {
+        w.writeLine("MOV SP D" + callLocation.nestinglevel);
+        for (int i = 0; i < actual.size(); i++) {
             //  Type check
             try {
-                p = function.params.get(i);
-                r = params.get(i);
+                f = formal.get(i);
+                a = actual.get(i);
             }
             catch (IndexOutOfBoundsException e) {
-                error("Function input is not the same size as the parameter list for "
-                    + function.name);
+                error("Procedure input is not the same size as the parameter list for "
+                    + callLocation.name);
                 break;
             }
-            if (r.type != p.type) {
-                error("Function input is not the same type as the parameter declaration "
-                    + function.name);
+            if (a.type != f.type) {
+                error("Procedure input is not the same type as the parameter declaration "
+                    + callLocation.name);
                 break;
             }
             
-            //  push
-            //  Does not care about in vs inout - todo?
-            w.writeLine("PUSH " + r.code);
+            //  push the parameter
+            w.writeLine("PUSH " + a.code);
+        }
+        if (callLocation.kind == Kind.FUNCTION) {            
+            w.writeLine("CALL L" + functions.get(callLocation.name));
+        }
+        else {
+            w.writeLine("CALL L" + procedures.get(callLocation.name));
         }
     }
-    public void genFunctionBranch(Symbol function) {
-        w.writeLine("CALL L" + functions.get(function.name));
+    public void comeFromCall(Symbol callLocation, ArrayList<SemanticRecord> actual) {
+        ArrayList<Parameter> formal = callLocation.params;
+        Parameter f;
+        SemanticRecord a;
+        //  Reverse order because stack
+        for (int i = formal.size() - 1; -1 < i; i--) {
+            //  Type check
+            f = formal.get(i);
+            
+            //  Preserve value
+            if (f.kind == Kind.INOUTPARAMETER) {
+                a = actual.get(i);
+                w.writeLine("POP " + a.code);
+            }
+            else if (f.kind == Kind.INPARAMETER) {
+                w.writeLine("POP");
+            }
+        }
+        
+        //  Restore previous nesting level
+        w.writeLine("POP D" + callLocation.nestinglevel);
     }
-    public void genReturn() {
-        nest--;
-        w.writeLine("RET");
+    public void popToReturnLocation(Symbol function) {
+        
     }
+
 
     /**
      * Push the stack pointer
