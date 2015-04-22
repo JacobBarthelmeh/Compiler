@@ -301,7 +301,7 @@ public class SemanticAnalyzer {
         functions.put(function.name, LABEL_COUNTER++);
     }
     public void removeLocals(ArrayList<Symbol> locals) {
-        w.writeLine("SUB SP " + locals.size() + " SP");
+        w.writeLine("SUB SP #" + locals.size() + " SP");
     }
     public void prepareCall(Symbol callLocation, ArrayList<SemanticRecord> actual) {
         ArrayList<Parameter> formal = callLocation.params;
