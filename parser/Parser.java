@@ -356,7 +356,6 @@ public class Parser {
                 OptionalFormalParameterList();
                 sh.finishEntry();
                 Symbol entry = sh.getEntry(name);
-                sa.genProcedureLabel(entry);
                 sa.onStartFormalCall(entry);
                 ArrayList<Parameter> params = sh.getEntry(name).params;
                 sh.pushTable();
@@ -398,7 +397,6 @@ public class Parser {
                 OptionalFormalParameterList();
                 sh.finishEntry();
                 Symbol entry = sh.getEntry(name);
-                sa.genFunctionLabel(entry);
                 sa.onStartFormalCall(entry);
                 ArrayList<Parameter> params = entry.params;
                 sh.pushTable();

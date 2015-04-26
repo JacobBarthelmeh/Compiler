@@ -4,7 +4,6 @@ import compiler.Compiler;
 import compiler.Token;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Stack;
 import symboltable.Parameter;
 import symboltable.Symbol;
 import symboltable.SymbolTableHandler;
@@ -14,16 +13,31 @@ import util.Type;
 import util.Writer;
 
 public class SemanticAnalyzer {
-    HashMap<String, Integer> procedures, functions;
-   
-    static int LABEL_COUNTER = 0;
+    //  Whether or not errors have arisen - cancels compilation if set to true
     public boolean noerrors = true;
-    Stack<Type> types;
-
+    
     //  Initialization time conflict - just set it public
     public SymbolTableHandler sh;
+    
+    //  A special file writer that only creates/writes to a file if the compile
+    //  was successful.
+    private final Writer w;
+    
+    //  Hashmap provides easy lookup for procedures/functions to know which
+    //  labels to reference. 
+    private final HashMap<String, Integer> callLocations;
+    
+    //  The running coint of how many labels have been made
+    private static int LABEL_COUNTER = 0;
+    
+    //  The writing mode. True for writeln, false for write
+    private boolean writingLine;
 
     //  GENERAL NECESSARY FUNCTIONS
+    /**
+     * Produce an error and cancel compile.
+     * @param err The error message
+     */
     public void error(String err) {
         if (Compiler.DEBUG) {
             System.err.println(err);
@@ -48,12 +62,16 @@ public class SemanticAnalyzer {
         w.close();
     }
     
+    /**
+     * Move something from one place to another.
+     * @param from The place to move from
+     * @param to The place to move to
+     */
     public void genMove(String from, String to) {
         w.writeLine("MOV " + from + " " + to);
     }
 
     //  C LEVEL: EXPRESSIONS, ASSIGNMENTS, READS, WRITES
-    //  HANDLING EXPRESSIONS
     /**
      * Handles casting arithmetic properly to float if necessary
      *
@@ -130,7 +148,9 @@ public class SemanticAnalyzer {
         }
         w.writeLine(opp.code);
     }
-    
+    /**
+     * Generate a negation of a boolean.
+     */
     public void genNot_S() {
         w.writeLine("NOTS");
     }
@@ -152,8 +172,7 @@ public class SemanticAnalyzer {
 
     //  ASSIGNMENT
     /**
-     * Signal the Semantic
-     *
+     * Assign a variable to a destination. Type casting is handled.
      * @param into The location to assign to
      * @param from Where to find the value's type
      */
@@ -168,8 +187,7 @@ public class SemanticAnalyzer {
 
     //  READING
     /**
-     * Signal the Semantic Analyzer that a genRead shall begin
-     *
+     * Read user input into the program.
      * @param rec The record containing the destination to read into
      */
     public void genRead(SemanticRecord rec) {
@@ -202,21 +220,17 @@ public class SemanticAnalyzer {
     }
 
     //  WRITING
-    boolean line;
-
     /**
-     * Signal the Semantic Analyzer that a genWrite_S shall begin
-     *
-     * @param line Whether to writeln
+     * Flag the begin of a write statement
+     * @param writingLine Whether to writeln rather than just write
      */
-    public void startWrite(boolean line) {
-        this.line = line;
+    public void startWrite(boolean writingLine) {
+        this.writingLine = writingLine;
     }
 
     /**
-     * Signal the Semantic Analyzer to genWrite_S
-     *
-     * @param t The Token containing the desired genWrite_S value
+     * Generate a write statement using current writing mode.
+     * @param t The Token containing the desired write value to write
      */
     public void genWrite_S(Token t) {
         String code = "#" + t.getContents();
@@ -227,7 +241,7 @@ public class SemanticAnalyzer {
                 break;
             //  Handle other types
         }
-        if (line) {
+        if (writingLine) {
             w.writeLine("WRTLNS");
         } else {
             w.writeLine("WRTS");
@@ -235,26 +249,44 @@ public class SemanticAnalyzer {
     }
 
     //  B LEVEL
-    //  Prepare conditional branchinG
+    //  Prepare conditional branching
+    /**
+     * Create a new label.
+     * @return The new label value.
+     */
     public int newLabel() {
         return LABEL_COUNTER++;
     }
-
+    /**
+     * Put a label into the program.
+     * @param l  The label to put into the program.
+     */
     public void putLabel(int l) {
         w.writeLine("L" + l + ":");
     }
-
+    /**
+     * Put an unconditional branch to a label.
+     * @param l The label to branch to.
+     */
     public void genBranch(int l) {
         w.writeLine("BR L" + l);
     }
-
+    /**
+     * Put a conditional branch to a label.
+     * @param l The label to branch to if the condition is false.
+     */
     public void genBranchFalse_S(int l) {
         w.writeLine("BRFS L" + l);
     }
-
+    /**
+     * Generate the initialize part of a for statement
+     * @param control The variable to iterate over
+     * @param initial The initial value of that variable
+     */
     public void genForInitialize(SemanticRecord control, SemanticRecord initial) {
         //  It should only ever be an integer... right?
         w.writeLine("PUSH " + initial.code);
+        //  Cast it anyway? lol
         if (initial.type == Type.INTEGER) {
             w.writeLine("POP " + control.code);
         } else if (initial.type == Type.FLOAT) {
@@ -264,7 +296,11 @@ public class SemanticAnalyzer {
             error("Cannot construct a non-numeric iterator");
         }
     }
-
+    /**
+     * Generate the alter part of a for statement
+     * @param control The variable to iterate over
+     * @param increment The iterate direction (up = true, down = false)
+     */
     public void genForAlter(SemanticRecord control, boolean increment) {
         //  to
         if (increment) {
@@ -276,38 +312,26 @@ public class SemanticAnalyzer {
             w.writeLine("SUB " + control.code + " #1 " + control.code);
         }
     }
-
+    /**
+     * Generate the test part of a for statement
+     * @param control The control variable to iterate over
+     * @param increment Whether to iterate up rather than down
+     * @param end The expected end value of the for loop
+     */
     public void genForTest(SemanticRecord control, boolean increment, SemanticRecord end) {
+        //  Push parameters
         w.writeLine("PUSH " + control.code);
         w.writeLine("PUSH " + end.code);
+        //  Test <= or >= depends on whether to use increment or decrement
         if (increment) {
             w.writeLine("CMPLTS");
         } else {
             w.writeLine("CMPGTS");
-            
         }
     }
 
-    //  A LEVEL
-    //  Functions and Procedures
-    /**
-     * Produces a procedure label and saves the label so it can be called later.
-     * @param procedure The procedure to generate a label for
-     */
-    public void genProcedureLabel(Symbol procedure) {
-        w.writeLine("L" + LABEL_COUNTER + ":");
-        procedures.put(procedure.name, LABEL_COUNTER++);
-    }
-    /**
-     * Produces a function label and saves the label so it can be called later.
-     * @param function The function to generate a label for
-     */
-    public void genFunctionLabel(Symbol function) {
-        w.writeLine("L" + LABEL_COUNTER + ":");
-        functions.put(function.name, LABEL_COUNTER++);
-    }
-    
-    //  FUNCTION CALLS
+    //  A LEVEL :3
+    //  FUNCTIONS AND PROCEDURES CALLS
     /*
      * Stack operations:
      * +------+----+------+
@@ -329,12 +353,16 @@ public class SemanticAnalyzer {
      * @param callLocation The location called to
      */
     public void onStartFormalCall(Symbol callLocation) {
+        //  Generate the label to the destination
+        w.writeLine("L" + LABEL_COUNTER + ":");
+        callLocations.put(callLocation.name, LABEL_COUNTER++);
+
         //  Save the return value
         //  Also takes it out from between the parameters and locals
         //  which causes an offset error otherwise
-        w.writeLine("POP -1(D" + (callLocation.nestinglevel + 1) + ")");
         //  Note the nesting level is off by one. This is because the procedure
         //  or function appears in the scope above its own scope
+        w.writeLine("POP -1(D" + (callLocation.nestinglevel + 1) + ")");
     }
     /**
      * Removes the local variables from the current scope.
@@ -387,12 +415,7 @@ public class SemanticAnalyzer {
             //  We don't care if they're in/out until the return
             w.writeLine("PUSH " + a.code);
         }
-        if (callLocation.kind == Kind.FUNCTION) {
-            w.writeLine("CALL L" + functions.get(callLocation.name));
-        }
-        else {
-            w.writeLine("CALL L" + procedures.get(callLocation.name));
-        }
+        w.writeLine("CALL L" + callLocations.get(callLocation.name));
     }
     /**
      * Prepares runtime to come back from a function or procedure call.
@@ -415,21 +438,22 @@ public class SemanticAnalyzer {
         }
         //  Restore the register to its value before the call
         w.writeLine("POP D" + callLocation.nestinglevel);
+        //  Because of the way the return value was only optionally added, there
+        //  is no need for a procedure to worry about it. If it was a function
+        //  call, the return value is now on the top of the stack.
     }
 
     /**
-     * Provides padding on the stack to store a variable
+     * Provides padding on the stack to store a variable.
      */
     public void padForVariable() {
+        //  It's one statement, but the method name helps provide usage
         w.writeLine("ADD SP #1 SP");
     }
     
     public SemanticAnalyzer(String filename, SymbolTableHandler sh) {
         w = new Writer(filename);
         this.sh = sh;
-        procedures = new HashMap<>();
-        functions = new HashMap<>();
+        callLocations = new HashMap<>();
     }
-    
-    private final Writer w;
 }
