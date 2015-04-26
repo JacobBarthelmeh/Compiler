@@ -332,7 +332,9 @@ public class SemanticAnalyzer {
         //  Save the return value
         //  Also takes it out from between the parameters and locals
         //  which causes an offset error otherwise
-        w.writeLine("POP -1(D" + callLocation.nestinglevel + ")");
+        w.writeLine("POP -1(D" + (callLocation.nestinglevel + 1) + ")");
+        //  Note the nesting level is off by one. This is because the procedure
+        //  or function appears in the scope above its own scope
     }
     /**
      * Removes the local variables from the current scope.
@@ -347,7 +349,8 @@ public class SemanticAnalyzer {
      */
     public void onEndFormalCall(Symbol callLocation) {
         //  Restore the return value
-        w.writeLine("PUSH -1(D" + callLocation.nestinglevel + ")");
+        //  Same off-by-one trap
+        w.writeLine("PUSH -1(D" + (callLocation.nestinglevel + 1) + ")");
         //  return
         w.writeLine("RET");
     }
@@ -391,19 +394,6 @@ public class SemanticAnalyzer {
             w.writeLine("CALL L" + procedures.get(callLocation.name));
         }
     }
-    /*
-     * Stack operations:
-     * +------+----+------+
-     * |      |real|      +
-     * +------+----+------+
-     * |local1|  0 | 0(D0)|
-     * |local2|  1 | 1(D0)|
-     * |funret|  2 |-2(D1)|
-     * |old D1|  4 |-1(D1)|
-     * |param1|  6 | 0(D1)|
-     * |param2|  7 | 1(D1)|
-     * +------+----+------+
-     */
     /**
      * Prepares runtime to come back from a function or procedure call.
      * @param callLocation The destination to call to
@@ -424,13 +414,13 @@ public class SemanticAnalyzer {
             }
         }
         //  Restore the register to its value before the call
-        w.writeLine("POP D" + callLocation.nestinglevel + ")");
+        w.writeLine("POP D" + callLocation.nestinglevel);
     }
 
     /**
-     * Push the stack pointer
+     * Provides padding on the stack to store a variable
      */
-    public void genStackPush() {
+    public void padForVariable() {
         w.writeLine("ADD SP #1 SP");
     }
     

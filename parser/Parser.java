@@ -194,7 +194,7 @@ public class Parser {
                     sh.setKind(Kind.VARIABLE);
                     sh.finishEntry();
                     locals.add(sh.getEntry(s));
-                    sa.genStackPush();
+                    sa.padForVariable();
                 }
                 break;
             default:
