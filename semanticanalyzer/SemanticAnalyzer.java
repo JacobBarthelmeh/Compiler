@@ -15,9 +15,7 @@ import util.Writer;
 
 public class SemanticAnalyzer {
     HashMap<String, Integer> procedures, functions;
-    
-    public static SemanticRecord SP = new SemanticRecord(null, null, "SP", "", "", Type.NOTYPE);
-    
+   
     static int LABEL_COUNTER = 0;
     public boolean noerrors = true;
     Stack<Type> types;
@@ -292,87 +290,142 @@ public class SemanticAnalyzer {
 
     //  A LEVEL
     //  Functions and Procedures
+    /**
+     * Produces a procedure label and saves the label so it can be called later.
+     * @param procedure The procedure to generate a label for
+     */
     public void genProcedureLabel(Symbol procedure) {
         w.writeLine("L" + LABEL_COUNTER + ":");
         procedures.put(procedure.name, LABEL_COUNTER++);
     }
+    /**
+     * Produces a function label and saves the label so it can be called later.
+     * @param function The function to generate a label for
+     */
     public void genFunctionLabel(Symbol function) {
         w.writeLine("L" + LABEL_COUNTER + ":");
         functions.put(function.name, LABEL_COUNTER++);
     }
+    
+    //  FUNCTION CALLS
+    /*
+     * Stack operations:
+     * +------+----+------+
+     * |      |real|      +
+     * +------+----+------+
+     * |local1|  0 | 0(D0)|
+     * |local2|  1 | 1(D0)|
+     * |funret|  2 |-2(D1)|
+     * |old D1|  4 |-1(D1)|
+     * |param1|  5 | 0(D1)|
+     * |param2|  6 | 1(D1)|
+     * |  ret |  7 | 2(D1)|//temporary
+     * |local1|  8 | 2(D1)|
+     * |  ret |  9 | 3(D1)|//restingplace
+     * +------+----+------+
+     */
+    /**
+     * Begins the logic at the start of a procedure or function call.
+     * @param callLocation The location called to
+     */
+    public void onStartFormalCall(Symbol callLocation) {
+        //  Save the return value
+        //  Also takes it out from between the parameters and locals
+        //  which causes an offset error otherwise
+        w.writeLine("POP -1(D" + callLocation.nestinglevel + ")");
+    }
+    /**
+     * Removes the local variables from the current scope.
+     * @param locals The list of local variables
+     */
     public void removeLocals(ArrayList<Symbol> locals) {
         w.writeLine("SUB SP #" + locals.size() + " SP");
     }
-    public void prepareCall(Symbol callLocation, ArrayList<SemanticRecord> actual) {
-        ArrayList<Parameter> formal = callLocation.params;
-        Parameter f;
-        SemanticRecord a;
-        
-        //  Function need one slot just UNDER the new location for return value
-        //  There is also no need to pop this because it will be on top of the
-        //  stack when the stack call has finished.
+    /**
+     * Produces a return statement to the appropriate location
+     * @param callLocation The location called to
+     */
+    public void onEndFormalCall(Symbol callLocation) {
+        //  Restore the return value
+        w.writeLine("PUSH -1(D" + callLocation.nestinglevel + ")");
+        //  return
+        w.writeLine("RET");
+    }
+    /**
+     * Prepares a call with the parameters provided and then makes a call to the
+     * procedure or function.
+     * @param callLocation The destination to call to
+     * @param actual The list of actual parameters provided
+     */
+    public void onStartActualCall(Symbol callLocation, ArrayList<SemanticRecord> actual) {
+        //  Make room for the function return if relevant
         if (callLocation.kind == Kind.FUNCTION) {
             w.writeLine("ADD SP #1 SP");
         }
-        
-        //  Preserve the old nesting level
+        //  Save the previous use of the desired nesting register in case of
+        //  same-level calls
         w.writeLine("PUSH D" + callLocation.nestinglevel);
-        
-        //  Prepare the next nesting level
-        w.writeLine("MOV SP D" + callLocation.nestinglevel);
-        for (int i = 0; i < actual.size(); i++) {
-            //  Type check
-            try {
-                f = formal.get(i);
-                a = actual.get(i);
+        ArrayList<Parameter> formal = callLocation.params;
+        //  Error handling
+        if (formal.size() != actual.size()) {
+            error("Call Error: Incorrect number of parameters provided for call"
+                    + " to " + callLocation.name + ". Provided: " + actual.size()
+                    + ". Wanted: " + formal.size());
+            return;
+        }
+        //  Needs to be iterative not iteratorative
+        for (int i = 0; i < formal.size(); i++) {
+            Parameter f = formal.get(i);
+            SemanticRecord a = actual.get(i);
+            if (f.type != a.type) {
+                error("Call Error: Parameter provided is incorrect type.");
+                return;
             }
-            catch (IndexOutOfBoundsException e) {
-                error("Procedure input is not the same size as the parameter list for "
-                    + callLocation.name);
-                break;
-            }
-            if (a.type != f.type) {
-                error("Procedure input is not the same type as the parameter declaration "
-                    + callLocation.name);
-                break;
-            }
-            
-            //  push the parameter
+            //  We don't care if they're in/out until the return
             w.writeLine("PUSH " + a.code);
         }
-        if (callLocation.kind == Kind.FUNCTION) {            
+        if (callLocation.kind == Kind.FUNCTION) {
             w.writeLine("CALL L" + functions.get(callLocation.name));
         }
         else {
             w.writeLine("CALL L" + procedures.get(callLocation.name));
         }
     }
-    public void comeFromCall(Symbol callLocation, ArrayList<SemanticRecord> actual) {
+    /*
+     * Stack operations:
+     * +------+----+------+
+     * |      |real|      +
+     * +------+----+------+
+     * |local1|  0 | 0(D0)|
+     * |local2|  1 | 1(D0)|
+     * |funret|  2 |-2(D1)|
+     * |old D1|  4 |-1(D1)|
+     * |param1|  6 | 0(D1)|
+     * |param2|  7 | 1(D1)|
+     * +------+----+------+
+     */
+    /**
+     * Prepares runtime to come back from a function or procedure call.
+     * @param callLocation The destination to call to
+     * @param actual The list of actual parameters provided for the call
+     */
+    public void onEndActualCall(Symbol callLocation, ArrayList<SemanticRecord> actual) {
         ArrayList<Parameter> formal = callLocation.params;
-        Parameter f;
-        SemanticRecord a;
-        //  Reverse order because stack
-        for (int i = formal.size() - 1; -1 < i; i--) {
-            //  Type check
-            f = formal.get(i);
-            
-            //  Preserve value
+        //  Again must be iterative
+        //  We could save 1/10000000th of a second by decrementing
+        for (int i = 0; i < formal.size(); i++) {
+            Parameter f = formal.get(formal.size() - 1 - i);
+            SemanticRecord a = actual.get(actual.size() - 1 - i);
             if (f.kind == Kind.INOUTPARAMETER) {
-                a = actual.get(i);
                 w.writeLine("POP " + a.code);
             }
-            else if (f.kind == Kind.INPARAMETER) {
-                w.writeLine("POP");
+            else {
+                w.writeLine("SUB SP #1 SP");
             }
         }
-        
-        //  Restore previous nesting level
-        w.writeLine("POP D" + callLocation.nestinglevel);
+        //  Restore the register to its value before the call
+        w.writeLine("POP D" + callLocation.nestinglevel + ")");
     }
-    public void genReturn() {
-        w.writeLine("RET");
-    }
-
 
     /**
      * Push the stack pointer

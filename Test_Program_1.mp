@@ -3,7 +3,7 @@
 {ak;djfa;slkjfd;alskjd}
 
 program lab1;
-    var  otherthing, choice: integer;
+    var  otherThing, choice: integer;
 		floatMathTest: Float;
 		booleanValue: boolean;
 		float_MathTest: string;

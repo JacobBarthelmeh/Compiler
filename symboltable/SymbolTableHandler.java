@@ -49,6 +49,7 @@ public class SymbolTableHandler {
         if (entry == null) {
             throw new RuntimeException("Parameters cannot be added to null entry.");
         }
+        name = name.toLowerCase();
         if (isParam) {
             param.name = name;
         }
@@ -105,6 +106,7 @@ public class SymbolTableHandler {
         nestinglevel--;
     }
     public Symbol getEntry(String lexeme) {
+        lexeme = lexeme.toLowerCase();
         for (int level = nestinglevel; -1 < level; level--) {
             Symbol e = tables[level].getEntry(lexeme);
             if (e != null) {

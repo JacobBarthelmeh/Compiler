@@ -284,7 +284,7 @@ public class Parser {
         stackTrace += "ProcedureDeclaration\n";
         switch (getRule(NonTerminal.ProcedureDeclaration)) {
             case 17:
-                ProcedureHeading();
+                Symbol entry = ProcedureHeading();
                 if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
@@ -292,7 +292,7 @@ public class Parser {
                     error(err);
                 }
                 Block();
-                sa.genReturn();
+                sa.onEndFormalCall(entry);
                 if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
@@ -313,7 +313,7 @@ public class Parser {
         stackTrace += "FunctionDeclaration\n";
         switch (getRule(NonTerminal.FunctionDeclaration)) {
             case 18:
-                FunctionHeading();
+                Symbol entry = FunctionHeading();
                 if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
@@ -321,7 +321,7 @@ public class Parser {
                     error(err);
                 }
                 Block();
-                sa.genReturn();
+                sa.onEndFormalCall(entry);
                 if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
                 } else {
@@ -338,7 +338,7 @@ public class Parser {
 
     // Nonterminal 12
     // <ProcedureHeading> --> procedure <ProcedureIdentifier> <OptionalFormalParameterList> RULE #19
-    private void ProcedureHeading() {
+    private Symbol ProcedureHeading() {
         stackTrace += "ProcedureHeading\n";
         switch (getRule(NonTerminal.ProcedureHeading)) {
             case 19:
@@ -357,6 +357,7 @@ public class Parser {
                 sh.finishEntry();
                 Symbol entry = sh.getEntry(name);
                 sa.genProcedureLabel(entry);
+                sa.onStartFormalCall(entry);
                 ArrayList<Parameter> params = sh.getEntry(name).params;
                 sh.pushTable();
                 for (Parameter p : params) {
@@ -370,17 +371,17 @@ public class Parser {
                     }
                     sh.finishEntry();
                 }
-                break;
+                return entry;
             default:
                 String[] err = {"procedure"};
                 error(err);
-                break;
+                return null;
         }
     }
 
     // Nonterminal 13
     // <FunctionHeading> --> function <FunctionIdentifier> <OptionalFormalParameterList> : <Type> RULE #20
-    private void FunctionHeading() {
+    private Symbol FunctionHeading() {
         stackTrace += "FunctionHeading\n";
         switch (getRule(NonTerminal.FunctionHeading)) {
             case 20:
@@ -398,6 +399,7 @@ public class Parser {
                 sh.finishEntry();
                 Symbol entry = sh.getEntry(name);
                 sa.genFunctionLabel(entry);
+                sa.onStartFormalCall(entry);
                 ArrayList<Parameter> params = entry.params;
                 sh.pushTable();
                 for (Parameter p : params) {
@@ -419,11 +421,11 @@ public class Parser {
                 }
                 Type t = Type();
                 entry.type = t;
-                break;
+                return entry;
             default:
                 String[] err = {"function"};
                 error(err);
-                break;
+                return null;
         }
     }
 
@@ -1155,8 +1157,8 @@ public class Parser {
                 String id = ProcedureIdentifier();
                 Symbol procedure = sh.getEntry(id);
                 ArrayList<SemanticRecord> params = OptionalActualParameterList();
-                sa.prepareCall(procedure, params);
-                sa.comeFromCall(procedure, params);
+                sa.onStartActualCall(procedure, params);
+                sa.onEndActualCall(procedure, params);
                 break;
             default:
                 String exp[] = {""};
@@ -1540,8 +1542,8 @@ public class Parser {
                     sa.genPush(r);
                     Symbol function = sh.getEntry(FunctionIdentifier());
                     ArrayList<SemanticRecord> params = OptionalActualParameterList();
-                    sa.prepareCall(function, params);
-                    sa.comeFromCall(function, params);
+                    sa.onStartActualCall(function, params);
+                    sa.onEndActualCall(function, params);
                     return r;
                 }
             //  Fall through. It wasn't a function, so it should be an identifier.
