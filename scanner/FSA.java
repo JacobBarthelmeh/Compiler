@@ -8,18 +8,19 @@ import util.Terminal;
 public class FSA {
 
     /**
-     * Test a digit and return the token
-     *
-     * @param r
-     * @return
+     * Test a digit and return the token.
+     * @param reader The file reader
+     * @param row The row of the occurrence
+     * @param col The col of the occurrence
+     * @return The token containing the number
      */
-    public static Token TEST_DIGIT(Reader r, int row, int col) {
+    public static Token TEST_DIGIT(Reader reader, int row, int col) {
         String str = "";
         int state = 0;
         Terminal id = Terminal.INTEGER_LIT;
         char c;
         do {
-            c = r.nextChar();
+            c = reader.nextChar();
             switch (state) {
                 case 0:
                     if (c >= '0' && c <= '9') {
@@ -27,7 +28,7 @@ public class FSA {
                         state = 1;
                     } else {
                         //other character found
-                        r.ungetChar(c);
+                        reader.ungetChar(c);
                         return null;
                     }
                     break;
@@ -47,7 +48,7 @@ public class FSA {
                         state = 4;
                     } else {
                         //other character found
-                        r.ungetChar(c);
+                        reader.ungetChar(c);
                         return new Token(str, id, row, col);
                     }
                     break;
@@ -59,8 +60,8 @@ public class FSA {
                         state = 5;
                     } else {
                         //other character found
-                        r.ungetChar(c);
-                        r.ungetChar('.');
+                        reader.ungetChar(c);
+                        reader.ungetChar('.');
                         return new Token(str.subSequence(0, str.length() - 1).toString(), id, row, col);
                     }
                     break;
@@ -75,8 +76,8 @@ public class FSA {
                             state = 6;
                             break;
                         default:
-                            r.ungetChar(c);
-                            r.ungetChar('E');
+                            reader.ungetChar(c);
+                            reader.ungetChar('E');
                             return new Token(str.subSequence(0, str.length() - 1).toString(), id, row, col);
                     }
                     break;
@@ -91,8 +92,8 @@ public class FSA {
                             state = 10;
                             break;
                         default:
-                            r.ungetChar(c);
-                            r.ungetChar('e');
+                            reader.ungetChar(c);
+                            reader.ungetChar('e');
                             return new Token(str.subSequence(0, str.length() - 1).toString(), id, row, col);
                     }
                     break;
@@ -109,7 +110,7 @@ public class FSA {
                         state = 3;
                     } else {
                         //other character found
-                        r.ungetChar(c);
+                        reader.ungetChar(c);
                         return new Token(str, id, row, col);
                     }
                     break;
@@ -121,9 +122,9 @@ public class FSA {
                         state = 7;
                     } else {
                         //other character found
-                        r.ungetChar(c);
-                        r.ungetChar('-');
-                        r.ungetChar('E');
+                        reader.ungetChar(c);
+                        reader.ungetChar('-');
+                        reader.ungetChar('E');
                         return new Token(str.subSequence(0, str.length() - 2).toString(), id, row, col);
                     }
                     break;
@@ -133,7 +134,7 @@ public class FSA {
                         state = 1;
                     } else {
                         //other character found
-                        r.ungetChar(c);
+                        reader.ungetChar(c);
                         return new Token(str, id, row, col);
                     }
                     break;
@@ -145,9 +146,9 @@ public class FSA {
                         state = 7;
                     } else {
                         //other character found
-                        r.ungetChar(c);
-                        r.ungetChar('+');
-                        r.ungetChar('E');
+                        reader.ungetChar(c);
+                        reader.ungetChar('+');
+                        reader.ungetChar('E');
                         return new Token(str.subSequence(0, str.length() - 2).toString(), id, row, col);
                     }
                     break;
@@ -158,9 +159,9 @@ public class FSA {
                         state = 7;
                     } else {
                         //other character found
-                        r.ungetChar(c);
-                        r.ungetChar('-');
-                        r.ungetChar('e');
+                        reader.ungetChar(c);
+                        reader.ungetChar('-');
+                        reader.ungetChar('e');
                         return new Token(str.subSequence(0, str.length() - 2).toString(), id, row, col);
                     }
                     break;
@@ -171,9 +172,9 @@ public class FSA {
                         state = 7;
                     } else {
                         //other character found
-                        r.ungetChar(c);
-                        r.ungetChar('+');
-                        r.ungetChar('e');
+                        reader.ungetChar(c);
+                        reader.ungetChar('+');
+                        reader.ungetChar('e');
                         return new Token(str.subSequence(0, str.length() - 2).toString(), id, row, col);
                     }
                     break;
@@ -186,34 +187,18 @@ public class FSA {
         //End of file fall through
         return new Token(str, id, row, col);
     }
-
-    public static Token TEST_LETTER(Reader r, int row, int col) {
-        //  TODO
-        //  State 0: Accept either _ or letter
-        //      If _ is accepted, move to state 1
-        //      If letter is accepted, move to state 2
-        //  State 1: Accept a letter
-        //      If letter is accepted move to state 2
-        //      If anything else is found, reject
-        //  State 2:
-        //      If a letter is found, loop on 2
-        //      If _ is found, go to state 3
-        //      Otherwise go to state 4
-        //  State 3:
-        //      If a letter is found, go to state 2
-        //      Otherwise reject
-        //  State 4:
-        //      Found identifier! However, it still must be
-        //      run through the reserved words list which 
-        //      can be foudn in the README
+    /**
+     * Tests to see if this is a keyword or identifier
+     * @param reader The file reader
+     * @param row The row of the occurrence
+     * @param col The col of the occurrence
+     * @return The token containing the keyword or identifier
+     */
+    public static Token TEST_LETTER(Reader reader, int row, int col) {
         int state = 0;
-        char c = r.nextChar();
+        char c = reader.nextChar();
         String str = "";
         
-        //  Todd's insertion (because testing was due in the lab)
-        //  Feel free to replace this code with your own. I just didn't
-        //  want to have unfinished code going into the lab since it is
-        //  not actually the focus of the lab
         while (c!= '\u001a') {
             switch (state) {
                 case 0:
@@ -232,26 +217,26 @@ public class FSA {
                     //  This state can only be reached by underscore and it requires
                     //  that there be an alphanumeric directly after all underscores
                 case 1:
-                    c = r.peekChar();
+                    c = reader.peekChar();
                     if (c <= 'z' && c >= 'a' || c <= 'Z' && c >= 'A' || c <= '9' && c >= '0') {
                         state = 2;
                         str += c;
-                        r.nextChar();
+                        reader.nextChar();
                         break;
                     }
                     return new Token(str, Terminal.IDENTIFIER, row, col);
                 case 2:
-                    c = r.peekChar();
+                    c = reader.peekChar();
                     if (c == '_') {
                         state = 1;
                         str += c;
-                        r.nextChar();
+                        reader.nextChar();
                         break;
                     }
                     if (c <= 'z' && c >= 'a' || c <= 'Z' && c >= 'A' || c <= '9' && c >= '0') {
                         state = 2;
                         str += c;
-                        r.nextChar();
+                        reader.nextChar();
                         break;
                     }
                     //  No underscore or character- c is peeking at the first char
@@ -262,7 +247,10 @@ public class FSA {
                     break;
             }
         }
-        switch (str.toLowerCase()) {
+        //  This language is case-insensitive. Includes keywords and identifiers.
+        str = str.toLowerCase();
+        switch (str) {
+            //  1 bytecode :3
             case "and": return new Token(str, Terminal.AND, row, col);
             case "begin": return new Token(str, Terminal.BEGIN, row, col);
             case "boolean": return new Token(str, Terminal.BOOLEAN, row, col);
@@ -296,154 +284,18 @@ public class FSA {
             case "writeln": return new Token(str, Terminal.WRITELN, row, col);
             default: return new Token(str, Terminal.IDENTIFIER, row, col);
         }
-        
-        /*
-        Robert's Code
-        //  Accept all consecutive alphanumeric characters (with _ included)
-        while (c != '\u001a') {
-            c = r.peekChar();
-            //  Note- numbers are permitted after the first letter is read
-
-            //  Also note: Use of Regex (which means all .matches) is not allowed in this project
-            if (("" + c).matches("(a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|0|1|2|3|4|5|6|7|8|9|\\_)")) {
-                str += c;
-                switch (state) {
-                    //  State 0: Accept either _ or letter
-                    //      If _ is accepted, move to state 1
-                    //      If letter is accepted, move to state 2
-                    case 0:
-                        if (c == '_') {
-                            state = 1;
-                        } else { // alphabetic character received
-                            state = 2;
-                        }
-                        break;
-
-                    //      If letter is accepted move to state 2
-                    //      If anything else is found, reject
-                    case 1:
-                        // if the character read in is alphanumeric....
-                        if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
-                            state = 2;
-                            break;
-                        } // if it isn't alphanumeric return null
-                        else {
-                            return null;
-                        }
-
-                    //  State 2:
-                    //      If a letter is found, loop on 2
-                    //      If _ is found, go to state 3
-                    //      Otherwise go to state 4
-                    case 2:
-                        // Letter found
-                        if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
-                            state = 2;
-                        } // '_' found
-                        else if (c == '_') {
-                            state = 3;
-                        } else {
-                            state = 4;
-                        }
-                        break;
-
-                    //  State 3:
-                    //      If a letter is found, go to state 2
-                    //      Otherwise reject
-                    case 3:
-                        // Alphanumeric found, go to state 2
-                        if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
-                            state = 2;
-                        } // No alphanumeric found, reject
-                        else {
-                            return null;
-                        }
-                }
-            }
-            r.nextChar();
-        }
-        if (state == 4) {
-            //  Switch is a machine-level hashmap
-            switch (str) {
-                case "and":
-                    return new Token(str, Terminal.AND);
-                case "begin":
-                    return new Token(str, Terminal.BEGIN);
-                case "Boolean":
-                    return new Token(str, Terminal.BOOLEAN);
-                case "div":
-                    return new Token(str, Terminal.DIV);
-                case "do":
-                    return new Token(str, Terminal.DO);
-                case "downto":
-                    return new Token(str, Terminal.DOWNTO);
-                case "else":
-                    return new Token(str, Terminal.ELSE);
-                case "end":
-                    return new Token(str, Terminal.END);
-                case "flase":
-                    return new Token(str, Terminal.FALSE);
-                case "fixed":
-                    return new Token(str, Terminal.FIXED);
-                case "float":
-                    return new Token(str, Terminal.FLOAT);
-                case "for":
-                    return new Token(str, Terminal.FOR);
-                case "function":
-                    return new Token(str, Terminal.FUNCTION);
-                case "if":
-                    return new Token(str, Terminal.IF);
-                case "integer":
-                    return new Token(str, Terminal.INTEGER);
-                case "mod":
-                    return new Token(str, Terminal.MOD);
-                case "not":
-                    return new Token(str, Terminal.NOT);
-                case "or":
-                    return new Token(str, Terminal.OR);
-                case "procedure":
-                    return new Token(str, Terminal.PROCEDURE);
-                case "program":
-                    return new Token(str, Terminal.PROGRAM);
-                case "read":
-                    return new Token(str, Terminal.READ);
-                case "repeat":
-                    return new Token(str, Terminal.REPEAT);
-                case "string":
-                    return new Token(str, Terminal.STRING);
-                case "then":
-                    return new Token(str, Terminal.THEN);
-                case "true":
-                    return new Token(str, Terminal.TRUE);
-                case "to":
-                    return new Token(str, Terminal.TO);
-                case "type":
-                    return new Token(str, Terminal.TYPE);
-                case "until":
-                    return new Token(str, Terminal.UNTIL);
-                case "var":
-                    return new Token(str, Terminal.VAR);
-                case "while":
-                    return new Token(str, Terminal.WHILE);
-                case "write":
-                    return new Token(str, Terminal.WRITE);
-                case "writeln":
-                    return new Token(str, Terminal.WRITELN);
-                default:
-                    return new Token("identifer:" + str, Terminal.IDENTIFIER);
-            }
-        }
-        r.nextChar();
-
-        System.out.println("ERROR: Reached endline for LETTER FSA");
-        return null;
-        */
     }
-
-    public static Token TEST_STRING_LIT(Reader r, int row, int col) {
+    /**
+     * Tests to see if this is a string literal
+     * @param reader The file to read from
+     * @param row The row of the occurrence
+     * @param col The col of the occurrence
+     * @return The token with the string
+     */
+    public static Token TEST_STRING_LIT(Reader reader, int row, int col) {
         String str = "";
         int state = 0;
-        char c = r.nextChar();  //  1 char accepted
+        char c = reader.nextChar();  //  1 char accepted
 
         //  Precondition: first character is the first character in the token
         while (c != '\u001a') {
@@ -467,7 +319,7 @@ public class FSA {
                  Stay in the state otherwise
                  */
                 case 1:
-                    c = r.nextChar();
+                    c = reader.nextChar();
                     str += c;
                     if (c == '\'') {
                         state = 2;
@@ -489,11 +341,17 @@ public class FSA {
         }
         return null;
     }
-
-    public static Token TEST_COLON(Reader r, int row, int col) {
+    /**
+     * Tests to see if this is an := or :
+     * @param reader The file reader
+     * @param row The row of the occurrence
+     * @param col The col of the occurrence
+     * @return The token containing the result
+     */
+    public static Token TEST_COLON(Reader reader, int row, int col) {
         String str = "";
         int state = 0;
-        char c = r.nextChar();
+        char c = reader.nextChar();
         //  Precondition: first character is the first character in the machine
         while (c != '\u001a') {
             switch (state) {
@@ -516,7 +374,7 @@ public class FSA {
                  Accept : otherwise
                  */
                 case 1:
-                    c = r.peekChar();   //  Don't want to accept always
+                    c = reader.peekChar();   //  Don't want to accept always
                     if (c == '=') {
                         str += c;       //  save the := symbol
                         state = 2;      //  Move to accept assign
@@ -528,7 +386,7 @@ public class FSA {
                  Accept :=
                  */
                 case 2:
-                    r.nextChar();   //  keep the found token (pc met!)
+                    reader.nextChar();   //  keep the found token (pc met!)
                     return new Token(str, Terminal.ASSIGN, row, col);
                 //  Postcondition: c points to the character after this token
             }
@@ -538,10 +396,17 @@ public class FSA {
         return null;
     }
 
-    public static Token TEST_LTHAN(Reader r, int row, int col) {
+    /**
+     * Tests to see if this is < or <= or <>
+     * @param reader The file reader
+     * @param row The row of the occurrence
+     * @param col The col of the occurrence
+     * @return The token containing the result
+     */
+    public static Token TEST_LTHAN(Reader reader, int row, int col) {
         String str = "";
         int state = 0;
-        char c = r.nextChar();
+        char c = reader.nextChar();
         //  Precondition: first character is the first character in the machine
         while (c != '\u001a') {
             switch (state) {
@@ -566,7 +431,7 @@ public class FSA {
                  */
                 case 1:
                     //  Don't always accept the next character
-                    c = r.peekChar();
+                    c = reader.peekChar();
                     if (c == '=') {
                         str += c;
                         state = 2;
@@ -583,13 +448,13 @@ public class FSA {
                  Accept <=
                  */
                 case 2:
-                    r.nextChar();   //  now points after = (pc met!)
+                    reader.nextChar();   //  now points after = (pc met!)
                     return new Token(str, Terminal.LEQUAL, row, col);
                 /*  State 3:
                  Accept <>
                  */
                 case 3:
-                    r.nextChar();   //  now points after = (pc met!)
+                    reader.nextChar();   //  now points after = (pc met!)
                     return new Token(str, Terminal.NEQUAL, row, col);
             }
         }
@@ -597,10 +462,16 @@ public class FSA {
         System.out.println("ERROR: Reached endline for LTHANFSA");
         return null;
     }
-
-    public static Token TEST_GTHAN(Reader r, int row, int col) {
+    /**
+     * Tests to see if this is < or <=
+     * @param reader The file reader
+     * @param row The row of the occurrence
+     * @param col The col of the occurrence
+     * @return The result
+     */
+    public static Token TEST_GTHAN(Reader reader, int row, int col) {
         String str = "";
-        char c = r.nextChar();
+        char c = reader.nextChar();
         int state = 0;
         while (c != '\u001a') {
             switch (state) {
@@ -622,7 +493,7 @@ public class FSA {
                  Accept > otherwise
                  */
                 case 1:
-                    c = r.peekChar();
+                    c = reader.peekChar();
                     if (c == '=') {
                         str += c;
                         state = 2;
@@ -635,112 +506,12 @@ public class FSA {
 
                  */
                 case 2:
-                    r.nextChar();   //  accept the = so the pc is met
+                    reader.nextChar();   //  accept the = so the pc is met
                     return new Token(str, Terminal.GEQUAL, row, col);
             }
         }
         //  This should never happen;
         System.out.println("ERROR: Reached endline for GTHAN FSA");
-        return null;
-    }
-
-    public static Token TEST_COMMA(Reader r, int row, int col) {
-        char c = r.nextChar();
-        if (c == ',') {
-            return new Token(",", Terminal.COMMA, row, col);
-        }
-        //  This should never happen
-        System.out.println("ERROR: Reached endline for COMMA FSA");
-        return null;
-    }
-
-    public static Token TEST_EQUAL(Reader r, int row, int col) {
-        char c = r.nextChar();
-        if (c == '=') {
-            return new Token("=", Terminal.EQUAL, row, col);
-        }
-        //  This should never happen
-        System.out.println("ERROR: Reached endline for EQUAL FSA");
-        return null;
-    }
-
-    public static Token TEST_FLOAT_DIVIDE(Reader r, int row, int col) {
-        char c = r.nextChar();
-        if (c == '/') {
-            return new Token("/", Terminal.FLOAT_DIVIDE, row, col);
-        }
-        //  This should never happen
-        System.out.println("ERROR: Reached endline for FLOAT_DIVIDE FSA");
-        return null;
-    }
-
-    public static Token TEST_LPAREN(Reader r, int row, int col) {
-        char c = r.nextChar();
-        if (c == '(') {
-            return new Token("(", Terminal.LPAREN, row, col);
-        }
-        //  This should never happen
-        System.out.println("ERROR: Reached endline for LPAREN FSA");
-        return null;
-    }
-
-    public static Token TEST_RPAREN(Reader r, int row, int col) {
-        char c = r.nextChar();
-        if (c == ')') {
-            return new Token(")", Terminal.RPAREN, row, col);
-        }
-        //  This should never happen
-        System.out.println("ERROR: Reached endline for RPAREN FSA");
-        return null;
-    }
-
-    public static Token TEST_MINUS(Reader r, int row, int col) {
-        char c = r.nextChar();
-        if (c == '-') {
-            return new Token("-", Terminal.MINUS, row, col);
-        }
-        //  This should never happen
-        System.out.println("ERROR: Reached endline for MINUS FSA");
-        return null;
-    }
-
-    public static Token TEST_PERIOD(Reader r, int row, int col) {
-        char c = r.nextChar();
-        if (c == '.') {
-            return new Token(".", Terminal.PERIOD, row, col);
-        }
-        //  This should never happen
-        System.out.println("ERROR: Reached endline for PERIOD FSA");
-        return null;
-    }
-
-    public static Token TEST_PLUS(Reader r, int row, int col) {
-        char c = r.nextChar();
-        if (c == '+') {
-            return new Token("+", Terminal.PLUS, row, col);
-        }
-        //  This should never happen
-        System.out.println("ERROR: Reached endline for PLUS FSA");
-        return null;
-    }
-
-    public static Token TEST_SCOLON(Reader r, int row, int col) {
-        char c = r.nextChar();
-        if (c == ';') {
-            return new Token(";", Terminal.SCOLON, row, col);
-        }
-        //  This should never happen
-        System.out.println("ERROR: Reached endline for SCOLON FSA");
-        return null;
-    }
-
-    public static Token TEST_TIMES(Reader r, int row, int col) {
-        char c = r.nextChar();
-        if (c == '*') {
-            return new Token("*", Terminal.TIMES, row, col);
-        }
-        //  This should never happen
-        System.out.println("ERROR: Reached endline for TIMES FSA");
         return null;
     }
 }

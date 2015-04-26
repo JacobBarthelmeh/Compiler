@@ -1,5 +1,4 @@
 package parser;
-
 import compiler.Compiler;
 import compiler.Token;
 import symboltable.Parameter;
@@ -21,7 +20,6 @@ public class Parser {
     // See Complete-LL(1)-Table-2015-03-10.xlsx for information
     // Nonterminal 1
     // <SystemGoal> --> <Program> EOF RULE #1
-
     private void SystemGoal() {
         stackTrace += "SystemGoal\n";
         switch (getRule(NonTerminal.SystemGoal)) {
@@ -353,7 +351,7 @@ public class Parser {
                 sh.setName(name);
                 sh.setType(Type.NOTYPE);
                 sh.setKind(Kind.PROCEDURE);
-                OptionalFormalParameterList();
+                OptionalFormalParameterList();  //  <-- Parser component
                 sh.finishEntry();
                 Symbol entry = sh.getEntry(name);
                 sa.onStartFormalCall(entry);
@@ -394,7 +392,7 @@ public class Parser {
                 sh.startEntry();
                 sh.setName(name);
                 sh.setKind(Kind.FUNCTION);
-                OptionalFormalParameterList();
+                OptionalFormalParameterList();  //  <-- Parser component
                 sh.finishEntry();
                 Symbol entry = sh.getEntry(name);
                 sa.onStartFormalCall(entry);

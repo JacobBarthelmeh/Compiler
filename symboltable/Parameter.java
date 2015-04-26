@@ -1,5 +1,4 @@
 package symboltable;
-
 import util.Kind;
 import util.Type;
 public class Parameter {
@@ -11,6 +10,7 @@ public class Parameter {
         this.type = type;
         this.kind = kind;
     }
+    @Override
     public String toString() {
         return "(" + name + ":" + type + "," + kind + ")";
     }
