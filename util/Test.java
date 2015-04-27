@@ -49,11 +49,11 @@ public class Test {
         }
         */
         String
-            testLoc = "src/Test_Program_1.mp",
+            testLoc = "Test_Program_1.mp",
             parseOutput = "testprogram1parse.txt",
             outputLoc = "Test_Program_1.mm";
         System.out.println("Running " + testLoc);
-        if (parser_test("src/a-testfile.mp", parseOutput, outputLoc)) {
+        if (parser_test("Test_Program_1.mp", parseOutput, outputLoc)) {
            System.out.println("pass");
         } else {
             System.out.println("fail!!!");

@@ -1,4 +1,5 @@
 package parser;
+
 import compiler.Compiler;
 import compiler.Token;
 import symboltable.Parameter;
@@ -24,9 +25,13 @@ public class Parser {
         stackTrace += "SystemGoal\n";
         switch (getRule(NonTerminal.SystemGoal)) {
             case 1:
+                //push registers on stack so that they can be restored after run
+                sa.genStoreRegisters();
                 Program(); // nonterminal 2
                 if (l1.getTerminal() == Terminal.EOF) {
                     match();
+                    //restore the register values
+                    sa.genRestoreRegisters();
                     //  Closes the file to complete genWrite_S
                     sa.genHalt();
                 } else {
@@ -110,12 +115,7 @@ public class Parser {
             case 4:
                 ArrayList<Symbol> locals = new ArrayList<>();
                 VariableDeclarationPart(locals);
-                int label = sa.newLabel();
-                //  Jump over the procedures and declarations... for now
-                sa.genBranch(label);
                 ProcedureAndFunctionDeclarationPart();
-                //  Go right to the statements
-                sa.putLabel(label);
                 StatementPart();
                 sa.removeLocals(locals);
                 sh.popTable();
@@ -270,12 +270,22 @@ public class Parser {
         stackTrace += "ProcedureAndFunctionDeclarationPart\n";
         switch (getRule(NonTerminal.ProcedureAndFunctionDeclarationPart)) {
             case 14:
+                int label = sa.newLabel();
+                //  Jump over the procedures and declarations... for now
+                sa.genBranch(label);
                 ProcedureDeclaration();
                 ProcedureAndFunctionDeclarationPart();
+                //  Go right to the statements
+                sa.putLabel(label);
                 break;
             case 15:
+                label = sa.newLabel();
+                //  Jump over the procedures and declarations... for now
+                sa.genBranch(label);
                 FunctionDeclaration();
                 ProcedureAndFunctionDeclarationPart();
+                //  Go right to the statements
+                sa.putLabel(label);
                 break;
             case 16:
                 break;
@@ -335,7 +345,7 @@ public class Parser {
                 } else {
                     String[] err = {";"};
                     error(err);
-                }                
+                }
                 break;
             default:
                 String[] err = {";"};
