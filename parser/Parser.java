@@ -48,7 +48,17 @@ public class Parser {
         switch (getRule(NonTerminal.Program)) {
             case 2:
                 sh.pushTable(); //  Construct the original table
-                sa.genMove("SP", "D0");  //  Must initialize D0
+                //  Initialize the registers
+                sa.genMove("SP", "D0");
+                sa.genMove("SP", "D1");
+                sa.genMove("SP", "D2");
+                sa.genMove("SP", "D3");
+                sa.genMove("SP", "D4");
+                sa.genMove("SP", "D5");
+                sa.genMove("SP", "D6");
+                sa.genMove("SP", "D7");
+                sa.genMove("SP", "D8");
+                sa.genMove("SP", "D9");
                 ProgramHeading(); // nonterminal 3
                 if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
