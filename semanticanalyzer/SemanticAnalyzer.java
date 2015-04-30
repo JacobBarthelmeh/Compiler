@@ -53,25 +53,27 @@ public class SemanticAnalyzer {
      * @param rec What to push onto the stack
      */
     public void genPush(SemanticRecord rec) {
-        w.writeLine("PUSH " + rec.code);
+        if (rec.symbol != null && rec.symbol.kind == Kind.INOUTVARIABLE) {
+            w.writeLine("PUSH @" + rec.code);
+        } else {
+            w.writeLine("PUSH " + rec.code);
+        }
     }
 
     /**
-     * Used for storing register values on the stack
+     * Used for storing register values on the stack when starting the program
      */
-    public void genStoreRegisters() {
-        for (int i = 0; i < 10; i++) {
-            w.writeLine("PUSH D" + i);
-        }
+    public void genStoreRegisters(int nestingL) {
+        w.writeLine("PUSH D" + nestingL);
+        w.writeLine("MOV SP D" + nestingL);
     }
 
     /**
      * Used for restoring register values after program run
      */
-    public void genRestoreRegisters() {
-        for (int i = 9; i >= 0; i--) {
-            w.writeLine("POP D" + i);
-        }
+    public void genRestoreRegisters(int nestingL) {
+        w.writeLine("MOV D" + nestingL + " SP");
+        w.writeLine("POP D" + nestingL);
     }
 
     /**
@@ -205,7 +207,15 @@ public class SemanticAnalyzer {
         if (into.type == Type.INTEGER && from.type == Type.FLOAT) {
             w.writeLine("CASTSI");
         }
-        w.writeLine("POP " + into.code);
+        if (from.symbol != null && from.symbol.kind == Kind.FUNCTION) {// & from.symbol.kind == Kind.FUNCTION) {
+            //push returned value onto the stack
+            w.writeLine("PUSH " + from.code);
+        }
+        if (into.symbol.kind == Kind.INOUTPARAMETER) {
+            w.writeLine("POP @" + into.code);
+        } else {
+            w.writeLine("POP " + into.code);
+        }
     }
 
     //  READING
@@ -371,38 +381,29 @@ public class SemanticAnalyzer {
 
     //  A LEVEL :3
     //  FUNCTIONS AND PROCEDURES CALLS
-    /*
-     * Stack operations:
-     * +------+----+------+
-     * |      |real|      +
-     * +------+----+------+
-     * |local1|  0 | 0(D0)|
-     * |local2|  1 | 1(D0)|
-     * |funret|  2 |-2(D1)|
-     * |old D1|  4 |-1(D1)|
-     * |param1|  5 | 0(D1)|
-     * |param2|  6 | 1(D1)|
-     * |  ret |  7 | 2(D1)|//temporary
-     * |local1|  8 | 2(D1)|
-     * |  ret |  9 | 3(D1)|//restingplace
-     * +------+----+------+
-     */
     /**
      * Begins the logic at the start of a procedure or function call.
      *
      * @param callLocation The location called to
      */
     public void onStartFormalCall(Symbol callLocation) {
+
+        ArrayList<Parameter> params = callLocation.params;
+        int nestingL = sh.nestinglevel;
+
         //  Generate the label to the destination
         w.writeLine("L" + LABEL_COUNTER + ":");
         callLocations.put(callLocation.name, LABEL_COUNTER++);
 
-        //  Save the return value
-        //  Also takes it out from between the parameters and locals
-        //  which causes an offset error otherwise
-        //  Note the nesting level is off by one. This is because the procedure
-        //  or function appears in the scope above its own scope
-        w.writeLine("POP -1(D" + (callLocation.nestinglevel + 1) + ")");
+        //store register
+        genStoreRegisters(nestingL);
+
+        w.writeLine("ADD SP #" + params.size() + " SP");
+        int offset = 4 + params.size();
+        for (int i = 0; i < params.size(); i++) {
+            w.writeLine("MOV " + (i - offset) + "(SP) "
+                    + sh.getEntry(params.get(i).name).offset + "(D" + nestingL + ")");
+        }
     }
 
     /**
@@ -411,7 +412,7 @@ public class SemanticAnalyzer {
      * @param locals The list of local variables
      */
     public void removeLocals(ArrayList<Symbol> locals) {
-        w.writeLine("SUB SP #" + locals.size() + " SP");
+        //w.writeLine("SUB SP #" + locals.size() + " SP");
     }
 
     /**
@@ -420,9 +421,9 @@ public class SemanticAnalyzer {
      * @param callLocation The location called to
      */
     public void onEndFormalCall(Symbol callLocation) {
-        //  Restore the return value
-        //  Same off-by-one trap
-        w.writeLine("PUSH -1(D" + (callLocation.nestinglevel + 1) + ")");
+
+        //restore register used
+        genRestoreRegisters(sh.nestinglevel + 1);
         //  return
         w.writeLine("RET");
     }
@@ -435,13 +436,6 @@ public class SemanticAnalyzer {
      * @param actual The list of actual parameters provided
      */
     public void onStartActualCall(Symbol callLocation, ArrayList<SemanticRecord> actual) {
-        //  Make room for the function return if relevant
-        if (callLocation.kind == Kind.FUNCTION) {
-            w.writeLine("ADD SP #1 SP");
-        }
-        //  Save the previous use of the desired nesting register in case of
-        //  same-level calls
-        w.writeLine("PUSH D" + callLocation.nestinglevel);
         ArrayList<Parameter> formal = callLocation.params;
         //  Error handling
         if (formal.size() != actual.size()) {
@@ -458,8 +452,14 @@ public class SemanticAnalyzer {
                 error("Call Error: Parameter provided is incorrect type.");
                 return;
             }
-            //  We don't care if they're in/out until the return
-            w.writeLine("PUSH " + a.code);
+            if (f.kind == Kind.INOUTPARAMETER) {
+                //Put address of variable onto the stack
+                w.writeLine("PUSH D" + a.symbol.nestinglevel);
+                w.writeLine("PUSH #" + a.symbol.offset);
+                w.writeLine("ADDS");
+            } else {
+                w.writeLine("PUSH " + a.code);
+            }
         }
         w.writeLine("CALL L" + callLocations.get(callLocation.name));
     }
@@ -471,20 +471,20 @@ public class SemanticAnalyzer {
      * @param actual The list of actual parameters provided for the call
      */
     public void onEndActualCall(Symbol callLocation, ArrayList<SemanticRecord> actual) {
-        ArrayList<Parameter> formal = callLocation.params;
-        //  Again must be iterative
-        //  We could save 1/10000000th of a second by decrementing
-        for (int i = 0; i < formal.size(); i++) {
-            Parameter f = formal.get(formal.size() - 1 - i);
-            SemanticRecord a = actual.get(actual.size() - 1 - i);
-            if (f.kind == Kind.INOUTPARAMETER) {
-                w.writeLine("POP " + a.code);
-            } else {
-                w.writeLine("SUB SP #1 SP");
-            }
-        }
-        //  Restore the register to its value before the call
-        w.writeLine("POP D" + callLocation.nestinglevel);
+//        ArrayList<Parameter> formal = callLocation.params;
+//        //  Again must be iterative
+//        //  We could save 1/10000000th of a second by decrementing
+//        for (int i = 0; i < formal.size(); i++) {
+//            Parameter f = formal.get(formal.size() - 1 - i);
+//            SemanticRecord a = actual.get(actual.size() - 1 - i);
+//            if (f.kind == Kind.INOUTPARAMETER) {
+//                w.writeLine("POP " + a.code);
+//            } else {
+//                w.writeLine("SUB SP #1 SP");
+//            }
+//        }
+//        //  Restore the register to its value before the call
+//        w.writeLine("POP D" + callLocation.nestinglevel);
         //  Because of the way the return value was only optionally added, there
         //  is no need for a procedure to worry about it. If it was a function
         //  call, the return value is now on the top of the stack.

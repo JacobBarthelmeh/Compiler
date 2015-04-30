@@ -25,13 +25,9 @@ public class Parser {
         stackTrace += "SystemGoal\n";
         switch (getRule(NonTerminal.SystemGoal)) {
             case 1:
-                //push registers on stack so that they can be restored after run
-                sa.genStoreRegisters();
                 Program(); // nonterminal 2
                 if (l1.getTerminal() == Terminal.EOF) {
                     match();
-                    //restore the register values
-                    sa.genRestoreRegisters();
                     //  Closes the file to complete genWrite_S
                     sa.genHalt();
                 } else {
@@ -53,17 +49,9 @@ public class Parser {
         switch (getRule(NonTerminal.Program)) {
             case 2:
                 sh.pushTable(); //  Construct the original table
-                //  Initialize the registers
-                sa.genMove("SP", "D0");
-                sa.genMove("SP", "D1");
-                sa.genMove("SP", "D2");
-                sa.genMove("SP", "D3");
-                sa.genMove("SP", "D4");
-                sa.genMove("SP", "D5");
-                sa.genMove("SP", "D6");
-                sa.genMove("SP", "D7");
-                sa.genMove("SP", "D8");
-                sa.genMove("SP", "D9");
+                int nestingL = sh.nestinglevel;
+                //push registers on stack so that they can be restored after run
+                sa.genStoreRegisters(nestingL);
                 ProgramHeading(); // nonterminal 3
                 if (l1.getTerminal() == Terminal.SCOLON) {
                     match();
@@ -78,6 +66,8 @@ public class Parser {
                     String[] err = {"."};
                     error(err);
                 }
+                //restore the register values
+                sa.genRestoreRegisters(nestingL);
                 break;
             default:
                 String[] err = {"program"};
@@ -374,7 +364,6 @@ public class Parser {
                 OptionalFormalParameterList();  //  <-- Parser component
                 sh.finishEntry();
                 Symbol entry = sh.getEntry(name);
-                sa.onStartFormalCall(entry);
                 ArrayList<Parameter> params = sh.getEntry(name).params;
                 sh.pushTable();
                 for (Parameter p : params) {
@@ -388,6 +377,7 @@ public class Parser {
                     }
                     sh.finishEntry();
                 }
+                sa.onStartFormalCall(entry);
                 return entry;
             default:
                 String[] err = {"procedure"};
@@ -415,7 +405,6 @@ public class Parser {
                 OptionalFormalParameterList();  //  <-- Parser component
                 sh.finishEntry();
                 Symbol entry = sh.getEntry(name);
-                sa.onStartFormalCall(entry);
                 ArrayList<Parameter> params = entry.params;
                 sh.pushTable();
                 for (Parameter p : params) {
@@ -429,6 +418,7 @@ public class Parser {
                     }
                     sh.finishEntry();
                 }
+                sa.onStartFormalCall(entry);
                 if (l1.getTerminal() == Terminal.COLON) {
                     match();
                 } else {
@@ -921,10 +911,13 @@ public class Parser {
                 }
                 break;
             case 55://rule 55
+                t = l1;
                 FunctionIdentifier(); //rule 55
                 if (l1.getTerminal() == Terminal.ASSIGN) {
                     match();
-                    Expression();
+                    SemanticRecord returnstuff = Expression();
+                    sa.genAssignment(new SemanticRecord(t, sh.getEntry(t.getContents())), returnstuff);
+
                 } else {
                     String[] err = {"assign"};
                     error(err);
@@ -1555,7 +1548,6 @@ public class Parser {
                 Symbol entry = sh.getEntry(l1.getContents());
                 if (entry.kind == Kind.FUNCTION) {
                     r = new SemanticRecord(l1, entry);
-                    sa.genPush(r);
                     Symbol function = sh.getEntry(FunctionIdentifier());
                     ArrayList<SemanticRecord> params = OptionalActualParameterList();
                     sa.onStartActualCall(function, params);
