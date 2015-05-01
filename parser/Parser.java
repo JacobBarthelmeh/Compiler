@@ -1165,7 +1165,9 @@ public class Parser {
             case 67://rule 67
                 String id = ProcedureIdentifier();
                 Symbol procedure = sh.getEntry(id);
+                sa.funcCall = true;
                 ArrayList<SemanticRecord> params = OptionalActualParameterList();
+                sa.funcCall = false;
                 sa.onStartActualCall(procedure, params);
                 sa.onEndActualCall(procedure, params);
                 break;
@@ -1549,7 +1551,9 @@ public class Parser {
                 if (entry.kind == Kind.FUNCTION) {
                     r = new SemanticRecord(l1, entry);
                     Symbol function = sh.getEntry(FunctionIdentifier());
+                    sa.funcCall = true;
                     ArrayList<SemanticRecord> params = OptionalActualParameterList();
+                    sa.funcCall = false;
                     sa.onStartActualCall(function, params);
                     sa.onEndActualCall(function, params);
                     return r;

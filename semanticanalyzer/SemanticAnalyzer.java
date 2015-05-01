@@ -34,6 +34,9 @@ public class SemanticAnalyzer {
     //  The writing mode. True for writeln, false for write
     private boolean writingLine;
 
+    // tell if processing parameters
+    public boolean funcCall;
+
     //  GENERAL NECESSARY FUNCTIONS
     /**
      * Produce an error and cancel compile.
@@ -53,8 +56,34 @@ public class SemanticAnalyzer {
      * @param rec What to push onto the stack
      */
     public void genPush(SemanticRecord rec) {
-        if (rec.symbol != null && rec.symbol.kind == Kind.INOUTVARIABLE) {
-            w.writeLine("PUSH @" + rec.code);
+        if (rec.symbol != null) {
+            switch (rec.symbol.kind) {
+                case INOUTVARIABLE:
+                    if (funcCall) {
+                        w.writeLine("PUSH " + rec.code);
+                    } else {
+                        w.writeLine("PUSH @" + rec.code);
+                    }
+                    break;
+                case INOUTPARAMETER:
+                    //Put address of variable onto the stack
+                    w.writeLine("PUSH D" + rec.symbol.nestinglevel);
+                    w.writeLine("PUSH #" + rec.symbol.offset);
+                    w.writeLine("ADDS");
+                    break;
+                case VARIABLE:
+                    if (funcCall) {
+                        //Put address of variable onto the stack
+                        w.writeLine("PUSH D" + rec.symbol.nestinglevel);
+                        w.writeLine("PUSH #" + rec.symbol.offset);
+                        w.writeLine("ADDS");
+                    } else {
+                        w.writeLine("PUSH " + rec.code);
+                    }
+                    break;
+                default:
+                    w.writeLine("PUSH " + rec.code);
+            }
         } else {
             w.writeLine("PUSH " + rec.code);
         }
@@ -211,7 +240,7 @@ public class SemanticAnalyzer {
             //push returned value onto the stack
             w.writeLine("PUSH " + from.code);
         }
-        if (into.symbol.kind == Kind.INOUTPARAMETER) {
+        if (into.symbol.kind == Kind.INOUTPARAMETER || into.symbol.kind == Kind.INOUTVARIABLE) {
             w.writeLine("POP @" + into.code);
         } else {
             w.writeLine("POP " + into.code);
@@ -399,9 +428,9 @@ public class SemanticAnalyzer {
         genStoreRegisters(nestingL);
 
         w.writeLine("ADD SP #" + params.size() + " SP");
-        int offset = 4 + params.size();
+        int offset = -2 - params.size();
         for (int i = 0; i < params.size(); i++) {
-            w.writeLine("MOV " + (i - offset) + "(SP) "
+            w.writeLine("MOV " + (offset - params.size() + i) + "(SP) "
                     + sh.getEntry(params.get(i).name).offset + "(D" + nestingL + ")");
         }
     }
@@ -451,14 +480,6 @@ public class SemanticAnalyzer {
             if (f.type != a.type) {
                 error("Call Error: Parameter provided is incorrect type.");
                 return;
-            }
-            if (f.kind == Kind.INOUTPARAMETER) {
-                //Put address of variable onto the stack
-                w.writeLine("PUSH D" + a.symbol.nestinglevel);
-                w.writeLine("PUSH #" + a.symbol.offset);
-                w.writeLine("ADDS");
-            } else {
-                w.writeLine("PUSH " + a.code);
             }
         }
         w.writeLine("CALL L" + callLocations.get(callLocation.name));
