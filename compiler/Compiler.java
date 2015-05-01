@@ -35,7 +35,7 @@ public class Compiler {
             par.setRuleOutputFile(rOut);
             par.parseFile(fIn);
         } else {
-            Test.run(args);
+            Test.main(args);
         }
     }
 }
