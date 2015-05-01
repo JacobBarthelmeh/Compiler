@@ -1169,7 +1169,6 @@ public class Parser {
                 ArrayList<SemanticRecord> params = OptionalActualParameterList();
                 sa.funcCall = false;
                 sa.onStartActualCall(procedure, params);
-                sa.onEndActualCall(procedure, params);
                 break;
             default:
                 String exp[] = {""};
@@ -1555,7 +1554,6 @@ public class Parser {
                     ArrayList<SemanticRecord> params = OptionalActualParameterList();
                     sa.funcCall = false;
                     sa.onStartActualCall(function, params);
-                    sa.onEndActualCall(function, params);
                     return r;
                 }
             //  Fall through. It wasn't a function, so it should be an identifier.

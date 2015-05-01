@@ -484,32 +484,7 @@ public class SemanticAnalyzer {
         }
         w.writeLine("CALL L" + callLocations.get(callLocation.name));
     }
-
-    /**
-     * Prepares runtime to come back from a function or procedure call.
-     *
-     * @param callLocation The destination to call to
-     * @param actual The list of actual parameters provided for the call
-     */
-    public void onEndActualCall(Symbol callLocation, ArrayList<SemanticRecord> actual) {
-//        ArrayList<Parameter> formal = callLocation.params;
-//        //  Again must be iterative
-//        //  We could save 1/10000000th of a second by decrementing
-//        for (int i = 0; i < formal.size(); i++) {
-//            Parameter f = formal.get(formal.size() - 1 - i);
-//            SemanticRecord a = actual.get(actual.size() - 1 - i);
-//            if (f.kind == Kind.INOUTPARAMETER) {
-//                w.writeLine("POP " + a.code);
-//            } else {
-//                w.writeLine("SUB SP #1 SP");
-//            }
-//        }
-//        //  Restore the register to its value before the call
-//        w.writeLine("POP D" + callLocation.nestinglevel);
-        //  Because of the way the return value was only optionally added, there
-        //  is no need for a procedure to worry about it. If it was a function
-        //  call, the return value is now on the top of the stack.
-    }
+    
 
     /**
      * Provides padding on the stack to store a variable.

@@ -29,7 +29,7 @@ public class Compiler {
             par.setRuleOutputFile(fOut);
             par.parseFile(fIn);
         } else {
-            Test.main(args);
+            Test.run(args);
         }
     }
 }
