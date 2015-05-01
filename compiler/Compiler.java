@@ -13,7 +13,9 @@ public class Compiler {
         if (args.length > 0) {
             String fIn = "";
             String fOut = "a.mm"; //default output a.mm
-            String curDir = System.getProperty("user.dir");
+            String rOut = "RuleOutput.csv"; //output file for rules if wanted
+            Compiler.DEBUG = false;
+            String curDir = System.getProperty("user.dir") + "/";
             for (int i = 0; i < args.length; i++) {
                 switch (args[i].trim()) {
                     case "-c":
@@ -23,10 +25,14 @@ public class Compiler {
                         break;
                     case "-o":
                         fOut = curDir + args[++i];
+                        break;
+                    case "-d":
+                        Compiler.DEBUG = true;
+                        break;
                 }
             }
             Parser par = new Parser(new SemanticAnalyzer(fOut, new SymbolTableHandler()));
-            par.setRuleOutputFile(fOut);
+            par.setRuleOutputFile(rOut);
             par.parseFile(fIn);
         } else {
             Test.run(args);

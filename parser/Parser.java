@@ -1833,23 +1833,27 @@ public class Parser {
         scanner = new Scanner(in);
         l1 = scanner.nextToken();
         SystemGoal();
-        rFile.close();
+        if (Compiler.DEBUG) {
+            rFile.close();
+        }
         scanner.close();
         return noerrors;
     }
 
     // Prints the rule taken
     private int ruleFile(int rule) {
-        if (rFile == null) {
-            try {
-                rFile = new PrintWriter(rule_tree_file);
-                rFile.println("Rules Taken,Token,Non-Terminal");
-            } catch (Exception e) {
-                System.out.println("Unable to make file " + rule_tree_file);
-                return 1;
+        if (Compiler.DEBUG) {
+            if (rFile == null) {
+                try {
+                    rFile = new PrintWriter(rule_tree_file);
+                    rFile.println("Rules Taken,Token,Non-Terminal");
+                } catch (Exception e) {
+                    System.out.println("Unable to make file " + rule_tree_file);
+                    return 1;
+                }
             }
+            rFile.print(rule + "," + l1);
         }
-        rFile.print(rule + "," + l1);
         return 0;
     }
 
@@ -1927,8 +1931,10 @@ public class Parser {
             System.exit(1);
         }
         int rule = Table[nonTerminal][index]; // integer corresponding to rule taken
-        ruleFile(rule); // genWrite_S the rule taken
-        rFile.print("," + nt + "\n"); //print terminal taken
+        if (Compiler.DEBUG) {
+            ruleFile(rule); // genWrite_S the rule taken
+            rFile.print("," + nt + "\n"); //print terminal taken
+        }
         return rule;
     }
 
