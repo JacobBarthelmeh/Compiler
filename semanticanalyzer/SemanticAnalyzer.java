@@ -441,7 +441,9 @@ public class SemanticAnalyzer {
      * @param locals The list of local variables
      */
     public void removeLocals(ArrayList<Symbol> locals) {
-        //w.writeLine("SUB SP #" + locals.size() + " SP");
+        if (locals != null && locals.size() > 0) {
+            w.writeLine("SUB SP #" + locals.size() + " SP");
+        }
     }
 
     /**
@@ -483,8 +485,10 @@ public class SemanticAnalyzer {
             }
         }
         w.writeLine("CALL L" + callLocations.get(callLocation.name));
+        if (formal.size() > 0) {
+            w.writeLine("SUB SP #" + formal.size() + " SP"); //clean up stack
+        }
     }
-    
 
     /**
      * Provides padding on the stack to store a variable.
