@@ -1,62 +1,37 @@
 package util;
+
+import java.io.File;
 import parser.Parser;
 import semanticanalyzer.SemanticAnalyzer;
 import symboltable.SymbolTableHandler;
 
 public class Test {
 
-    /* input files */
-    static String inputC = "c-testfile.mp";
-    static String inputB = "b-testfile.mp";
-    static String inputA = "a-testfile.mp";
+    public static void run(String[] args) {
+        try {
 
-    /* output files */
-    static String scannerOutC = "c-scanner_test.txt";
-    static String parserOutC = "c-parser_test.txt";
-    static String fileOutC = "c_output.mp";
+            /*
+             File search method based from
+             http://stackoverflow.com/questions/15482423/how-to-list-the-files-in-current-directory
+             */
+            File f = new File("."); //gets the current directory
 
-    static String scannerOutB = "b-scanner_test.txt";
-    static String parserOutB = "b-parser_test.txt";
-    static String fileOutB = "b_output.mp";
-
-    static String scannerOutA = "a-scanner_test.txt";
-    static String parserOutA = "a-parser_test.txt";
-    static String fileOutA = "a_output.mp";
-
-    public static void main(String[] args) {
-        /*
-        //  C RANKED TESTS
-        System.out.println("Running C ranked tests");
-        if (parser_test(inputC, parserOutC, fileOutC)) {
-            System.out.println("pass");
-        } else {
-            System.out.println("fail!!!");
-        }
-        //  B RANKED TESTS
-        System.out.println("Running B ranked tests");
-        if (parser_test(inputB, parserOutB, fileOutB)) {
-            System.out.println("pass");
-        } else {
-            System.out.println("fail!!!");
-        }
-        
-        //  A RANKED TESTS
-        System.out.println("Running A ranked tests");
-        if (parser_test(inputA, parserOutA, fileOutA)) {
-           System.out.println("pass");
-        } else {
-            System.out.println("fail!!!");
-        }
-        */
-        String
-            testLoc = "Test_Program_1.mp",
-            parseOutput = "testprogram1parse.txt",
-            outputLoc = "Test_Program_1.mm";
-        System.out.println("Running " + testLoc);
-        if (parser_test("Test_Program_1.mp", parseOutput, outputLoc)) {
-           System.out.println("pass");
-        } else {
-            System.out.println("fail!!!");
+            //look for files in the directory ending with .mp
+            File[] files = f.listFiles();
+            System.out.println("Looking at all files in current directory and compiling those that end in .mp");
+            for (File file : files) {
+                if (!file.isDirectory()) {
+                    String s = file.getCanonicalPath();
+                    if (s.contains(".mp")) {
+                        System.out.println("Compiling " + s);
+                        String fOut = s.replace(".mp", ".mm");
+                        String fRules = s.replace(".mp", ".csv");
+                        parser_test(s, fRules, fOut);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Error when reading in files " + e);
         }
     }
 
