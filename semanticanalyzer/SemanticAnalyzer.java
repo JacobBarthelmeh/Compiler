@@ -236,6 +236,10 @@ public class SemanticAnalyzer {
         if (into.type == Type.INTEGER && from.type == Type.FLOAT) {
             w.writeLine("CASTSI");
         }
+        else if (into.type == Type.FLOAT && from.type == Type.INTEGER) {
+            w.writeLine("CASTSF");
+        }
+        
         if (from.symbol != null && from.symbol.kind == Kind.FUNCTION) {// & from.symbol.kind == Kind.FUNCTION) {
             //push returned value onto the stack
             w.writeLine("PUSH " + from.code);
