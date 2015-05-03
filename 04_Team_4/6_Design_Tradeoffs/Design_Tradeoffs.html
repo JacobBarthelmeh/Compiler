@@ -1,100 +1,115 @@
-<!DOCTYPE html> 
-<html><!-- InstanceBegin template="/Templates/page.dwt" codeOutsideHTMLIsLocked="false" -->
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-
-<link rel="stylesheet" href="../../../../Stylesheets/prettify.css" />
-<link rel="stylesheet" href="../../../../Stylesheets/pageStylesheet.css" />
-<link rel="stylesheet" href="../../../../Stylesheets/navigationStylesheet.css" />
-<link rel="stylesheet" href="../../../../Stylesheets/allTextStyles.css" />
-<link rel="stylesheet" href="../../../../Stylesheets/colors-blue.css" />
-
-<script type="text/javascript" src="../../../../Scripts/google-code-prettify/run_prettify.js"></script>
-<script type="text/javascript" src="../../../../Scripts/recomputeAttributes.js"></script>
-
-
-<!-- InstanceBeginEditable name="doctitle" -->
-<title>Design Tradeoffs</title>
-<!-- InstanceEndEditable -->
-</head>
-
-<body id="body-style">
-
-<!-- 
-<div id="browser-window-veil">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Design Tradeoffs</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice 4.1.1  (Unix)">
+	<META NAME="CREATED" CONTENT="0;0">
+	<META NAME="CHANGEDBY" CONTENT="jak TheOne">
+	<META NAME="CHANGED" CONTENT="20150503;13574100">
+	<META NAME="CHANGEDBY" CONTENT="jak TheOne">
+	<!-- InstanceBegin template="/Templates/page.dwt" codeOutsideHTMLIsLocked="false" -->
+	<SCRIPT SRC="../../../../Scripts/google-code-prettify/run_prettify.js"></SCRIPT>
+	<SCRIPT SRC="../../../../Scripts/recomputeAttributes.js"></SCRIPT>
+	<!-- InstanceBeginEditable name="doctitle" -->
+	<!-- InstanceEndEditable -->
+	<!-- <div id="browser-window-veil">
 </div>
 -->
-
-<div id="page-container">
-
-<header id="header">
-<div id="track-icon1">
-  <img src="../../../../Media/StyleImages/bobcat-small.png" alt="bobcat icon" width="75" height="48"></div>
-<div id="track-icon2">
-</div>
-<div id="track-icon3">
-</div>
-  <div id="headMatter">
-    <span id="headTitle1">
-      <!-- InstanceBeginEditable name="Header" -->
-        Header
-	  <!-- InstanceEndEditable --> 
-    </span>
-    <span id="headTitle2">
-    </span>
-  </div>
-</header>
-
-<nav id="navigate">
-</nav>
-
-
-<aside id="aside-left">
-<div id="asideLeftTitle">
-Compilers 2015
-</div>
-
-</aside>
-
-<aside id="aside-right">
-</aside>
-
-<footer id="footer">
-  <div id="footMatter">
-    <span id="previousPageLink">
-
-    </span>
-    <span id="currentPageNumber">
-    </span>
-    <span id="nextPageLink">
-
-    </span>
-  </div>
-</footer>
-
-<article id="mainContent">
-<!-- InstanceBeginEditable name="Main" -->
-<h1>Design Tradeoffs</h1>
-
-<h2>Data Structure Tradeoffs</h2>
-
-<h3>Regular Language Scanner</h3>
-<p>
-  This could have easily been done using RegEx, which is a standard library built in to almost every programming language with string operations. The number of lines making the scanner (and the number of hours) could have been a fraction of what it is. However, Java's switch statement is an assembly-level HashMap that runs in 1 Bytecode (1 instruction/cycle in Java's virtual machine). So, many ugly lines of code were made but which run faster than RegEx (O(1) in 1 bytecode versus O(n!)). This modularized the scanner so cleanly that the same design was used for the parser as well.
-</p>
-
-<h3>Symbol Table Design</h3>
-<p>
-  The Symbol Tables are handled by a Symbol Table Handler. The Symbol Table Handler guarantees that the tables and entries are populated properly. The Parser simply provides the Handler with calls such as pushTable(), popTable(), newEntry(), finishEntry(), etc. However, the SemanticAnalyzer only ever needs to use one operation: getEntry(). Thus, in the Parser's perspective, the Symbol Table design is of a Stack, but in the Semantic Analyzer's perspective, the Symbol Table design is of a HashMap. This is to make use of both data structures' best features. Stack operations of inserting and deleting are O(1) while searching is O(n), but the Parser only inserts and deletes. HashMap operations of inserting and deleting can become O(n) when collision between names is possible (which it is, in this project), but lookup is O(1). The Semantic Analyzer only ever makes use the lookup feature. In reality, the lookup feature takes O(t) time, where t (the number of tables) is maximally bounded by 10 and is no greater than 2 for the average case, which is for all practical purposes a constant running time.
-</p>
-
-<h3>Semantic Analyzer Design</h3>
-<p>
- TODO Jacob
- </p>
-<!-- InstanceEndEditable -->
-
-</article>
-</div>
-</body>
-<!-- InstanceEnd --></html>
+	<STYLE TYPE="text/css">
+	<!--
+		H2.ctl { font-family: "Arial Unicode MS" }
+		H3.ctl { font-family: "Arial Unicode MS" }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<DIV ID="page-container" DIR="LTR">
+	<P><BR><BR>
+	</P>
+	<DIV ID="track-icon1" DIR="LTR">
+		<P><IMG SRC="../../../../Media/StyleImages/bobcat-small.png" NAME="graphics1" ALIGN=BOTTOM WIDTH=75 HEIGHT=48 BORDER=0></P>
+	</DIV>
+	<DIV ID="track-icon2" DIR="LTR">
+		<P><BR><BR>
+		</P>
+	</DIV>
+	<DIV ID="track-icon3" DIR="LTR">
+		<P><BR><BR>
+		</P>
+	</DIV>
+	<DIV ID="headMatter" DIR="LTR">
+		<P><A NAME="headTitle1"></A><A NAME="headTitle2"></A><!-- InstanceBeginEditable name="Header" -->Header<!-- InstanceEndEditable -->
+				</P>
+	</DIV>
+	<DIV ID="asideLeftTitle" DIR="LTR">
+		<P>Compilers 2015 
+		</P>
+	</DIV>
+	<DIV ID="footMatter" DIR="LTR">
+		<P><A NAME="previousPageLink"></A><A NAME="currentPageNumber"></A><A NAME="nextPageLink"></A>
+		<BR><BR>
+		</P>
+	</DIV>
+	<H1><!-- InstanceBeginEditable name="Main" -->Design Tradeoffs</H1>
+	<H2 CLASS="western">Data Structure Tradeoffs</H2>
+	<H3 CLASS="western">Regular Language Scanner</H3>
+	<P>This could have easily been done using RegEx, which is a standard
+	library built in to almost every programming language with string
+	operations. The number of lines making the scanner (and the number
+	of hours) could have been a fraction of what it is. However, Java's
+	switch statement is an assembly-level HashMap that runs in 1
+	Bytecode (1 instruction/cycle in Java's virtual machine). So, many
+	ugly lines of code were made but which run faster than RegEx (O(1)
+	in 1 bytecode versus O(n!)). This modularized the scanner so cleanly
+	that the same design was used for the parser as well. 
+	</P>
+	<H3 CLASS="western">Symbol Table Design</H3>
+	<P>The Symbol Tables are handled by a Symbol Table Handler. The
+	Symbol Table Handler guarantees that the tables and entries are
+	populated properly. The Parser simply provides the Handler with
+	calls such as pushTable(), popTable(), newEntry(), finishEntry(),
+	etc. However, the SemanticAnalyzer only ever needs to use one
+	operation: getEntry(). Thus, in the Parser's perspective, the Symbol
+	Table design is of a Stack, but in the Semantic Analyzer's
+	perspective, the Symbol Table design is of a HashMap. This is to
+	make use of both data structures' best features. Stack operations of
+	inserting and deleting are O(1) while searching is O(n), but the
+	Parser only inserts and deletes. HashMap operations of inserting and
+	deleting can become O(n) when collision between names is possible
+	(which it is, in this project), but lookup is O(1). The Semantic
+	Analyzer only ever makes use the lookup feature. In reality, the
+	lookup feature takes O(t) time, where t (the number of tables) is
+	maximally bounded by 10 and is no greater than 2 for the average
+	case, which is for all practical purposes a constant running time. 
+	</P>
+	<H3 CLASS="western">Semantic Analyzer Design</H3>
+	<P>In the design of the semantic analyzer it is set up to have a
+	module design pattern, offering up general functions to be called
+	when triggered events happen in the parser. The constructor takes as
+	arguments; the symbol table handler object, and the name of the file
+	that the machine code is to be outputted. As the process unfolds the
+	semantic analyzer pushes each line of code to that file. At the
+	beginning of the program and for each function/procedure call there
+	is a function to handle generating code to store the current
+	register. Then at the end of each there is a corresponding function
+	to restore them. At the beginning of setting up a function call the
+	argument values, or address of stack location in the case of by
+	reference, is pushed onto the stack. Then after branching to the
+	location of machine code for the function, it knows that the most
+	recent thing on the stack is those arguments. Since the only loops
+	in the code is for iterating over function parameters, and there is
+	no recursive calls, the theoretical run time should be bound by O(n)
+	where n is lines of code being generated and there is some k, being
+	a constant representing the number of function/procedure parameters
+	being processed. The biggest trade off in the design is that it
+	follows a naive stack only based approach. This will lead to slower
+	run times of compiled code, at times taking maybe three cycles where
+	the same process could be done in one. Using this stack only based
+	design gives the fugacious advantage of being more simple to
+	implement.<!-- InstanceEndEditable --> 
+	</P>
+</DIV>
+<P><!-- InstanceEnd --></P>
+</BODY>
+</HTML>
