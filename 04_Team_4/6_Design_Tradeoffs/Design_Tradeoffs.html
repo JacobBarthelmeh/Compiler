@@ -6,7 +6,8 @@
 	<META NAME="GENERATOR" CONTENT="OpenOffice 4.1.1  (Unix)">
 	<META NAME="CREATED" CONTENT="0;0">
 	<META NAME="CHANGEDBY" CONTENT="jak TheOne">
-	<META NAME="CHANGED" CONTENT="20150503;13574100">
+	<META NAME="CHANGED" CONTENT="20150503;14374800">
+	<META NAME="CHANGEDBY" CONTENT="jak TheOne">
 	<META NAME="CHANGEDBY" CONTENT="jak TheOne">
 	<!-- InstanceBegin template="/Templates/page.dwt" codeOutsideHTMLIsLocked="false" -->
 	<SCRIPT SRC="../../../../Scripts/google-code-prettify/run_prettify.js"></SCRIPT>
@@ -97,17 +98,23 @@
 	argument values, or address of stack location in the case of by
 	reference, is pushed onto the stack. Then after branching to the
 	location of machine code for the function, it knows that the most
-	recent thing on the stack is those arguments. Since the only loops
-	in the code is for iterating over function parameters, and there is
-	no recursive calls, the theoretical run time should be bound by O(n)
-	where n is lines of code being generated and there is some k, being
-	a constant representing the number of function/procedure parameters
-	being processed. The biggest trade off in the design is that it
-	follows a naive stack only based approach. This will lead to slower
-	run times of compiled code, at times taking maybe three cycles where
-	the same process could be done in one. Using this stack only based
-	design gives the fugacious advantage of being more simple to
-	implement.<!-- InstanceEndEditable --> 
+	recent thing on the stack is those arguments. <BR><BR>After
+	consideration of whether to initialize variables or not, we decided
+	to initialize them. The leading factor on this decision was how
+	uninformative the runtime error thrown was from the virtual machine
+	when encountering an empty memory location on the stack. So when the
+	stack is adjusted to contain space for a new variable that memory
+	space is automatically set to the value 0.<BR><BR>Since the only
+	loops in the code is for iterating over function parameters, and
+	there is no recursive calls, the theoretical run time should be
+	bound by O(n) where n is lines of code being generated and there is
+	some k, being a constant representing the number of
+	function/procedure parameters being processed. The biggest trade off
+	in the design is that it follows a naive stack only based approach.
+	This will lead to slower run times of compiled code, at times taking
+	maybe three cycles where the same process could be done in one.
+	Using this stack only based design gives the fugacious advantage of
+	being more simple to implement.<!-- InstanceEndEditable --> 
 	</P>
 </DIV>
 <P><!-- InstanceEnd --></P>
