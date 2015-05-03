@@ -1,0 +1,95 @@
+<!DOCTYPE html> 
+<html><!-- InstanceBegin template="/Templates/page.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<link rel="stylesheet" href="../../../../Stylesheets/prettify.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/pageStylesheet.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/navigationStylesheet.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/allTextStyles.css" />
+<link rel="stylesheet" href="../../../../Stylesheets/colors-blue.css" />
+
+<script type="text/javascript" src="../../../../Scripts/google-code-prettify/run_prettify.js"></script>
+<script type="text/javascript" src="../../../../Scripts/recomputeAttributes.js"></script>
+
+
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Design Tradeoffs</title>
+<!-- InstanceEndEditable -->
+</head>
+
+<body id="body-style">
+
+<!-- 
+<div id="browser-window-veil">
+</div>
+-->
+
+<div id="page-container">
+
+<header id="header">
+<div id="track-icon1">
+  <img src="../../../../Media/StyleImages/bobcat-small.png" alt="bobcat icon" width="75" height="48"></div>
+<div id="track-icon2">
+</div>
+<div id="track-icon3">
+</div>
+  <div id="headMatter">
+    <span id="headTitle1">
+      <!-- InstanceBeginEditable name="Header" -->
+        Header
+	  <!-- InstanceEndEditable --> 
+    </span>
+    <span id="headTitle2">
+    </span>
+  </div>
+</header>
+
+<nav id="navigate">
+</nav>
+
+
+<aside id="aside-left">
+<div id="asideLeftTitle">
+Compilers 2015
+</div>
+
+</aside>
+
+<aside id="aside-right">
+</aside>
+
+<footer id="footer">
+  <div id="footMatter">
+    <span id="previousPageLink">
+
+    </span>
+    <span id="currentPageNumber">
+    </span>
+    <span id="nextPageLink">
+
+    </span>
+  </div>
+</footer>
+
+<article id="mainContent">
+<!-- InstanceBeginEditable name="Main" -->
+<h1>Design Tradeoffs</h1>
+
+<h2>Data Structure Tradeoffs</h2>
+
+<h3>Regular Language Scanner</h3>
+<p>
+  This could have easily been done using RegEx, which is a standard library built in to almost every programming language with string operations. The number of lines making the scanner (and the number of hours) could have been a fraction of what it is. However, Java's switch statement is an assembly-level HashMap that runs in 1 Bytecode (1 instruction/cycle in Java's virtual machine). So, many ugly lines of code were made but which run faster than RegEx (O(1) in 1 bytecode versus O(n!)). This modularized the scanner so cleanly that the same design was used for the parser as well.
+</p>
+
+<h3>Symbol Table Design</h3>
+<p>
+  The Symbol Tables are handled by a Symbol Table Handler. The Symbol Table Handler guarantees that the tables and entries are populated properly. The Parser simply provides the Handler with calls such as pushTable(), popTable(), newEntry(), finishEntry(), etc. However, the SemanticAnalyzer only ever needs to use one operation: getEntry(). Thus, in the Parser's perspective, the Symbol Table design is of a Stack, but in the Semantic Analyzer's perspective, the Symbol Table design is of a HashMap. This is to make use of both data structures' best features. Stack operations of inserting and deleting are O(1) while searching is O(n), but the Parser only inserts and deletes. HashMap operations of inserting and deleting can become O(n) when collision between names is possible (which it is, in this project), but lookup is O(1). The Semantic Analyzer only ever makes use the lookup feature. In reality, the lookup feature takes O(t) time, where t (the number of tables) is maximally bounded by 10 and is no greater than 2 for the average case, which is for all practical purposes a constant running time.
+</p>
+<!-- InstanceEndEditable -->
+
+</article>
+</div>
+</body>
+<!-- InstanceEnd --></html>
