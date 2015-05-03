@@ -27,10 +27,12 @@ public class SymbolTableHandler {
     }
     public void startParameter() {
         if (isParam) {
-            throw new RuntimeException("Cannot add a parameter to a parameter.");   
+            throw new RuntimeException(
+                    "Cannot add a parameter to a parameter.");   
         }
         if (entry == null) {
-            throw new RuntimeException("Parameters cannot be added to null entry.");
+            throw new RuntimeException(
+                    "Parameters cannot be added to null entry.");
         }
         param = new Parameter("DEFAULT", Type.NOTYPE, Kind.NOKIND);
         isParam= true;
@@ -47,7 +49,8 @@ public class SymbolTableHandler {
     }
     public void setName(String name) {
         if (entry == null) {
-            throw new RuntimeException("Parameters cannot be added to null entry.");
+            throw new RuntimeException(
+                    "Parameters cannot be added to null entry.");
         }
         name = name.toLowerCase();
         if (isParam) {
@@ -55,7 +58,8 @@ public class SymbolTableHandler {
         }
         else {
             if (tables[nestinglevel].getEntry(name) != null) {
-                throw new RuntimeException("Entry with lexeme '" + name + "' already exists for this nesting level.");
+                throw new RuntimeException("Entry with lexeme '" + name
+                        + "' already exists for this nesting level.");
             }
             entry.name = name;
         }
@@ -84,7 +88,8 @@ public class SymbolTableHandler {
     }
     public void pushTable() {
         if (entry != null) {
-            throw new RuntimeException("Cannot push table while making a symbol.");
+            throw new RuntimeException(
+                    "Cannot push table while making a symbol.");
         }
         if (nestinglevel == 9) {
             throw new RuntimeException("Cannot push passed ten tables.");
@@ -94,7 +99,8 @@ public class SymbolTableHandler {
     }
     public void popTable() {
         if (entry != null) {
-            throw new RuntimeException("Cannot pop table while making a symbol.");
+            throw new RuntimeException(
+                    "Cannot pop table while making a symbol.");
         }
         if (nestinglevel == -1) {
             throw new RuntimeException("Can't pop the global table!");
@@ -116,7 +122,8 @@ public class SymbolTableHandler {
         if (Compiler.DEBUG) {
             System.out.println(toString());
         }
-        throw new RuntimeException("Could not find '" + lexeme + "' in any symbol table.");
+        throw new RuntimeException("Could not find '" + lexeme
+                + "' in any symbol table.");
     }    
     @Override
     public String toString() {

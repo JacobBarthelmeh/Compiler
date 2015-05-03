@@ -624,7 +624,8 @@ public class Parser {
                 StatementTail();
                 break;
             default:
-                String[] err = {"begin", "read", "write", "writeln", "if", "repeat", "for", "procedure", "identifier"};
+                String[] err = {"begin", "read", "write", "writeln", "if",
+                    "repeat", "for", "procedure", "identifier"};
                 error(err);
                 break;
         }
@@ -707,7 +708,8 @@ public class Parser {
                 ProcedureStatement();
                 break;
             default:
-                String[] err = {"begin", "read", "write", "writeln", "if", "repeat", "for", "procedure", "identifier"};
+                String[] err = {"begin", "read", "write", "writeln", "if",
+                    "repeat", "for", "procedure", "identifier"};
                 error(err);
                 break;
         }
@@ -731,7 +733,7 @@ public class Parser {
     }
 
     // Nonterminal 25
-    // <ReadStatement> --> genRead ( <ReadParameter> <ReadParameterTail> ) RULE #45
+    // <ReadStatement> --> genRead ( <ReadParameter> <ReadParameterTail> ) // 45
     private void ReadStatement() {
         stackTrace += "ReadStatement\n";
         switch (getRule(NonTerminal.ReadStatement)) {
@@ -803,8 +805,8 @@ public class Parser {
     }
 
     // Nonterminal 28
-    // <WriteStatement> --> genWrite_S  ( <WriteParameter> <WriteParameterTail> ) RULE #49
-    // <WriteStatement> --> writeln ( <WriteParameter> <WriteParameterTail> ) RULE #50
+// <WriteStatement> --> genWrite_S  ( <WriteParameter> <WriteParameterTail> //49
+// <WriteStatement> --> writeln ( <WriteParameter> <WriteParameterTail> ) //  50
     private void WriteStatement() {
         stackTrace += "WriteStatment\n";
         switch (getRule(NonTerminal.WriteStatement)) {
@@ -853,7 +855,7 @@ public class Parser {
     }
 
     // Nonterminal 29
-    // <WriteParameterTail> --> , <WriteParameter> <WrieteParameterTail> RULE #51
+    // <WriteParameterTail> --> , <WriteParameter> <WrieteParameterTail> // 51
     // <WriteParameterTail> -->  lambda RULE #52
     private void WriteParameterTail() {
         stackTrace += "WriteParameterTail\n";
@@ -902,7 +904,8 @@ public class Parser {
                 if (l1.getTerminal() == Terminal.ASSIGN) {
                     match();
                     SemanticRecord returnstuff = Expression();
-                    sa.genAssignment(new SemanticRecord(t, sh.getEntry(t.getContents())), returnstuff);
+                    sa.genAssignment(new SemanticRecord(
+                            t, sh.getEntry(t.getContents())), returnstuff);
                 } else {
                     String[] err = {"assign"};
                     error(err);
@@ -914,7 +917,8 @@ public class Parser {
                 if (l1.getTerminal() == Terminal.ASSIGN) {
                     match();
                     SemanticRecord returnstuff = Expression();
-                    sa.genAssignment(new SemanticRecord(t, sh.getEntry(t.getContents())), returnstuff);
+                    sa.genAssignment(new SemanticRecord(
+                            t, sh.getEntry(t.getContents())), returnstuff);
 
                 } else {
                     String[] err = {"assign"};
@@ -929,7 +933,7 @@ public class Parser {
     }
 
     // Nonterminal 32
-    // <IfStatement> --> if <BooleanExpression> then <Statement> <OptionalElsePart> RULE #56
+//<IfStatement> -> if <BooleanExpression> then <Statement><OptionalElsePart>//45
     private void IfStatement() {
         stackTrace += "IfStatement\n";
         switch (getRule(NonTerminal.IfStatement)) {
@@ -984,7 +988,7 @@ public class Parser {
     }
 
     // Nonterminal 34
-    // <RepeatStatement> --> repeat <StatementSequence> until <BooleanExpression> RULE #59
+//<RepeatStatement> -> repeat <StatementSequence> until <BooleanExpression> //59
     private void RepeatStatement() {
         stackTrace += "RepeatStatement\n";
         switch (getRule(NonTerminal.RepeatStatement)) {
@@ -1046,7 +1050,9 @@ public class Parser {
     }
 
     // Nonterminal 36
-    // <ForStatement> --> for <ControlVariable> := <InitialValue> <StepValue> <FinalValue> do <Statement> RULE #61
+    // <ForStatement> -->
+        //  for <ControlVariable> := <InitialValue> <StepValue> <FinalValue>
+        //  do <Statement> RULE #61
     private void ForStatement() {
         stackTrace += "ForStatement\n";
         switch (getRule(NonTerminal.ForStatement)) {
@@ -1176,8 +1182,8 @@ public class Parser {
     }
 
     // Nonterminal 42
-    // <OptionalActualParameterList> --> ( <ActualParameter> <ActualParameterTail> ) RULE #68
-    // <OptionalActualParameterList> --> lambda RULE #69
+//<OptionalActualParameterList> -> ( <ActualParameter><ActualParameterTail>)//68
+//<OptionalActualParameterList> -> lambda RULE #69
     private ArrayList<SemanticRecord> OptionalActualParameterList() {
         stackTrace += "OptionalActualParameterList\n";
         switch (getRule(NonTerminal.OptionalActualParameterList)) {
@@ -1203,7 +1209,7 @@ public class Parser {
     }
 
     // Nonterminal 43
-    // <ActualParameterTail> --> , <ActualParameter> <ActualParameterTail> RULE #70
+    // <ActualParameterTail> --> , <ActualParameter> <ActualParameterTail> // 70
     // <ActualParameterTail> --> lambda RULE #71
     private void ActualParameterTail(ArrayList<SemanticRecord> params) {
         stackTrace += "ActualParameterTail\n";
@@ -1252,7 +1258,7 @@ public class Parser {
     }
 
     // Nonterminal 46
-    // <OptionalRelationalPart> --> <RelationalOperator> <SimpleExpression> RULE #74
+    // <OptionalRelationalPart> --> <RelationalOperator> <SimpleExpression> #74
     // <OptionalRelationalPart> --> lambda RULE #75
     private SemanticRecord OptionalRelationalPart(SemanticRecord left) {
         stackTrace += "OptionalRelationalPart\n";
@@ -1261,7 +1267,8 @@ public class Parser {
                 Operator opp = RelationalOperator(); //rule 74
                 SemanticRecord right = SimpleExpression(); //rule 74
                 sa.genArithOperator_S(left, opp, right);
-                return new SemanticRecord(right.token, right.symbol, "", "", "", Type.BOOLEAN);
+                return new SemanticRecord(
+                        right.token, right.symbol,"", "", "", Type.BOOLEAN);
             case 75://rule 75
                 return left;
             default:
@@ -1300,7 +1307,8 @@ public class Parser {
                 match();
                 return Operator.NEQUAL;
             default:
-                String exp[] = {"EQUAL", "LTHAN", "GTHAN", "LEQUAL", "GEQUAL", "NEQUAL"};
+                String exp[] = {"EQUAL", "LTHAN", "GTHAN", "LEQUAL", "GEQUAL", 
+                    "NEQUAL"};
                 error(exp);
                 return Operator.NOOP;
         }
@@ -1491,7 +1499,8 @@ public class Parser {
     private SemanticRecord Factor() {
         stackTrace += "Factor\n";
 
-        //handle special case in table that branchs when id is not at end of statement
+        //handle special case in table that branchs when id is not at end of
+        //statement
         int rule = getRule(NonTerminal.Factor);
         if (rule == 106) {
             l2 = scanner.nextToken();
@@ -1549,19 +1558,22 @@ public class Parser {
                     r = new SemanticRecord(l1, entry);
                     Symbol function = sh.getEntry(FunctionIdentifier());
                     sa.funcCall = true;
-                    ArrayList<SemanticRecord> params = OptionalActualParameterList();
+                    ArrayList<SemanticRecord> params =
+                            OptionalActualParameterList();
                     sa.funcCall = false;
                     sa.onStartActualCall(function, params);
                     return r;
                 }
-            //  Fall through. It wasn't a function, so it should be an identifier.
+            //  Fall through. It wasn't a function, so it should be identifier.
             case 116:  // RULE 116
                 r = new SemanticRecord(l1, sh.getEntry(l1.getContents()));
                 sa.genPush(r);
                 match();
                 return r;
             default:
-                String[] exp = {"INTEGER", "FLOAT", "STRING_LIT", "TRUE", "FALSE", "NOT", "LPAREN EXPRESSION RPAREN", "FunctionIdentifier OptionalActualParameterList"};
+                String[] exp = {"INTEGER", "FLOAT", "STRING_LIT", "TRUE",
+                    "FALSE", "NOT", "LPAREN EXPRESSION RPAREN", 
+                    "FunctionIdentifier OptionalActualParameterList"};
                 error(exp);
                 return null;
         }
@@ -1712,60 +1724,6 @@ public class Parser {
     }
 
     /**
-     *
-     * @param arr character array generated from a line of the csv ll1 table
-     * @return A substring of the character array containing the elements
-     * ranging from char[0] up to the first ',' character
-     *
-     * Because of the order in which this method and the removeStr method below
-     * are called, only character arrays such as ",-1,-1,3,-1,4,53,-1,-1," will be passed
-     * in, meaning that the string returned will either be empty, or it will be
-     * an integer represented in string form.
-     */
-    private String nextStr(char[] arr) {
-        // Substring to be returned
-        String s = "";
-
-        // Finds an integer and returns it in the form of a string or finds
-        // a ',' and returns an empty string.
-        for (int i = 0; i < arr.length && arr[i] != ','; i++) {
-            s += arr[i];
-        }
-
-        return s;
-    }
-
-    /**
-     * Removes
-     *
-     * @param arr a character array from one line of the ll1 csv table
-     * @return a substring built from the passed parameter containing the
-     * characters from one character beyond the first comma to the end of the
-     * array
-     */
-    private String removeStr(char[] arr) {
-        String s = "";
-        int i = 0; // Iterator variable
-        // Takes a char array from the CSV ll1 table and iterates through
-        // the array until the end of the array is reached, or a comma
-        // is reached
-        while (i < arr.length && arr[i] != ',') {
-            i++;
-        }
-        i++; /* move over comma */
-
-        // Generates a substring built from the original character array
-        // The substring contains the original character array except
-        // for the first character up to the first ',' character.
-        // If the array has no commas, the substring will be blank
-        // EG "asdfasdfasdf,hello world" would return the substring "hello world"
-        for (; i < arr.length; i++) {
-            s += arr[i];
-        }
-        return s;
-    }
-
-    /**
      * Set a file to parse
      *
      * @param in file to be parsed
@@ -1840,7 +1798,8 @@ public class Parser {
         }
         noerrors = false;
         System.err.println("Parse Error: found " + l1.getContents() + " "
-                + l1.getTerminal() + " at line " + l1.getLine() + " col " + l1.getCol());
+                + l1.getTerminal() + " at line " + l1.getLine() + " col "
+                + l1.getCol());
         System.err.print("Was expecting ");
         System.err.print(Arrays.toString(expected));
         System.err.println("");
@@ -1860,19 +1819,24 @@ public class Parser {
      * @return The rule to execute
      */
     private int getRule(NonTerminal nt) {
-        int index = l1.getTerminal().ordinal(), // The index corresponding to the current look ahead token
+        //  The index corresponding to the current look ahead token
+        int index = l1.getTerminal().ordinal(),
                 nonTerminal = nt.ordinal();
 
         if (nonTerminal > Table.length) {
-            System.out.println("Error nonTerminal " + nonTerminal + " is not in table");
+            System.out.println("Error nonTerminal " + nonTerminal
+                    + " is not in table");
             System.exit(1);
         }
         if (index > Table[nonTerminal].length) {
-            System.out.println("Error token " + index + "  " + l1.getTerminal() + " not in table ");
+            System.out.println("Error token " + index + "  " + l1.getTerminal() 
+                    + " not in table ");
             System.out.println(" " + Table[nonTerminal].length);
             System.exit(1);
         }
-        int rule = Table[nonTerminal][index]; // integer corresponding to rule taken
+        
+        // integer corresponding to rule taken
+        int rule = Table[nonTerminal][index]; 
         if (Compiler.DEBUG) {
             ruleFile(rule); // genWrite_S the rule taken
             rFile.print("," + nt + "\n"); //print terminal taken
@@ -1886,11 +1850,13 @@ public class Parser {
     private Token l2; // used for some cases when table is ll2
     private Scanner scanner;
     private PrintWriter rFile;
-    private String rule_tree_file = "rule_list.csv"; // Contains rules for going from non-terminals to terminals
+    //  Contains rules for going from non-terminals to terminals
+    //  Helpful for debugging
+    private String rule_tree_file = "rule_list.csv"; 
     private boolean noerrors = true;
     private String stackTrace = "";
     
-    //  The best design you've ever seen
+    //  The best design choice you've ever seen
     private final int Table[][] = {
         {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
         {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
@@ -1956,4 +1922,195 @@ public class Parser {
         {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 113, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
         {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 114, -1, 115, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
     };
+/*  Hard-to-read one that doesn't text-wrap in the document
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 4, -1, -1, -1, -1, -1, 4, -1, -
+1, -1, -1, -1, -1, -1, -1, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, 6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 6, -1, -1, -1, -1, -1, 6, -1, -
+1, -1, -1, -1, -1, -1, -1, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8, -1, -1, -1, -1, -1, 8, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 7, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 9, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, 13, -1, -1, -1, -1, -1, -1, -1, 11, -1, -1, -1, 10, -1, -1, -1, -1, -
+1, -1, -1, 12, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, 16, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 15, -1, -1, -1, -1, -1, 14, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 17, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 18, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 19, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 20, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 22, 22, 
+21, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 23, -1, 
+-1, 24, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, 26, -1, -1, -1, 25, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 27, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, 28, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, 29, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, 30, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, 31, -1, -1, -1, -1, -1, 31, -1, -1, -1, 31, -1, 31, -1, -1, -1, -1, -1, -
+1, 31, 31, -1, -1, -1, -1, 31, -1, 31, 31, 31, 31, -1, -1, -1, -1, -1, 31, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, 33, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, 33, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 32, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, 35, -1, -1, -1, -1, 34, 34, -1, -1, -1, 42, -1, 39, -1, -1, -1, -1, 43, -
+1, 36, 41, -1, -1, -1, -1, 34, -1, 40, 37, 37, 38, -1, -1, -1, -1, -1, 34, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, 44, 44, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, 44, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 44, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, 45, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 46, -1, -1, 
+-1, 47, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 48, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 49, 50, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 51, -1, -1, 
+-1, 52, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, 53, -1, -1, -1, -1, -1, -1, -1, 53, -1, -1, -
+1, -1, -1, -1, -1, -1, 53, -1, -1, -1, -1, -1, 53, 53, 53, 53, -1, -1, -1, -1, 
+53, -1, -1, -1, -1, -1, -1, -1, -1, 53, 53, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 54, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 56, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, 57, 58, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, 58, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 58, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, 59, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, 60, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 61, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, 63, -1, -1, -1, -1, -1, -1, -1, 63, -1, -1, -
+1, -1, -1, -1, -1, -1, 63, -1, -1, -1, -1, -1, 63, 63, 63, 63, -1, -1, -1, -1, 
+63, -1, -1, -1, -1, -1, -1, -1, -1, 63, 63, -1, -1},
+{-1, -1, -1, -1, -1, 65, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, 64, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, 66, -1, -1, -1, -1, -1, -1, -1, 66, -1, -1, -
+1, -1, -1, -1, -1, -1, 66, -1, -1, -1, -1, -1, 66, 66, 66, 66, -1, -1, -1, -1, 
+66, -1, -1, -1, -1, -1, -1, -1, -1, 66, 66, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 67, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, 69, 69, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, 69, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 69, -1, 
+68, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 70, -1, -1, 
+-1, 71, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, 72, -1, -1, -1, -1, -1, -1, -1, 72, -1, -1, -
+1, -1, -1, -1, -1, -1, 72, -1, -1, -1, -1, -1, 72, 72, 72, 72, -1, -1, -1, -1, 
+72, -1, -1, -1, -1, -1, -1, -1, -1, 72, 72, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, 73, -1, -1, -1, -1, -1, -1, -1, 73, -1, -1, -
+1, -1, -1, -1, -1, -1, 73, -1, -1, -1, -1, -1, 73, 73, 73, 73, -1, -1, -1, -1, 
+73, -1, -1, -1, -1, -1, -1, -1, -1, 73, 73, -1, -1},
+{-1, -1, -1, -1, 75, 75, 75, 75, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, 75, 75, -1, 75, -1, -1, -1, -1, -1, -1, -1, -1, -1, 75, 75, -1, 
+75, 75, 74, 74, 74, 74, 74, 74, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, 76, 78, 77, 79, 80, 81, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, 82, -1, -1, -1, -1, -1, -1, -1, 82, -1, -1, -
+1, -1, -1, -1, -1, -1, 82, -1, -1, -1, -1, -1, 82, 82, 82, 82, -1, -1, -1, -1, 
+82, -1, -1, -1, -1, -1, -1, -1, -1, 82, 82, -1, -1},
+{-1, -1, -1, -1, 84, 84, 84, 84, -1, -1, -1, -1, -1, -1, -1, -1, -1, 83, -1, -
+1, -1, -1, -1, 84, 84, -1, 84, -1, -1, -1, -1, -1, -1, -1, -1, -1, 84, 84, -1, 
+-1, 84, 84, 84, 84, 84, 84, 84, -1, 83, 83, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, 87, -1, -1, -1, -1, -1, -1, -1, 87, -1, -1, -
+1, -1, -1, -1, -1, -1, 87, -1, -1, -1, -1, -1, 87, 87, 87, 87, -1, -1, -1, -1, 
+87, -1, -1, -1, -1, -1, -1, -1, -1, 85, 86, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 90, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, 88, 89, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, 91, -1, -1, -1, -1, -1, -1, -1, 91, -1, -1, -
+1, -1, -1, -1, -1, -1, 91, -1, -1, -1, -1, -1, 91, 91, 91, 91, -1, -1, -1, -1, 
+91, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{92, -1, -1, 92, 93, 93, 93, 93, -1, -1, -1, -1, -1, -1, -1, 92, -1, 93, -1, -
+1, -1, -1, -1, 93, 93, -1, 93, -1, -1, -1, -1, -1, -1, -1, -1, -1, 93, 93, -1, 
+-1, 93, 93, 93, 93, 93, 93, 93, -1, 93, 93, 92, 92},
+{98, -1, -1, 96, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 97, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 94, 95},
+{-1, -1, -1, -1, -1, -1, -1, -1, 103, -1, -1, -1, -1, -1, -1, -1, 104, -1, -1, 
+-1, -1, -1, -1, -1, -1, 102, -1, -1, -1, -1, -1, 106, 99, 100, 101, -1, -1, -
+1, -1, 105, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 107, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 108, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 109, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 110, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, 111, -1, -1, -1, -1, -1, -1, -1, 111, -1, -1, 
+-1, -1, -1, -1, -1, -1, 111, -1, -1, -1, -1, -1, 111, 111, 111, 111, -1, -1, -
+1, -1, 111, -1, -1, -1, -1, -1, -1, -1, -1, 111, 111, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, 112, -1, -1, -1, -1, -1, -1, -1, 112, -1, -1, 
+-1, -1, -1, -1, -1, -1, 112, -1, -1, -1, -1, -1, 112, 112, 112, 112, -1, -1, -
+1, -1, 112, -1, -1, -1, -1, -1, -1, -1, -1, 112, 112, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 113, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -
+1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 114, -1, 
+115, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
+*/
 }

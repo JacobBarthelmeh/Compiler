@@ -2,7 +2,6 @@ package scanner;
 
 import util.Reader;
 import compiler.Token;
-import javax.swing.JOptionPane;
 import util.Terminal;
 
 public class FSA {
@@ -62,7 +61,8 @@ public class FSA {
                         //other character found
                         reader.ungetChar(c);
                         reader.ungetChar('.');
-                        return new Token(str.subSequence(0, str.length() - 1).toString(), id, row, col);
+                        return new Token(str.subSequence(
+                                0, str.length() - 1).toString(), id, row, col);
                     }
                     break;
                 case 3:
@@ -78,7 +78,8 @@ public class FSA {
                         default:
                             reader.ungetChar(c);
                             reader.ungetChar('E');
-                            return new Token(str.subSequence(0, str.length() - 1).toString(), id, row, col);
+                            return new Token(str.subSequence(0,str.length() - 1)
+                                    .toString(), id, row, col);
                     }
                     break;
                 case 4:
@@ -94,7 +95,8 @@ public class FSA {
                         default:
                             reader.ungetChar(c);
                             reader.ungetChar('e');
-                            return new Token(str.subSequence(0, str.length() - 1).toString(), id, row, col);
+                            return new Token(str.subSequence(0,
+                                    str.length() - 1).toString(), id, row, col);
                     }
                     break;
                 case 5:
@@ -125,7 +127,8 @@ public class FSA {
                         reader.ungetChar(c);
                         reader.ungetChar('-');
                         reader.ungetChar('E');
-                        return new Token(str.subSequence(0, str.length() - 2).toString(), id, row, col);
+                        return new Token(str.subSequence(0, str.length() - 2)
+                                .toString(), id, row, col);
                     }
                     break;
                 case 7:
@@ -149,7 +152,8 @@ public class FSA {
                         reader.ungetChar(c);
                         reader.ungetChar('+');
                         reader.ungetChar('E');
-                        return new Token(str.subSequence(0, str.length() - 2).toString(), id, row, col);
+                        return new Token(str.subSequence(0, str.length() - 2)
+                                .toString(), id, row, col);
                     }
                     break;
                 case 10:
@@ -162,7 +166,8 @@ public class FSA {
                         reader.ungetChar(c);
                         reader.ungetChar('-');
                         reader.ungetChar('e');
-                        return new Token(str.subSequence(0, str.length() - 2).toString(), id, row, col);
+                        return new Token(str.subSequence(0, str.length() - 2)
+                                .toString(), id, row, col);
                     }
                     break;
                 case 12:
@@ -175,13 +180,10 @@ public class FSA {
                         reader.ungetChar(c);
                         reader.ungetChar('+');
                         reader.ungetChar('e');
-                        return new Token(str.subSequence(0, str.length() - 2).toString(), id, row, col);
+                        return new Token(str.subSequence(0, str.length() - 2)
+                                .toString(), id, row, col);
                     }
                     break;
-                default:
-                    //you lose
-                    JOptionPane.showMessageDialog(null, "you lose : state = " + state);
-
             }
         } while (c != '\u001a');
         //End of file fall through
@@ -212,13 +214,16 @@ public class FSA {
                         str += c;
                         break;
                     }
-                    System.out.println("ERROR: Failed precondition for TEST_LETTER FSA");
+                    System.out.println("Failed TEST_LETTER precondition.");
                     return null;
-                    //  This state can only be reached by underscore and it requires
-                    //  that there be an alphanumeric directly after all underscores
+                    //  This state can only be reached by underscore and it
+                    //  requires that there be an alphanumeric directly after
+                    //  all underscores
                 case 1:
                     c = reader.peekChar();
-                    if (c <= 'z' && c >= 'a' || c <= 'Z' && c >= 'A' || c <= '9' && c >= '0') {
+                    if (c <= 'z' && c >= 'a'
+                     || c <= 'Z' && c >= 'A'
+                     || c <= '9' && c >= '0') {
                         state = 2;
                         str += c;
                         reader.nextChar();
@@ -233,21 +238,23 @@ public class FSA {
                         reader.nextChar();
                         break;
                     }
-                    if (c <= 'z' && c >= 'a' || c <= 'Z' && c >= 'A' || c <= '9' && c >= '0') {
+                    if (c <= 'z' && c >= 'a'
+                     || c <= 'Z' && c >= 'A'
+                     || c <= '9' && c >= '0') {
                         state = 2;
                         str += c;
                         reader.nextChar();
                         break;
                     }
-                    //  No underscore or character- c is peeking at the first char
-                    //  that is not in this token, so postcondition is met.
+                    //  No underscore or character- c is peeking at the first
+                    //  char that is not in this token, so postcondition is met.
                     //  Force the exit condition; doesn't get added to string
                     //  so it doesn't really matter
                     c = '\u001a';
                     break;
             }
         }
-        //  This language is case-insensitive. Includes keywords and identifiers.
+        //  This language is case-insensitive. Includes keywords and identifiers
         str = str.toLowerCase();
         switch (str) {
             //  1 bytecode :3
@@ -269,7 +276,7 @@ public class FSA {
             case "mod": return new Token(str, Terminal.MOD, row, col);
             case "not": return new Token(str, Terminal.NOT, row, col);
             case "or": return new Token(str, Terminal.OR, row, col);
-            case "procedure": return new Token(str, Terminal.PROCEDURE, row, col);
+            case "procedure":return new Token(str,Terminal.PROCEDURE, row, col);
             case "program": return new Token(str, Terminal.PROGRAM, row, col);
             case "read": return new Token(str, Terminal.READ, row, col);
             case "repeat": return new Token(str, Terminal.REPEAT, row, col);
@@ -311,7 +318,7 @@ public class FSA {
                         state = 1;
                         break;
                     }
-                    System.out.println("ERROR: Failed precondition for STRING_LIT FSA");
+                    System.out.println("Failed STRING_LIT precondition");
                     return null;
                 /*  State 1:
                  c is ' or ?
@@ -366,7 +373,7 @@ public class FSA {
                         state = 1;
                         break;
                     }
-                    System.out.println("ERROR: Failed precondition for COLON FSA");
+                    System.out.println("Failed precondition for COLON FSA");
                     return null;
                 /*  State 1:
                  c is either = or ?
@@ -421,7 +428,7 @@ public class FSA {
                         state = 1;
                         break;
                     }
-                    System.out.println("ERROR: Failed precondition for LTHAN FSA");
+                    System.out.println("Failed precondition for LTHAN FSA");
                     return null;
                 /*  State 1:
                  c is = or > or ?
