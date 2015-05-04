@@ -995,10 +995,13 @@ public class Parser {
             case 59://rule 59
                 if (l1.getTerminal() == Terminal.REPEAT) {
                     match();
+                    int top = sa.newLabel();
+                    sa.putLabel(top);
                     StatementSequence();
                     if (l1.getTerminal() == Terminal.UNTIL) {
                         match();
                         BooleanExpression();
+                        sa.genBranchFalse_S(top);
                     } else {
                         String[] err = {"until"};
                         error(err);
