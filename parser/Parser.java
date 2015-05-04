@@ -1475,7 +1475,7 @@ public class Parser {
                 return Operator.DIVISION;
             case 96:           // / RULE 96
                 match();
-                return Operator.DIVISION;
+                return Operator.FLOAT_DIVISION;
             case 97:           // % RULE 97
                 match();
                 return Operator.MODULO;

@@ -131,7 +131,8 @@ public class SemanticAnalyzer {
      * @param right The right operand
      * @return Whether the result is dealing with floating point arithmetic
      */
-    public boolean handleArithCasts(SemanticRecord left, SemanticRecord right) {
+    public boolean handleArithCasts(SemanticRecord left,
+            Operator opp, SemanticRecord right) {
         //  Error checking on the left side
         if (left.type != Type.INTEGER && left.type != Type.FLOAT) {
             Token t = left.token;
@@ -148,14 +149,25 @@ public class SemanticAnalyzer {
                     + t.getCol());
             return false;
         }
+        //  Float divider on float operands
+        if (opp == Operator.DIVISION) {
+            if (left.type == Type.FLOAT || right.type == Type.FLOAT) {
+                error("Cannot use integer division with float operands."
+                    + " at line " + right.token.getLine() + " col "
+                    + right.token.getCol());
+                return false;
+            }
+        }
         //  Cast the left one properly
-        if (left.type == Type.INTEGER && right.type == Type.FLOAT) {
+        if (left.type == Type.INTEGER &&
+                (right.type == Type.FLOAT || opp == Operator.FLOAT_DIVISION)) {
             w.writeLine("SUB SP #1 SP");
             w.writeLine("CASTSF");
             w.writeLine("ADD SP #1 SP");
             return true;
         } //  Cast the right one properly
-        else if (left.type == Type.FLOAT && right.type == Type.INTEGER) {
+        else if (left.type == Type.FLOAT &&
+                (right.type == Type.INTEGER || opp == Operator.FLOAT_DIVISION)){
             w.writeLine("CASTSF");
             return true;
         }
@@ -172,7 +184,7 @@ public class SemanticAnalyzer {
      */
     public boolean genArithOperator_S(SemanticRecord left, Operator opp,
             SemanticRecord right) {
-        if (handleArithCasts(left, right)) {
+        if (handleArithCasts(left, opp, right)) {
             w.writeLine(opp.code + "F");
             return true;
         } else {

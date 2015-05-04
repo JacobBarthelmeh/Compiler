@@ -8,6 +8,7 @@ public enum Operator {
     //  MULTIPLICATION LEVEL OPERATORS
     MULTIPLICATION(1, "MULS"),
     DIVISION(1, "DIVS"),
+    FLOAT_DIVISION(1, "DIVS"),  //  The F is handled in the SA
     MODULO(1, "MODS"),
     NEGATION(1, "NEGS"),
     AND(1, "ANDS"),
