@@ -56,36 +56,21 @@ public class SemanticAnalyzer {
      * @param rec What to push onto the stack
      */
     public void genPush(SemanticRecord rec) {
-        if (rec.symbol != null) {
-            switch (rec.symbol.kind) {
-                case INOUTVARIABLE:
-                    if (funcCall) {
-                        w.writeLine("PUSH " + rec.code);
-                    } else {
+        if (!funcCall) {
+            if (rec.symbol != null) {
+                switch (rec.symbol.kind) {
+                    case INOUTVARIABLE:
                         w.writeLine("PUSH @" + rec.code);
-                    }
-                    break;
-                case INOUTPARAMETER:
-                    //Put address of variable onto the stack
-                    w.writeLine("PUSH D" + rec.symbol.nestinglevel);
-                    w.writeLine("PUSH #" + rec.symbol.offset);
-                    w.writeLine("ADDS");
-                    break;
-                case VARIABLE:
-                    if (funcCall) {
-                        //Put address of variable onto the stack
-                        w.writeLine("PUSH D" + rec.symbol.nestinglevel);
-                        w.writeLine("PUSH #" + rec.symbol.offset);
-                        w.writeLine("ADDS");
-                    } else {
+                        break;
+                    case VARIABLE:
                         w.writeLine("PUSH " + rec.code);
-                    }
-                    break;
-                default:
-                    w.writeLine("PUSH " + rec.code);
+                        break;
+                    default:
+                        w.writeLine("PUSH " + rec.code);
+                }
+            } else {
+                w.writeLine("PUSH " + rec.code);
             }
-        } else {
-            w.writeLine("PUSH " + rec.code);
         }
     }
 
@@ -504,6 +489,7 @@ public class SemanticAnalyzer {
                     + ". Wanted: " + formal.size());
             return;
         }
+
         //  Needs to be iterative not iteratorative
         for (int i = 0; i < formal.size(); i++) {
             Parameter f = formal.get(i);
@@ -511,6 +497,19 @@ public class SemanticAnalyzer {
             if (f.type != a.type) {
                 error("Call Error: Parameter provided is incorrect type.");
                 return;
+            }
+            switch (f.kind) {
+                case INOUTPARAMETER:
+                    if (a.symbol.kind == Kind.INOUTVARIABLE) {
+                        w.writeLine("PUSH " + a.code); //a is already storing an address
+                    } else {
+                        w.writeLine("PUSH D" + a.symbol.nestinglevel);
+                        w.writeLine("PUSH #" + a.symbol.offset);
+                        w.writeLine("ADDS");
+                    }
+                    break;
+                case INPARAMETER:
+                    w.writeLine("PUSH " + a.code);
             }
         }
         w.writeLine("CALL L" + callLocations.get(callLocation.name));
