@@ -171,7 +171,7 @@ public class SemanticAnalyzer {
      * @return Whether floating point arithmetic was used
      */
     public boolean genArithOperator_S(SemanticRecord left, Operator opp,
-                                      SemanticRecord right) {
+            SemanticRecord right) {
         if (handleArithCasts(left, right)) {
             w.writeLine(opp.code + "F");
             return true;
@@ -189,7 +189,7 @@ public class SemanticAnalyzer {
      * @param right The right operand
      */
     public void genLogicalOperator_S(SemanticRecord left, Operator opp,
-                                     SemanticRecord right) {
+            SemanticRecord right) {
         if (left.type != Type.BOOLEAN) {
             Token t = left.token;
             error("Left operand is incompatible with arithmetic functions. "
@@ -241,17 +241,16 @@ public class SemanticAnalyzer {
         //  Results in loss of data accuracy at runtime
         if (into.type == Type.INTEGER && from.type == Type.FLOAT) {
             w.writeLine("CASTSI");
-        }
-        else if (into.type == Type.FLOAT && from.type == Type.INTEGER) {
+        } else if (into.type == Type.FLOAT && from.type == Type.INTEGER) {
             w.writeLine("CASTSF");
         }
-        
+
         if (from.symbol != null && from.symbol.kind == Kind.FUNCTION) {
             //push returned value onto the stack
             w.writeLine("PUSH " + from.code);
         }
         if (into.symbol.kind == Kind.INOUTPARAMETER
-         || into.symbol.kind == Kind.INOUTVARIABLE) {
+                || into.symbol.kind == Kind.INOUTVARIABLE) {
             w.writeLine("POP @" + into.code);
         } else {
             w.writeLine("POP " + into.code);
@@ -280,8 +279,8 @@ public class SemanticAnalyzer {
                 default:
                     Token t = rec.token;
                     System.err.println("Read parameter must be of type "
-                            + "Float, Integer, or String. Found " 
-                            + t.getContents() + " at line " + t.getLine() 
+                            + "Float, Integer, or String. Found "
+                            + t.getContents() + " at line " + t.getLine()
                             + " col " + t.getCol());
                     System.err.println("Was expecting a variable name");
                     break;
@@ -370,7 +369,7 @@ public class SemanticAnalyzer {
      * @param control The variable to iterate over
      * @param initial The initial value of that variable
      */
-    public void genForInitialize(SemanticRecord control,SemanticRecord initial){
+    public void genForInitialize(SemanticRecord control, SemanticRecord initial) {
         //  It should only ever be an integer... right?
         w.writeLine("PUSH " + initial.code);
         //  Cast it anyway? lol
@@ -410,7 +409,7 @@ public class SemanticAnalyzer {
      * @param end The expected end value of the for loop
      */
     public void genForTest(SemanticRecord control, boolean increment,
-                           SemanticRecord end) {
+            SemanticRecord end) {
         //  Push parameters
         w.writeLine("PUSH " + control.code);
         w.writeLine("PUSH " + end.code);
@@ -441,11 +440,14 @@ public class SemanticAnalyzer {
         //store register
         genStoreRegisters(nestingL);
 
-        w.writeLine("ADD SP #" + params.size() + " SP");
+        //initialize variable stack locations to be 0
+        for (int i = 0; i < params.size(); i++) {
+            w.writeLine("PUSH #0");
+        }
         int offset = -2 - params.size();
         for (int i = 0; i < params.size(); i++) {
             w.writeLine("MOV " + (offset - params.size() + i) + "(SP) "
-                + sh.getEntry(params.get(i).name).offset+"(D" + nestingL + ")");
+                    + sh.getEntry(params.get(i).name).offset + "(D" + nestingL + ")");
         }
     }
 
@@ -480,13 +482,13 @@ public class SemanticAnalyzer {
      * @param callLocation The destination to call to
      * @param actual The list of actual parameters provided
      */
-    public void onStartActualCall(Symbol callLocation, 
-                                  ArrayList<SemanticRecord> actual) {
+    public void onStartActualCall(Symbol callLocation,
+            ArrayList<SemanticRecord> actual) {
         ArrayList<Parameter> formal = callLocation.params;
         //  Error handling
         if (formal.size() != actual.size()) {
             error("Call Error: Incorrect number of parameters provided for call"
-                    + " to " + callLocation.name + ". Provided: " +actual.size()
+                    + " to " + callLocation.name + ". Provided: " + actual.size()
                     + ". Wanted: " + formal.size());
             return;
         }
@@ -510,7 +512,7 @@ public class SemanticAnalyzer {
      */
     public void padForVariable() {
         //  It's one statement, but the method name helps provide usage
-        w.writeLine("ADD SP #1 SP");
+        w.writeLine("PUSH #0"); //initialize variable to 0
     }
 
     public SemanticAnalyzer(String filename, SymbolTableHandler sh) {
