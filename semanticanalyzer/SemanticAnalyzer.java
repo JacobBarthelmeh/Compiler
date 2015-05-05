@@ -53,8 +53,8 @@ public class SemanticAnalyzer {
      * @param rec What to push onto the stack
      */
     public void genPush(SemanticRecord rec) {
-        if (!funcCall) {
-            if (rec.symbol != null) {
+        if (rec.symbol != null) {
+            if (!funcCall) {
                 switch (rec.symbol.kind) {
                     case INOUTVARIABLE:
                         w.writeLine("PUSH @" + rec.code);
@@ -65,9 +65,9 @@ public class SemanticAnalyzer {
                     default:
                         w.writeLine("PUSH " + rec.code);
                 }
-            } else {
-                w.writeLine("PUSH " + rec.code);
             }
+        } else {
+            w.writeLine("PUSH " + rec.code);
         }
     }
 
@@ -186,6 +186,7 @@ public class SemanticAnalyzer {
             w.writeLine(opp.code + "F");
             return true;
         } else {
+
             w.writeLine(opp.code);
             return false;
         }
@@ -256,8 +257,10 @@ public class SemanticAnalyzer {
         }
 
         if (from.symbol != null && from.symbol.kind == Kind.FUNCTION) {
-            //push returned value onto the stack
-            w.writeLine("PUSH " + from.code);
+            if (from.code != "") {
+                //push returned value onto the stack
+                w.writeLine("PUSH " + from.code);
+            }
         }
         if (into.symbol.kind == Kind.INOUTPARAMETER
                 || into.symbol.kind == Kind.INOUTVARIABLE) {
@@ -327,13 +330,13 @@ public class SemanticAnalyzer {
             }
             w.writeLine("WRTS");
             while (offset-- > 0) {
-                w.writeLine("ADD SP #1 SP");
+                w.writeLine("ADD SP #2 SP");
                 w.writeLine("WRTS");
             }
             numwrites--;
         }
         if (line) {
-            w.writeLine("PUSH #'\\n'");
+            w.writeLine("PUSH #\"\\n\"");
             w.writeLine("WRTS");
         }
     }
@@ -506,6 +509,7 @@ public class SemanticAnalyzer {
             return;
         }
 
+        int numParams = formal.size();
         //  Needs to be iterative not iteratorative
         for (int i = 0; i < formal.size(); i++) {
             Parameter f = formal.get(i);
@@ -516,26 +520,23 @@ public class SemanticAnalyzer {
             }
             switch (f.kind) {
                 case INOUTPARAMETER:
-                    if (a.symbol.kind == Kind.INOUTVARIABLE) {
-                        if (a.code != "") {
-                            w.writeLine("PUSH " + a.code); //a is already storing an address
-                        }
-                    } else {
+                    if (a.symbol.kind != Kind.INOUTVARIABLE) {
                         w.writeLine("PUSH D" + a.symbol.nestinglevel);
                         w.writeLine("PUSH #" + a.symbol.offset);
                         w.writeLine("ADDS");
+                        w.writeLine("POP " + (formal.size() - i - 1) + "(SP)");
                     }
                     break;
-                case INPARAMETER:
-                    if (a.code != "") {
-                        w.writeLine("PUSH " + a.code);
-                    }
             }
         }
-        w.writeLine("CALL L" + callLocations.get(callLocation.name));
-        if (formal.size() > 0) {
+        w.writeLine(
+                "CALL L" + callLocations.get(callLocation.name));
+        if (formal.size()
+                > 0) {
             w.writeLine("SUB SP #" + formal.size() + " SP"); //clean up stack
         }
+        //push the returned value onto the stack
+        w.writeLine("PUSH " + callLocation.offset + "(D" + callLocation.nestinglevel + ")"  );
     }
 
     /**
