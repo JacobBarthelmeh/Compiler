@@ -31,9 +31,6 @@ public class SemanticAnalyzer {
     //  The running coint of how many labels have been made
     private static int LABEL_COUNTER = 0;
 
-    //  The writing mode. True for writeln, false for write
-    private boolean writingLine;
-
     // tell if processing parameters
     public boolean funcCall;
 
@@ -307,12 +304,11 @@ public class SemanticAnalyzer {
 
     //  WRITING
     /**
-     * Flag the begin of a write statement
-     *
-     * @param writingLine Whether to writeln rather than just write
+     * Signal the end of a writeln by writing line
      */
-    public void startWrite(boolean writingLine) {
-        this.writingLine = writingLine;
+    public void finishWriteln() {
+        w.writeLine("PUSH #\"\"");
+        w.writeLine("WRTLNS");
     }
 
     /**
@@ -329,11 +325,7 @@ public class SemanticAnalyzer {
                 break;
             //  Handle other types
         }
-        if (writingLine) {
-            w.writeLine("WRTLNS");
-        } else {
-            w.writeLine("WRTS");
-        }
+        w.writeLine("WRTS");
     }
 
     //  B LEVEL

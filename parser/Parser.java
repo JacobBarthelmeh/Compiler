@@ -805,7 +805,7 @@ public class Parser {
     }
 
     // Nonterminal 28
-// <WriteStatement> --> genWrite_S  ( <WriteParameter> <WriteParameterTail> //49
+// <WriteStatement> --> write  ( <WriteParameter> <WriteParameterTail> //49
 // <WriteStatement> --> writeln ( <WriteParameter> <WriteParameterTail> ) //  50
     private void WriteStatement() {
         stackTrace += "WriteStatment\n";
@@ -814,7 +814,6 @@ public class Parser {
                 match();
                 if (l1.getTerminal() == Terminal.LPAREN) {
                     match();
-                    sa.startWrite(false);
                     WriteParameter();
                     WriteParameterTail();
                     if (l1.getTerminal() == Terminal.RPAREN) {
@@ -833,9 +832,9 @@ public class Parser {
                 match();
                 if (l1.getTerminal() == Terminal.LPAREN) {
                     match();
-                    sa.startWrite(true);
                     WriteParameter();
                     WriteParameterTail();
+                    sa.finishWriteln();
                     if (l1.getTerminal() == Terminal.RPAREN) {
                         match();
                     } else {
