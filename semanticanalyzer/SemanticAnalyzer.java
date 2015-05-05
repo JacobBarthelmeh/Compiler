@@ -114,10 +114,24 @@ public class SemanticAnalyzer {
      *
      * @param left The left operand
      * @param right The right operand
+     * @param opp the operation being performed
      * @return Whether the result is dealing with floating point arithmetic
      */
     public boolean handleArithCasts(SemanticRecord left,
             Operator opp, SemanticRecord right) {
+        //MOD handeler
+        if (opp.code.equals("MODS")) {
+            if (left.type != Type.INTEGER) {
+                w.writeLine("SUB SP #1 SP");
+                w.writeLine("CASTSI");
+                w.writeLine("ADD SP #1 SP");
+            }
+            if (right.type != Type.INTEGER) {
+                w.writeLine("CASTSI");
+            }
+            return false;
+        }
+
         //  Error checking on the left side
         if (left.type != Type.INTEGER && left.type != Type.FLOAT) {
             Token t = left.token;
@@ -138,21 +152,21 @@ public class SemanticAnalyzer {
         if (opp == Operator.DIVISION) {
             if (left.type == Type.FLOAT || right.type == Type.FLOAT) {
                 error("Cannot use integer division with float operands."
-                    + " at line " + right.token.getLine() + " col "
-                    + right.token.getCol());
+                        + " at line " + right.token.getLine() + " col "
+                        + right.token.getCol());
                 return false;
             }
         }
         //  Cast the left one properly
-        if (left.type == Type.INTEGER &&
-                (right.type == Type.FLOAT || opp == Operator.FLOAT_DIVISION)) {
+        if (left.type == Type.INTEGER
+                && (right.type == Type.FLOAT || opp == Operator.FLOAT_DIVISION)) {
             w.writeLine("SUB SP #1 SP");
             w.writeLine("CASTSF");
             w.writeLine("ADD SP #1 SP");
             return true;
         } //  Cast the right one properly
-        else if (left.type == Type.FLOAT &&
-                (right.type == Type.INTEGER || opp == Operator.FLOAT_DIVISION)){
+        else if (left.type == Type.FLOAT
+                && (right.type == Type.INTEGER || opp == Operator.FLOAT_DIVISION)) {
             w.writeLine("CASTSF");
             return true;
         }
