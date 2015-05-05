@@ -316,34 +316,26 @@ public class SemanticAnalyzer {
     }
 
     /**
-     * Signal the end of a writeln by writing line
+     * Signal the end of a write to print the contents
+     * @param line Whether to finish the line at this time.
      */
     public void finishWrite(boolean line) {
-        while (numwrites > 0) {
+        if (numwrites > 0) {
+            int offset = numwrites - 1;
+            if (offset > 0) {
+                w.writeLine("SUB SP #" + offset + " SP");
+            }
             w.writeLine("WRTS");
+            while (offset-- > 0) {
+                w.writeLine("ADD SP #1 SP");
+                w.writeLine("WRTS");
+            }
             numwrites--;
         }
         if (line) {
-            w.writeLine("PUSH #\"\"");
-            w.writeLine("WRTLNS");
+            w.writeLine("PUSH #'\\n'");
+            w.writeLine("WRTS");
         }
-    }
-
-    /**
-     * Generate a write statement using current writing mode.
-     *
-     * @param t The Token containing the desired write value to write
-     */
-    public void genWrite_S(Token t) {
-        String code = "#" + t.getContents();
-        switch (t.getTerminal()) {
-            case IDENTIFIER:
-                Symbol s = sh.getEntry(t.getContents());
-                code = s.offset + "(D" + s.nestinglevel + ")";
-                break;
-            //  Handle other types
-        }
-        w.writeLine("WRTS");
     }
 
     //  B LEVEL
