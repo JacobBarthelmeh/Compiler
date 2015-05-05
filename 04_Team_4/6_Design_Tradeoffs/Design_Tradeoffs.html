@@ -7,8 +7,6 @@
 	<META NAME="CREATED" CONTENT="0;0">
 	<META NAME="CHANGEDBY" CONTENT="jak TheOne">
 	<META NAME="CHANGED" CONTENT="20150503;14374800">
-	<META NAME="CHANGEDBY" CONTENT="jak TheOne">
-	<META NAME="CHANGEDBY" CONTENT="jak TheOne">
 	<!-- InstanceBegin template="/Templates/page.dwt" codeOutsideHTMLIsLocked="false" -->
 	<SCRIPT SRC="../../../../Scripts/google-code-prettify/run_prettify.js"></SCRIPT>
 	<SCRIPT SRC="../../../../Scripts/recomputeAttributes.js"></SCRIPT>
@@ -98,13 +96,15 @@
 	argument values, or address of stack location in the case of by
 	reference, is pushed onto the stack. Then after branching to the
 	location of machine code for the function, it knows that the most
-	recent thing on the stack is those arguments. <BR><BR>After
+	recent thing on the stack is those arguments.</p>
+	<p>After
 	consideration of whether to initialize variables or not, we decided
 	to initialize them. The leading factor on this decision was how
 	uninformative the runtime error thrown was from the virtual machine
 	when encountering an empty memory location on the stack. So when the
 	stack is adjusted to contain space for a new variable that memory
-	space is automatically set to the value 0.<BR><BR>Since the only
+	space is automatically set to the value 0.</p>
+	<p>Since the only
 	loops in the code is for iterating over function parameters, and
 	there is no recursive calls, the theoretical run time should be
 	bound by O(n) where n is lines of code being generated and there is

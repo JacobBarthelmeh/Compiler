@@ -325,6 +325,7 @@ public class SemanticAnalyzer {
     public void finishWrite(boolean line) {
         if (numwrites > 0) {
             int offset = numwrites - 1;
+            int saved = offset;
             if (offset > 0) {
                 w.writeLine("SUB SP #" + offset + " SP");
             }
@@ -333,7 +334,9 @@ public class SemanticAnalyzer {
                 w.writeLine("ADD SP #2 SP");
                 w.writeLine("WRTS");
             }
-            numwrites--;
+            if (saved > 0) {
+                w.writeLine("SUB SP #" + saved + " SP");
+            }
         }
         if (line) {
             w.writeLine("PUSH #\"\\n\"");
