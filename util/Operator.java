@@ -16,7 +16,7 @@ public enum Operator {
     
     //  COMPARISON LEVEL OPERATORS
     EQUAL(2, "CMPEQS"),
-    NEQUAL(2, "CMPNEQS"),
+    NEQUAL(2, "CMPNES"),
     GEQUAL(2, "CMPGES"),
     LEQUAL(2, "CMPLES"),
     LTHAN(2, "CMPLTS"),

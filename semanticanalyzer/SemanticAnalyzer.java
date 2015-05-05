@@ -116,6 +116,25 @@ public class SemanticAnalyzer {
      */
     public boolean handleArithCasts(SemanticRecord left,
             Operator opp, SemanticRecord right) {
+
+        //  Error checking on the left side
+        if (left.type == Type.BOOLEAN
+                || left.type != Type.INTEGER && left.type != Type.FLOAT) {
+            Token t = left.token;
+            error("Left operand is incompatible with arithmetic functions. "
+                    + t.getContents() + " at line " + t.getLine() + " col "
+                    + t.getCol());
+            return false;
+        }
+        //  Error checking on the right side
+        if (right.type == Type.BOOLEAN
+                || right.type != Type.INTEGER && right.type != Type.FLOAT) {
+            Token t = right.token;
+            error("Right operand is incompatible with arithmetic functions. "
+                    + t.getContents() + " at line " + t.getLine() + " col "
+                    + t.getCol());
+            return false;
+        }
         //MOD handeler
         if (opp.code.equals("MODS")) {
             if (left.type != Type.INTEGER) {
@@ -126,23 +145,6 @@ public class SemanticAnalyzer {
             if (right.type != Type.INTEGER) {
                 w.writeLine("CASTSI");
             }
-            return false;
-        }
-
-        //  Error checking on the left side
-        if (left.type != Type.INTEGER && left.type != Type.FLOAT) {
-            Token t = left.token;
-            error("Left operand is incompatible with arithmetic functions. "
-                    + t.getContents() + " at line " + t.getLine() + " col "
-                    + t.getCol());
-            return false;
-        }
-        //  Error checking on the right side
-        if (right.type != Type.INTEGER && right.type != Type.FLOAT) {
-            Token t = right.token;
-            error("Right operand is incompatible with arithmetic functions. "
-                    + t.getContents() + " at line " + t.getLine() + " col "
-                    + t.getCol());
             return false;
         }
         //  Float divider on float operands
@@ -160,14 +162,14 @@ public class SemanticAnalyzer {
             w.writeLine("SUB SP #1 SP");
             w.writeLine("CASTSF");
             w.writeLine("ADD SP #1 SP");
-            return true;
         } //  Cast the right one properly
-        else if (left.type == Type.FLOAT
-                && (right.type == Type.INTEGER || opp == Operator.FLOAT_DIVISION)) {
+        if (right.type == Type.INTEGER && opp == Operator.FLOAT_DIVISION) {
             w.writeLine("CASTSF");
-            return true;
+        } else if (left.type == Type.FLOAT && right.type == Type.INTEGER) {
+            w.writeLine("CASTSF");
         }
-        return left.type == Type.FLOAT || right.type == Type.FLOAT;
+        return left.type == Type.FLOAT || right.type == Type.FLOAT
+                || opp == Operator.FLOAT_DIVISION;
     }
 
     /**
@@ -303,12 +305,28 @@ public class SemanticAnalyzer {
     }
 
     //  WRITING
+    int numwrites;
+
+    public void startWrite() {
+        numwrites = 0;
+    }
+
+    public void incWriteCount() {
+        numwrites++;
+    }
+
     /**
      * Signal the end of a writeln by writing line
      */
-    public void finishWriteln() {
-        w.writeLine("PUSH #\"\"");
-        w.writeLine("WRTLNS");
+    public void finishWrite(boolean line) {
+        while (numwrites > 0) {
+            w.writeLine("WRTS");
+            numwrites--;
+        }
+        if (line) {
+            w.writeLine("PUSH #\"\"");
+            w.writeLine("WRTLNS");
+        }
     }
 
     /**
@@ -418,9 +436,9 @@ public class SemanticAnalyzer {
         w.writeLine("PUSH " + end.code);
         //  Test <= or >= depends on whether to use increment or decrement
         if (increment) {
-            w.writeLine("CMPLTS");
+            w.writeLine("CMPLES");
         } else {
-            w.writeLine("CMPGTS");
+            w.writeLine("CMPGES");
         }
     }
 
@@ -507,7 +525,9 @@ public class SemanticAnalyzer {
             switch (f.kind) {
                 case INOUTPARAMETER:
                     if (a.symbol.kind == Kind.INOUTVARIABLE) {
-                        w.writeLine("PUSH " + a.code); //a is already storing an address
+                        if (a.code != "") {
+                            w.writeLine("PUSH " + a.code); //a is already storing an address
+                        }
                     } else {
                         w.writeLine("PUSH D" + a.symbol.nestinglevel);
                         w.writeLine("PUSH #" + a.symbol.offset);
@@ -515,7 +535,9 @@ public class SemanticAnalyzer {
                     }
                     break;
                 case INPARAMETER:
-                    w.writeLine("PUSH " + a.code);
+                    if (a.code != "") {
+                        w.writeLine("PUSH " + a.code);
+                    }
             }
         }
         w.writeLine("CALL L" + callLocations.get(callLocation.name));

@@ -814,8 +814,10 @@ public class Parser {
                 match();
                 if (l1.getTerminal() == Terminal.LPAREN) {
                     match();
+                    sa.startWrite();
                     WriteParameter();
                     WriteParameterTail();
+                    sa.finishWrite(false);
                     if (l1.getTerminal() == Terminal.RPAREN) {
                         match();
                     } else {
@@ -832,9 +834,10 @@ public class Parser {
                 match();
                 if (l1.getTerminal() == Terminal.LPAREN) {
                     match();
+                    sa.startWrite();
                     WriteParameter();
                     WriteParameterTail();
-                    sa.finishWriteln();
+                    sa.finishWrite(true);
                     if (l1.getTerminal() == Terminal.RPAREN) {
                         match();
                     } else {
@@ -881,7 +884,7 @@ public class Parser {
             case 53://rule 53
                 Token t = l1;
                 OrdinalExpression();
-                sa.genWrite_S(t);
+                sa.incWriteCount();
                 //  sa.genWrite_S(); //  genWrite_S the terminal
                 break;
             default:
@@ -1471,10 +1474,10 @@ public class Parser {
                 return Operator.MULTIPLICATION;
             case 95:  // / RULE 95
                 match();
-                return Operator.DIVISION;
+                return Operator.FLOAT_DIVISION;
             case 96:           // / RULE 96
                 match();
-                return Operator.FLOAT_DIVISION;
+                return Operator.DIVISION;
             case 97:           // % RULE 97
                 match();
                 return Operator.MODULO;
