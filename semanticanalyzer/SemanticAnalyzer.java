@@ -31,8 +31,7 @@ public class SemanticAnalyzer {
     //  The running coint of how many labels have been made
     private static int LABEL_COUNTER = 0;
 
-    // tell if processing parameters
-    public boolean funcCall;
+    private ArrayList<Integer> ret = new ArrayList<Integer>();
 
     //  GENERAL NECESSARY FUNCTIONS
     /**
@@ -54,17 +53,15 @@ public class SemanticAnalyzer {
      */
     public void genPush(SemanticRecord rec) {
         if (rec.symbol != null) {
-            if (!funcCall) {
-                switch (rec.symbol.kind) {
-                    case INOUTVARIABLE:
-                        w.writeLine("PUSH @" + rec.code);
-                        break;
-                    case VARIABLE:
-                        w.writeLine("PUSH " + rec.code);
-                        break;
-                    default:
-                        w.writeLine("PUSH " + rec.code);
-                }
+            switch (rec.symbol.kind) {
+                case INOUTVARIABLE:
+                    w.writeLine("PUSH @" + rec.code);
+                    break;
+                case VARIABLE:
+                    w.writeLine("PUSH " + rec.code);
+                    break;
+                default:
+                    w.writeLine("PUSH " + rec.code);
             }
         } else {
             w.writeLine("PUSH " + rec.code);
@@ -256,11 +253,11 @@ public class SemanticAnalyzer {
             w.writeLine("CASTSF");
         }
 
-        if (from.symbol != null && from.symbol.kind == Kind.FUNCTION) {
-            if (from.code != "") {
-                //push returned value onto the stack
-                w.writeLine("PUSH " + from.code);
-            }
+        if (into.symbol != null && into.symbol.kind == Kind.FUNCTION) {
+            //push returned value onto the stack
+            Symbol s = sh.getEntry("1"); //get the top return value
+            w.writeLine("POP " + s.offset + "(D" + s.nestinglevel + ")");
+            return;
         }
         if (into.symbol.kind == Kind.INOUTPARAMETER
                 || into.symbol.kind == Kind.INOUTVARIABLE) {
@@ -320,6 +317,7 @@ public class SemanticAnalyzer {
 
     /**
      * Signal the end of a write to print the contents
+     *
      * @param line Whether to finish the line at this time.
      */
     public void finishWrite(boolean line) {
@@ -459,11 +457,14 @@ public class SemanticAnalyzer {
         //store register
         genStoreRegisters(nestingL);
 
+        //pad for return value
+        padForVariable();
+
         //initialize variable stack locations to be 0
         for (int i = 0; i < params.size(); i++) {
             w.writeLine("PUSH #0");
         }
-        int offset = -2 - params.size();
+        int offset = -4 - params.size();
         for (int i = 0; i < params.size(); i++) {
             w.writeLine("MOV " + (offset - params.size() + i) + "(SP) "
                     + sh.getEntry(params.get(i).name).offset + "(D" + nestingL + ")");
@@ -488,8 +489,13 @@ public class SemanticAnalyzer {
      */
     public void onEndFormalCall(Symbol callLocation) {
 
-        //restore register used
-        genRestoreRegisters(sh.nestinglevel + 1);
+        //store return value
+        w.writeLine("MOV D" + (callLocation.nestinglevel + 1) + " SP");
+        w.writeLine("MOV 0(SP) " + -(callLocation.params.size() + 3)
+                + "(SP) ; number params = " + callLocation.params.size());
+        w.writeLine("POP D" + (callLocation.nestinglevel + 1));
+//restore register used
+        //genRestoreRegisters(sh.nestinglevel + 1);
         //  return
         w.writeLine("RET");
     }
@@ -512,7 +518,6 @@ public class SemanticAnalyzer {
             return;
         }
 
-        int numParams = formal.size();
         //  Needs to be iterative not iteratorative
         for (int i = 0; i < formal.size(); i++) {
             Parameter f = formal.get(i);
@@ -521,25 +526,23 @@ public class SemanticAnalyzer {
                 error("Call Error: Parameter provided is incorrect type.");
                 return;
             }
-            switch (f.kind) {
-                case INOUTPARAMETER:
-                    if (a.symbol.kind != Kind.INOUTVARIABLE) {
-                        w.writeLine("PUSH D" + a.symbol.nestinglevel);
-                        w.writeLine("PUSH #" + a.symbol.offset);
-                        w.writeLine("ADDS");
-                        w.writeLine("POP " + (formal.size() - i - 1) + "(SP)");
-                    }
-                    break;
+            if (f.kind == Kind.INOUTPARAMETER) {
+                if (a.symbol.kind != Kind.INOUTVARIABLE) {
+                    w.writeLine("PUSH D" + a.symbol.nestinglevel);
+                    w.writeLine("PUSH #" + a.symbol.offset);
+                    w.writeLine("ADDS");
+                    w.writeLine("POP -" + (formal.size() - i) + "(SP)");
+                }
             }
         }
+        padForVariable(); //for return value
         w.writeLine(
                 "CALL L" + callLocations.get(callLocation.name));
+        w.writeLine("MOV 0(SP) " + (-formal.size()) + "(SP)");
         if (formal.size()
                 > 0) {
             w.writeLine("SUB SP #" + formal.size() + " SP"); //clean up stack
         }
-        //push the returned value onto the stack
-        w.writeLine("PUSH " + callLocation.offset + "(D" + callLocation.nestinglevel + ")"  );
     }
 
     /**

@@ -6,6 +6,7 @@ public enum Type {
     FLOAT,
     STRING,
     BOOLEAN,
+    RETURN,
     NOTYPE
 };
 
