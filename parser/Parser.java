@@ -1559,6 +1559,11 @@ public class Parser {
                 return r;
             case 106:   // RULE 106
                 Symbol entry = sh.getEntry(l1.getContents());
+                if (entry.kind == Kind.PROCEDURE) {
+                    sa.error("Procedures have no type. " 
+                        + l1.getContents() + " at line " + l1.getLine() + " col "
+                        + l1.getCol());
+                }
                 if (entry.kind == Kind.FUNCTION) {
                     r = new SemanticRecord(l1, entry);
                     Symbol function = sh.getEntry(FunctionIdentifier());
