@@ -491,11 +491,8 @@ public class SemanticAnalyzer {
 
         //store return value
         w.writeLine("MOV D" + (callLocation.nestinglevel + 1) + " SP");
-        w.writeLine("MOV 0(SP) " + -(callLocation.params.size() + 3)
-                + "(SP) ; number params = " + callLocation.params.size());
+        w.writeLine("MOV 0(SP) " + -(callLocation.params.size() + 3) + "(SP)");
         w.writeLine("POP D" + (callLocation.nestinglevel + 1));
-//restore register used
-        //genRestoreRegisters(sh.nestinglevel + 1);
         //  return
         w.writeLine("RET");
     }
@@ -533,12 +530,15 @@ public class SemanticAnalyzer {
                     w.writeLine("ADDS");
                     w.writeLine("POP -" + (formal.size() - i) + "(SP)");
                 }
+                if (a.symbol.kind == Kind.INOUTVARIABLE) {
+                    w.writeLine("PUSH " + a.code);
+                    w.writeLine("POP -" + (formal.size() - i) + "(SP)");
+                }
             }
         }
         padForVariable(); //for return value
         w.writeLine(
                 "CALL L" + callLocations.get(callLocation.name));
-        w.writeLine("MOV 0(SP) " + (-formal.size()) + "(SP)");
         if (formal.size()
                 > 0) {
             w.writeLine("SUB SP #" + formal.size() + " SP"); //clean up stack
