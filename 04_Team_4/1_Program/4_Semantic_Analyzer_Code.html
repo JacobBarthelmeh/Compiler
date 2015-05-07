@@ -1,715 +1,723 @@
-<!DOCTYPE html> 
-<html><!-- InstanceBegin template="/Templates/page.dwt" codeOutsideHTMLIsLocked="false" -->
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-
-<link rel="stylesheet" href="../../../../Stylesheets/prettify.css" />
-<link rel="stylesheet" href="../../../../Stylesheets/pageStylesheet.css" />
-<link rel="stylesheet" href="../../../../Stylesheets/navigationStylesheet.css" />
-<link rel="stylesheet" href="../../../../Stylesheets/allTextStyles.css" />
-<link rel="stylesheet" href="../../../../Stylesheets/colors-blue.css" />
-
-<script type="text/javascript" src="../../../../Scripts/google-code-prettify/run_prettify.js"></script>
-<script type="text/javascript" src="../../../../Scripts/recomputeAttributes.js"></script>
-
-
-<!-- InstanceBeginEditable name="doctitle" -->
-<title>Sematic Analyzer</title>
-<!-- InstanceEndEditable -->
-</head>
-
-<body id="body-style">
-
-<!-- 
-<div id="browser-window-veil">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Sematic Analyzer</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice 4.1.1  (Unix)">
+	<META NAME="CREATED" CONTENT="0;0">
+	<META NAME="CHANGEDBY" CONTENT="jak TheOne">
+	<META NAME="CHANGED" CONTENT="20150506;20134200">
+	<!-- InstanceBegin template="/Templates/page.dwt" codeOutsideHTMLIsLocked="false" -->
+	<SCRIPT SRC="../../../../Scripts/google-code-prettify/run_prettify.js"></SCRIPT>
+	<SCRIPT SRC="../../../../Scripts/recomputeAttributes.js"></SCRIPT>
+	<!-- InstanceBeginEditable name="doctitle" -->
+	<!-- InstanceEndEditable -->
+	<!-- <div id="browser-window-veil">
 </div>
 -->
-
-<div id="page-container">
-
-<header id="header">
-<div id="track-icon1">
-  <img src="../../../../Media/StyleImages/bobcat-small.png" alt="bobcat icon" width="75" height="48"></div>
-<div id="track-icon2">
-</div>
-<div id="track-icon3">
-</div>
-  <div id="headMatter">
-    <span id="headTitle1">
-      <!-- InstanceBeginEditable name="Header" -->
-        Team 4
-	  <!-- InstanceEndEditable --> 
-    </span>
-    <span id="headTitle2">
-    </span>
-  </div>
-</header>
-
-<nav id="navigate">
-</nav>
-
-
-<aside id="aside-left">
-<div id="asideLeftTitle">
-Compilers 2015
-</div>
-
-</aside>
-
-<aside id="aside-right">
-</aside>
-
-<footer id="footer">
-  <div id="footMatter">
-    <span id="previousPageLink">
-
-    </span>
-    <span id="currentPageNumber">
-    </span>
-    <span id="nextPageLink">
-
-    </span>
-  </div>
-</footer>
-
-<article id="mainContent">
-<!-- InstanceBeginEditable name="Main" -->
-<h1>Semantic Analyzer</h1>
-
-<h2>Specifications</h2>
-<p>
-Click <a href="../../../01_Introduction/2_Project_Specifications/4_Semantic_Analyzer_Specifications.html">here</a><a href="../../../01_Introduction/2_Project_Specifications/4_Semantic_Analyzer_Specifications.html"></a> to view the semantic analyzer specifications.
-</p>
-
-<h2>Source Listing</h2>
-
-<pre class="prettyprint" ><code class="language-java">
-
-package semanticanalyzer;
-
-import compiler.Compiler;
-import compiler.Token;
-import java.util.ArrayList;
-import java.util.HashMap;
-import symboltable.Parameter;
-import symboltable.Symbol;
-import symboltable.SymbolTableHandler;
-import util.Kind;
-import util.Operator;
-import util.Type;
-import util.Writer;
-
-public class SemanticAnalyzer {
-
-    //  Whether or not errors have arisen - cancels compilation if set to true
-    public boolean noerrors = true;
-
-    //  Initialization time conflict - just set it public
-    public SymbolTableHandler sh;
-
-    //  A special file writer that only creates/writes to a file if the compile
-    //  was successful.
-    private final Writer w;
-
-    //  Hashmap provides easy lookup for procedures/functions to know which
-    //  labels to reference. 
-    private final HashMap<String, Integer> callLocations;
-
-    //  The running coint of how many labels have been made
-    private static int LABEL_COUNTER = 0;
-
-    //  The writing mode. True for writeln, false for write
-    private boolean writingLine;
-
-    // tell if processing parameters
-    public boolean funcCall;
-
-    //  GENERAL NECESSARY FUNCTIONS
-    /**
-     * Produce an error and cancel compile.
-     *
-     * @param err The error message
-     */
-    public void error(String err) {
-        if (Compiler.DEBUG) {
-            System.err.println(err);
-        }
-        noerrors = false;
-    }
-
-    /**
-     * Push something to the stack
-     *
-     * @param rec What to push onto the stack
-     */
-    public void genPush(SemanticRecord rec) {
-        if (rec.symbol != null) {
-            switch (rec.symbol.kind) {
-                case INOUTVARIABLE:
-                    if (funcCall) {
-                        w.writeLine("PUSH " + rec.code);
-                    } else {
-                        w.writeLine("PUSH @" + rec.code);
-                    }
-                    break;
-                case INOUTPARAMETER:
-                    //Put address of variable onto the stack
-                    w.writeLine("PUSH D" + rec.symbol.nestinglevel);
-                    w.writeLine("PUSH #" + rec.symbol.offset);
-                    w.writeLine("ADDS");
-                    break;
-                case VARIABLE:
-                    if (funcCall) {
-                        //Put address of variable onto the stack
-                        w.writeLine("PUSH D" + rec.symbol.nestinglevel);
-                        w.writeLine("PUSH #" + rec.symbol.offset);
-                        w.writeLine("ADDS");
-                    } else {
-                        w.writeLine("PUSH " + rec.code);
-                    }
-                    break;
-                default:
-                    w.writeLine("PUSH " + rec.code);
-            }
-        } else {
-            w.writeLine("PUSH " + rec.code);
-        }
-    }
-
-    /**
-     * Used for storing register values on the stack when starting the program
-     */
-    public void genStoreRegisters(int nestingL) {
-        w.writeLine("PUSH D" + nestingL);
-        w.writeLine("MOV SP D" + nestingL);
-    }
-
-    /**
-     * Used for restoring register values after program run
-     */
-    public void genRestoreRegisters(int nestingL) {
-        w.writeLine("MOV D" + nestingL + " SP");
-        w.writeLine("POP D" + nestingL);
-    }
-
-    /**
-     * Halt the program and close the output file.
-     */
-    public void genHalt() {
-        w.writeLine("HLT");
-        w.close();
-    }
-
-    /**
-     * Move something from one place to another.
-     *
-     * @param from The place to move from
-     * @param to The place to move to
-     */
-    public void genMove(String from, String to) {
-        w.writeLine("MOV " + from + " " + to);
-    }
-
-    //  C LEVEL: EXPRESSIONS, ASSIGNMENTS, READS, WRITES
-    /**
-     * Handles casting arithmetic properly to float if necessary
-     *
-     * @param left The left operand
-     * @param right The right operand
-     * @return Whether the result is dealing with floating point arithmetic
-     */
-    public boolean handleArithCasts(SemanticRecord left, SemanticRecord right) {
-        //  Error checking on the left side
-        if (left.type != Type.INTEGER && left.type != Type.FLOAT) {
-            Token t = left.token;
-            error("Left operand is incompatible with arithmetic functions. "
-                    + t.getContents() + " at line " + t.getLine() + " col "
-                    + t.getCol());
-            return false;
-        }
-        //  Error checking on the right side
-        if (right.type != Type.INTEGER && right.type != Type.FLOAT) {
-            Token t = right.token;
-            error("Right operand is incompatible with arithmetic functions. "
-                    + t.getContents() + " at line " + t.getLine() + " col "
-                    + t.getCol());
-            return false;
-        }
-        //  Cast the left one properly
-        if (left.type == Type.INTEGER && right.type == Type.FLOAT) {
-            w.writeLine("SUB SP #1 SP");
-            w.writeLine("CASTSF");
-            w.writeLine("ADD SP #1 SP");
-            return true;
-        } //  Cast the right one properly
-        else if (left.type == Type.FLOAT && right.type == Type.INTEGER) {
-            w.writeLine("CASTSF");
-            return true;
-        }
-        return left.type == Type.FLOAT || right.type == Type.FLOAT;
-    }
-
-    /**
-     * Generate an arithmetic operation given two operands
-     *
-     * @param left The left operand
-     * @param opp The operator
-     * @param right The right operand
-     * @return Whether floating point arithmetic was used
-     */
-    public boolean genArithOperator_S(SemanticRecord left, Operator opp,
-                                      SemanticRecord right) {
-        if (handleArithCasts(left, right)) {
-            w.writeLine(opp.code + "F");
-            return true;
-        } else {
-            w.writeLine(opp.code);
-            return false;
-        }
-    }
-
-    /**
-     * Generate a logical operation given two operands
-     *
-     * @param left The left operand
-     * @param opp The operator
-     * @param right The right operand
-     */
-    public void genLogicalOperator_S(SemanticRecord left, Operator opp,
-                                     SemanticRecord right) {
-        if (left.type != Type.BOOLEAN) {
-            Token t = left.token;
-            error("Left operand is incompatible with arithmetic functions. "
-                    + t.getContents() + " at line " + t.getLine() + " col "
-                    + t.getCol());
-            return;
-        }
-        if (right.type != Type.BOOLEAN) {
-            Token t = right.token;
-            error("Right operand is incompatible with arithmetic functions. "
-                    + t.getContents() + " at line " + t.getLine() + " col "
-                    + t.getCol());
-            return;
-        }
-        w.writeLine(opp.code);
-    }
-
-    /**
-     * Generate a negation of a boolean.
-     */
-    public void genNot_S() {
-        w.writeLine("NOTS");
-    }
-
-    /**
-     * The record that is being negated.
-     *
-     * @param rec The integer or float record to negate
-     */
-    public void genNegation_S(SemanticRecord rec) {
-        if (rec.type == Type.INTEGER) {
-            w.writeLine("NEGS");
-        } else if (rec.type == Type.FLOAT) {
-            w.writeLine("NEGSF");
-        } else {
-            error("Cannot negate a non-numeric value.");
-        }
-    }
-
-    //  ASSIGNMENT
-    /**
-     * Assign a variable to a destination. Type casting is handled.
-     *
-     * @param into The location to assign to
-     * @param from Where to find the value's type
-     */
-    public void genAssignment(SemanticRecord into, SemanticRecord from) {
-        //  Handle the casting problem
-        //  Results in loss of data accuracy at runtime
-        if (into.type == Type.INTEGER && from.type == Type.FLOAT) {
-            w.writeLine("CASTSI");
-        }
-        else if (into.type == Type.FLOAT && from.type == Type.INTEGER) {
-            w.writeLine("CASTSF");
-        }
-        
-        if (from.symbol != null && from.symbol.kind == Kind.FUNCTION) {
-            //push returned value onto the stack
-            w.writeLine("PUSH " + from.code);
-        }
-        if (into.symbol.kind == Kind.INOUTPARAMETER
-         || into.symbol.kind == Kind.INOUTVARIABLE) {
-            w.writeLine("POP @" + into.code);
-        } else {
-            w.writeLine("POP " + into.code);
-        }
-    }
-
-    //  READING
-    /**
-     * Read user input into the program.
-     *
-     * @param rec The record containing the destination to read into
-     */
-    public void genRead(SemanticRecord rec) {
-        String str = "RD";
-        try {
-            switch (rec.type) {
-                case FLOAT:
-                    str += "F";
-                    break;
-                case INTEGER:
-                    //  don't append
-                    break;
-                case STRING:
-                    str += "S";
-                    break;
-                default:
-                    Token t = rec.token;
-                    System.err.println("Read parameter must be of type "
-                            + "Float, Integer, or String. Found " 
-                            + t.getContents() + " at line " + t.getLine() 
-                            + " col " + t.getCol());
-                    System.err.println("Was expecting a variable name");
-                    break;
-            }
-            w.writeLine(str + " " + rec.code);
-        } catch (RuntimeException e) {
-            Token t = rec.token;
-            System.err.println("Read Error: found " + t.getContents()
-                    + " at line " + t.getLine() + " col " + t.getCol());
-            System.err.println("Was expecting a variable name");
-        }
-    }
-
-    //  WRITING
-    /**
-     * Flag the begin of a write statement
-     *
-     * @param writingLine Whether to writeln rather than just write
-     */
-    public void startWrite(boolean writingLine) {
-        this.writingLine = writingLine;
-    }
-
-    /**
-     * Generate a write statement using current writing mode.
-     *
-     * @param t The Token containing the desired write value to write
-     */
-    public void genWrite_S(Token t) {
-        String code = "#" + t.getContents();
-        switch (t.getTerminal()) {
-            case IDENTIFIER:
-                Symbol s = sh.getEntry(t.getContents());
-                code = s.offset + "(D" + s.nestinglevel + ")";
-                break;
-            //  Handle other types
-        }
-        if (writingLine) {
-            w.writeLine("WRTLNS");
-        } else {
-            w.writeLine("WRTS");
-        }
-    }
-
-    //  B LEVEL
-    //  Prepare conditional branching
-    /**
-     * Create a new label.
-     *
-     * @return The new label value.
-     */
-    public int newLabel() {
-        return LABEL_COUNTER++;
-    }
-
-    /**
-     * Put a label into the program.
-     *
-     * @param l The label to put into the program.
-     */
-    public void putLabel(int l) {
-        w.writeLine("L" + l + ":");
-    }
-
-    /**
-     * Put an unconditional branch to a label.
-     *
-     * @param l The label to branch to.
-     */
-    public void genBranch(int l) {
-        w.writeLine("BR L" + l);
-    }
-
-    /**
-     * Put a conditional branch to a label.
-     *
-     * @param l The label to branch to if the condition is false.
-     */
-    public void genBranchFalse_S(int l) {
-        w.writeLine("BRFS L" + l);
-    }
-
-    /**
-     * Generate the initialize part of a for statement
-     *
-     * @param control The variable to iterate over
-     * @param initial The initial value of that variable
-     */
-    public void genForInitialize(SemanticRecord control,SemanticRecord initial){
-        //  It should only ever be an integer... right?
-        w.writeLine("PUSH " + initial.code);
-        //  Cast it anyway? lol
-        if (initial.type == Type.INTEGER) {
-            w.writeLine("POP " + control.code);
-        } else if (initial.type == Type.FLOAT) {
-            w.writeLine("CASTSI");
-            w.writeLine("POP " + control.code);
-        } else {
-            error("Cannot construct a non-numeric iterator");
-        }
-    }
-
-    /**
-     * Generate the alter part of a for statement
-     *
-     * @param control The variable to iterate over
-     * @param increment The iterate direction (up = true, down = false)
-     */
-    public void genForAlter(SemanticRecord control, boolean increment) {
-        //  to
-        if (increment) {
-            //  increment
-            w.writeLine("ADD " + control.code + " #1 " + control.code);
-        } //  downto
-        else {
-            //  decrement
-            w.writeLine("SUB " + control.code + " #1 " + control.code);
-        }
-    }
-
-    /**
-     * Generate the test part of a for statement
-     *
-     * @param control The control variable to iterate over
-     * @param increment Whether to iterate up rather than down
-     * @param end The expected end value of the for loop
-     */
-    public void genForTest(SemanticRecord control, boolean increment,
-                           SemanticRecord end) {
-        //  Push parameters
-        w.writeLine("PUSH " + control.code);
-        w.writeLine("PUSH " + end.code);
-        //  Test <= or >= depends on whether to use increment or decrement
-        if (increment) {
-            w.writeLine("CMPLTS");
-        } else {
-            w.writeLine("CMPGTS");
-        }
-    }
-
-    //  A LEVEL :3
-    //  FUNCTIONS AND PROCEDURES CALLS
-    /**
-     * Begins the logic at the start of a procedure or function call.
-     *
-     * @param callLocation The location called to
-     */
-    public void onStartFormalCall(Symbol callLocation) {
-
-        ArrayList<Parameter> params = callLocation.params;
-        int nestingL = sh.nestinglevel;
-
-        //  Generate the label to the destination
-        w.writeLine("L" + LABEL_COUNTER + ":");
-        callLocations.put(callLocation.name, LABEL_COUNTER++);
-
-        //store register
-        genStoreRegisters(nestingL);
-
-        w.writeLine("ADD SP #" + params.size() + " SP");
-        int offset = -2 - params.size();
-        for (int i = 0; i < params.size(); i++) {
-            w.writeLine("MOV " + (offset - params.size() + i) + "(SP) "
-                + sh.getEntry(params.get(i).name).offset+"(D" + nestingL + ")");
-        }
-    }
-
-    /**
-     * Removes the local variables from the current scope.
-     *
-     * @param locals The list of local variables
-     */
-    public void removeLocals(ArrayList<Symbol> locals) {
-        if (locals != null && locals.size() > 0) {
-            w.writeLine("SUB SP #" + locals.size() + " SP");
-        }
-    }
-
-    /**
-     * Produces a return statement to the appropriate location
-     *
-     * @param callLocation The location called to
-     */
-    public void onEndFormalCall(Symbol callLocation) {
-
-        //restore register used
-        genRestoreRegisters(sh.nestinglevel + 1);
-        //  return
-        w.writeLine("RET");
-    }
-
-    /**
-     * Prepares a call with the parameters provided and then makes a call to the
-     * procedure or function.
-     *
-     * @param callLocation The destination to call to
-     * @param actual The list of actual parameters provided
-     */
-    public void onStartActualCall(Symbol callLocation, 
-                                  ArrayList<SemanticRecord> actual) {
-        ArrayList<Parameter> formal = callLocation.params;
-        //  Error handling
-        if (formal.size() != actual.size()) {
-            error("Call Error: Incorrect number of parameters provided for call"
-                    + " to " + callLocation.name + ". Provided: " +actual.size()
-                    + ". Wanted: " + formal.size());
-            return;
-        }
-        //  Needs to be iterative not iteratorative
-        for (int i = 0; i < formal.size(); i++) {
-            Parameter f = formal.get(i);
-            SemanticRecord a = actual.get(i);
-            if (f.type != a.type) {
-                error("Call Error: Parameter provided is incorrect type.");
-                return;
-            }
-        }
-        w.writeLine("CALL L" + callLocations.get(callLocation.name));
-        if (formal.size() > 0) {
-            w.writeLine("SUB SP #" + formal.size() + " SP"); //clean up stack
-        }
-    }
-
-    /**
-     * Provides padding on the stack to store a variable.
-     */
-    public void padForVariable() {
-        //  It's one statement, but the method name helps provide usage
-        w.writeLine("ADD SP #1 SP");
-    }
-
-    public SemanticAnalyzer(String filename, SymbolTableHandler sh) {
-        w = new Writer(filename);
-        this.sh = sh;
-        callLocations = new HashMap<>();
-    }
-}
-
-
-package semanticanalyzer;
-import compiler.Token;
-import symboltable.Symbol;
-import util.Type;
-
-public class SemanticRecord {
-    
-
-    public Token token;
-    public Symbol symbol;
-    public String code;
-    
-    //  Can be found from symbol, but not all records have symbols
-    public Type type;
-    
-    // why is this needed?
-    public String opp;
-    public String register;
-    
-    /**
-     * Generate everything in one initialize
-     * @param token
-     * @param symbol
-     * @param code
-     * @param opp
-     * @param register
-     * @param type 
-     */
-    public SemanticRecord(Token token, Symbol symbol, String code, String opp,
-            String register, Type type) {
-        this.token = token;
-        this.symbol = symbol;
-        this.code = code;
-        this.opp = opp;
-        this.register = register;
-        this.type = type;
-    }
-    
-    /**
-     * Allow the record to generate its own contents
-     * @param token
-     * @param symbol 
-     */
-    public SemanticRecord(Token token, Symbol symbol) {
-        this.token = token;
-        this.symbol = symbol;
-        if (symbol == null) {
-            type = Type.NOTYPE;
-        }
-        else {
-            type = symbol.type;
-        }
-        switch(token.getTerminal()) {
-            case IDENTIFIER:
-                code = symbol.offset + "(D" + symbol.nestinglevel + ")";
-                break;
-            case INTEGER_LIT:
-                code = "#" + token.getContents();
-                type = Type.INTEGER;
-                break;
-            case FLOAT_LIT:
-                code = "#" + token.getContents();
-                type = Type.FLOAT;
-                break;
-            case STRING_LIT:
-                code = "#" + token.getContents().replace('\'', '"');
-                type = Type.STRING;
-                break;
-            case TRUE:
-                code = "#1";
-                type = Type.BOOLEAN;
-                break;
-            case FALSE:
-                code = "#0";
-                type = Type.BOOLEAN;
-                break;
-            default:
-                code = "";
-                break;
-        }
-        
-        opp = "";
-        register = "";
-    }
-
-
-    @Override
-    public String toString() {
-        return "Semantic Record:" +
-                "\nType: " + type +
-                "\nOpp: " + opp +
-                "\nRegister: " + register +
-                "\nToken: " + token.toString();
-    }
-}
-
-
-</code></pre>
-
-<!-- InstanceEndEditable -->
-
-</article>
-</div>
-</body>
-<!-- InstanceEnd --></html>
+	<STYLE TYPE="text/css">
+	<!--
+		H2.ctl { font-family: "Arial Unicode MS" }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<DIV ID="page-container" DIR="LTR">
+	<P><BR><BR>
+	</P>
+	<DIV ID="track-icon1" DIR="LTR">
+		<P><IMG SRC="../../../../Media/StyleImages/bobcat-small.png" NAME="graphics1" ALIGN=BOTTOM WIDTH=75 HEIGHT=48 BORDER=0></P>
+	</DIV>
+	<DIV ID="track-icon2" DIR="LTR">
+		<P><BR><BR>
+		</P>
+	</DIV>
+	<DIV ID="track-icon3" DIR="LTR">
+		<P><BR><BR>
+		</P>
+	</DIV>
+	<DIV ID="headMatter" DIR="LTR">
+		<P><A NAME="headTitle1"></A><A NAME="headTitle2"></A><!-- InstanceBeginEditable name="Header" -->Team
+		4<!-- InstanceEndEditable --> 
+		</P>
+	</DIV>
+	<DIV ID="asideLeftTitle" DIR="LTR">
+		<P>Compilers 2015 
+		</P>
+	</DIV>
+	<DIV ID="footMatter" DIR="LTR">
+		<P><A NAME="previousPageLink"></A><A NAME="currentPageNumber"></A><A NAME="nextPageLink"></A>
+		<BR><BR>
+		</P>
+	</DIV>
+	<H1><!-- InstanceBeginEditable name="Main" -->Semantic Analyzer</H1>
+	<H2 CLASS="western">Specifications</H2>
+	<P>Click <A HREF="../../../01_Introduction/2_Project_Specifications/4_Semantic_Analyzer_Specifications.html">here</A>
+	to view the semantic analyzer specifications. 
+	</P>
+	<H2 CLASS="western">Source Listing</H2>
+	<PRE>
+
+<CODE>package semanticanalyzer;</CODE>
+
+<CODE>import compiler.Compiler;</CODE>
+<CODE>import compiler.Token;</CODE>
+<CODE>import java.util.ArrayList;</CODE>
+<CODE>import java.util.HashMap;</CODE>
+<CODE>import symboltable.Parameter;</CODE>
+<CODE>import symboltable.Symbol;</CODE>
+<CODE>import symboltable.SymbolTableHandler;</CODE>
+<CODE>import util.Kind;</CODE>
+<CODE>import util.Operator;</CODE>
+<CODE>import util.Type;</CODE>
+<CODE>import util.Writer;</CODE>
+
+<CODE>public class SemanticAnalyzer {</CODE>
+
+<CODE>    //  Whether or not errors have arisen - cancels compilation if set to true</CODE>
+<CODE>    public boolean noerrors = true;</CODE>
+
+<CODE>    //  Initialization time conflict - just set it public</CODE>
+<CODE>    public SymbolTableHandler sh;</CODE>
+
+<CODE>    //  A special file writer that only creates/writes to a file if the compile</CODE>
+<CODE>    //  was successful.</CODE>
+<CODE>    private final Writer w;</CODE>
+
+<CODE>    //  Hashmap provides easy lookup for procedures/functions to know which</CODE>
+<CODE>    //  labels to reference. </CODE>
+<CODE>    private final HashMap&lt;String, Integer&gt; callLocations;</CODE>
+
+<CODE>    //  The running coint of how many labels have been made</CODE>
+<CODE>    private static int LABEL_COUNTER = 0;</CODE>
+
+<CODE>    private ArrayList&lt;Integer&gt; ret = new ArrayList&lt;Integer&gt;();</CODE>
+
+<CODE>    //  GENERAL NECESSARY FUNCTIONS</CODE>
+<CODE>    /**</CODE>
+<CODE>     * Produce an error and cancel compile.</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param err The error message</CODE>
+<CODE>     */</CODE>
+<CODE>    public void error(String err) {</CODE>
+<CODE>        if (Compiler.DEBUG) {</CODE>
+<CODE>            System.err.println(err);</CODE>
+<CODE>        }</CODE>
+<CODE>        noerrors = false;</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Push something to the stack</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param rec What to push onto the stack</CODE>
+<CODE>     */</CODE>
+<CODE>    public void genPush(SemanticRecord rec) {</CODE>
+<CODE>        if (rec.symbol != null) {</CODE>
+<CODE>            switch (rec.symbol.kind) {</CODE>
+<CODE>                case INOUTVARIABLE:</CODE>
+<CODE>                    w.writeLine(&quot;PUSH @&quot; + rec.code);</CODE>
+<CODE>                    break;</CODE>
+<CODE>                case VARIABLE:</CODE>
+<CODE>                    w.writeLine(&quot;PUSH &quot; + rec.code);</CODE>
+<CODE>                    break;</CODE>
+<CODE>                default:</CODE>
+<CODE>                    w.writeLine(&quot;PUSH &quot; + rec.code);</CODE>
+<CODE>            }</CODE>
+<CODE>        } else {</CODE>
+<CODE>            w.writeLine(&quot;PUSH &quot; + rec.code);</CODE>
+<CODE>        }</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Used for storing register values on the stack when starting the program</CODE>
+<CODE>     */</CODE>
+<CODE>    public void genStoreRegisters(int nestingL) {</CODE>
+<CODE>        w.writeLine(&quot;PUSH D&quot; + nestingL);</CODE>
+<CODE>        w.writeLine(&quot;MOV SP D&quot; + nestingL);</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Used for restoring register values after program run</CODE>
+<CODE>     */</CODE>
+<CODE>    public void genRestoreRegisters(int nestingL) {</CODE>
+<CODE>        w.writeLine(&quot;MOV D&quot; + nestingL + &quot; SP&quot;);</CODE>
+<CODE>        w.writeLine(&quot;POP D&quot; + nestingL);</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Halt the program and close the output file.</CODE>
+<CODE>     */</CODE>
+<CODE>    public void genHalt() {</CODE>
+<CODE>        w.writeLine(&quot;HLT&quot;);</CODE>
+<CODE>        w.close();</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Move something from one place to another.</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param from The place to move from</CODE>
+<CODE>     * @param to The place to move to</CODE>
+<CODE>     */</CODE>
+<CODE>    public void genMove(String from, String to) {</CODE>
+<CODE>        w.writeLine(&quot;MOV &quot; + from + &quot; &quot; + to);</CODE>
+<CODE>    }</CODE>
+
+<CODE>    //  C LEVEL: EXPRESSIONS, ASSIGNMENTS, READS, WRITES</CODE>
+<CODE>    /**</CODE>
+<CODE>     * Handles casting arithmetic properly to float if necessary</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param left The left operand</CODE>
+<CODE>     * @param right The right operand</CODE>
+<CODE>     * @param opp the operation being performed</CODE>
+<CODE>     * @return Whether the result is dealing with floating point arithmetic</CODE>
+<CODE>     */</CODE>
+<CODE>    public boolean handleArithCasts(SemanticRecord left,</CODE>
+<CODE>            Operator opp, SemanticRecord right) {</CODE>
+
+<CODE>        //  Error checking on the left side</CODE>
+<CODE>        if (left.type == Type.BOOLEAN</CODE>
+<CODE>                || left.type != Type.INTEGER &amp;&amp; left.type != Type.FLOAT) {</CODE>
+<CODE>            Token t = left.token;</CODE>
+<CODE>            error(&quot;Left operand is incompatible with arithmetic functions. &quot;</CODE>
+<CODE>                    + t.getContents() + &quot; at line &quot; + t.getLine() + &quot; col &quot;</CODE>
+<CODE>                    + t.getCol());</CODE>
+<CODE>            return false;</CODE>
+<CODE>        }</CODE>
+<CODE>        //  Error checking on the right side</CODE>
+<CODE>        if (right.type == Type.BOOLEAN</CODE>
+<CODE>                || right.type != Type.INTEGER &amp;&amp; right.type != Type.FLOAT) {</CODE>
+<CODE>            Token t = right.token;</CODE>
+<CODE>            error(&quot;Right operand is incompatible with arithmetic functions. &quot;</CODE>
+<CODE>                    + t.getContents() + &quot; at line &quot; + t.getLine() + &quot; col &quot;</CODE>
+<CODE>                    + t.getCol());</CODE>
+<CODE>            return false;</CODE>
+<CODE>        }</CODE>
+<CODE>        //MOD handeler</CODE>
+<CODE>        if (opp.code.equals(&quot;MODS&quot;)) {</CODE>
+<CODE>            if (left.type != Type.INTEGER) {</CODE>
+<CODE>                w.writeLine(&quot;SUB SP #1 SP&quot;);</CODE>
+<CODE>                w.writeLine(&quot;CASTSI&quot;);</CODE>
+<CODE>                w.writeLine(&quot;ADD SP #1 SP&quot;);</CODE>
+<CODE>            }</CODE>
+<CODE>            if (right.type != Type.INTEGER) {</CODE>
+<CODE>                w.writeLine(&quot;CASTSI&quot;);</CODE>
+<CODE>            }</CODE>
+<CODE>            return false;</CODE>
+<CODE>        }</CODE>
+<CODE>        //  Float divider on float operands</CODE>
+<CODE>        if (opp == Operator.DIVISION) {</CODE>
+<CODE>            if (left.type == Type.FLOAT || right.type == Type.FLOAT) {</CODE>
+<CODE>                error(&quot;Cannot use integer division with float operands.&quot;</CODE>
+<CODE>                        + &quot; at line &quot; + right.token.getLine() + &quot; col &quot;</CODE>
+<CODE>                        + right.token.getCol());</CODE>
+<CODE>                return false;</CODE>
+<CODE>            }</CODE>
+<CODE>        }</CODE>
+<CODE>        //  Cast the left one properly</CODE>
+<CODE>        if (left.type == Type.INTEGER</CODE>
+<CODE>                &amp;&amp; (right.type == Type.FLOAT || opp == Operator.FLOAT_DIVISION)) {</CODE>
+<CODE>            w.writeLine(&quot;SUB SP #1 SP&quot;);</CODE>
+<CODE>            w.writeLine(&quot;CASTSF&quot;);</CODE>
+<CODE>            w.writeLine(&quot;ADD SP #1 SP&quot;);</CODE>
+<CODE>        } //  Cast the right one properly</CODE>
+<CODE>        if (right.type == Type.INTEGER &amp;&amp; opp == Operator.FLOAT_DIVISION) {</CODE>
+<CODE>            w.writeLine(&quot;CASTSF&quot;);</CODE>
+<CODE>        } else if (left.type == Type.FLOAT &amp;&amp; right.type == Type.INTEGER) {</CODE>
+<CODE>            w.writeLine(&quot;CASTSF&quot;);</CODE>
+<CODE>        }</CODE>
+<CODE>        return left.type == Type.FLOAT || right.type == Type.FLOAT</CODE>
+<CODE>                || opp == Operator.FLOAT_DIVISION;</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Generate an arithmetic operation given two operands</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param left The left operand</CODE>
+<CODE>     * @param opp The operator</CODE>
+<CODE>     * @param right The right operand</CODE>
+<CODE>     * @return Whether floating point arithmetic was used</CODE>
+<CODE>     */</CODE>
+<CODE>    public boolean genArithOperator_S(SemanticRecord left, Operator opp,</CODE>
+<CODE>            SemanticRecord right) {</CODE>
+<CODE>        if (handleArithCasts(left, opp, right)) {</CODE>
+<CODE>            w.writeLine(opp.code + &quot;F&quot;);</CODE>
+<CODE>            return true;</CODE>
+<CODE>        } else {</CODE>
+
+<CODE>            w.writeLine(opp.code);</CODE>
+<CODE>            return false;</CODE>
+<CODE>        }</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Generate a logical operation given two operands</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param left The left operand</CODE>
+<CODE>     * @param opp The operator</CODE>
+<CODE>     * @param right The right operand</CODE>
+<CODE>     */</CODE>
+<CODE>    public void genLogicalOperator_S(SemanticRecord left, Operator opp,</CODE>
+<CODE>            SemanticRecord right) {</CODE>
+<CODE>        if (left.type != Type.BOOLEAN) {</CODE>
+<CODE>            Token t = left.token;</CODE>
+<CODE>            error(&quot;Left operand is incompatible with arithmetic functions. &quot;</CODE>
+<CODE>                    + t.getContents() + &quot; at line &quot; + t.getLine() + &quot; col &quot;</CODE>
+<CODE>                    + t.getCol());</CODE>
+<CODE>            return;</CODE>
+<CODE>        }</CODE>
+<CODE>        if (right.type != Type.BOOLEAN) {</CODE>
+<CODE>            Token t = right.token;</CODE>
+<CODE>            error(&quot;Right operand is incompatible with arithmetic functions. &quot;</CODE>
+<CODE>                    + t.getContents() + &quot; at line &quot; + t.getLine() + &quot; col &quot;</CODE>
+<CODE>                    + t.getCol());</CODE>
+<CODE>            return;</CODE>
+<CODE>        }</CODE>
+<CODE>        w.writeLine(opp.code);</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Generate a negation of a boolean.</CODE>
+<CODE>     */</CODE>
+<CODE>    public void genNot_S() {</CODE>
+<CODE>        w.writeLine(&quot;NOTS&quot;);</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * The record that is being negated.</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param rec The integer or float record to negate</CODE>
+<CODE>     */</CODE>
+<CODE>    public void genNegation_S(SemanticRecord rec) {</CODE>
+<CODE>        if (rec.type == Type.INTEGER) {</CODE>
+<CODE>            w.writeLine(&quot;NEGS&quot;);</CODE>
+<CODE>        } else if (rec.type == Type.FLOAT) {</CODE>
+<CODE>            w.writeLine(&quot;NEGSF&quot;);</CODE>
+<CODE>        } else {</CODE>
+<CODE>            error(&quot;Cannot negate a non-numeric value.&quot;);</CODE>
+<CODE>        }</CODE>
+<CODE>    }</CODE>
+
+<CODE>    //  ASSIGNMENT</CODE>
+<CODE>    /**</CODE>
+<CODE>     * Assign a variable to a destination. Type casting is handled.</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param into The location to assign to</CODE>
+<CODE>     * @param from Where to find the value's type</CODE>
+<CODE>     */</CODE>
+<CODE>    public void genAssignment(SemanticRecord into, SemanticRecord from) {</CODE>
+<CODE>        //  Handle the casting problem</CODE>
+<CODE>        //  Results in loss of data accuracy at runtime</CODE>
+<CODE>        if (into.type == Type.INTEGER &amp;&amp; from.type == Type.FLOAT) {</CODE>
+<CODE>            w.writeLine(&quot;CASTSI&quot;);</CODE>
+<CODE>        } else if (into.type == Type.FLOAT &amp;&amp; from.type == Type.INTEGER) {</CODE>
+<CODE>            w.writeLine(&quot;CASTSF&quot;);</CODE>
+<CODE>        }</CODE>
+
+<CODE>        if (into.symbol != null &amp;&amp; into.symbol.kind == Kind.FUNCTION) {</CODE>
+<CODE>            //push returned value onto the stack</CODE>
+<CODE>            Symbol s = sh.getEntry(&quot;1&quot;); //get the top return value</CODE>
+<CODE>            w.writeLine(&quot;POP &quot; + s.offset + &quot;(D&quot; + s.nestinglevel + &quot;)&quot;);</CODE>
+<CODE>            return;</CODE>
+<CODE>        }</CODE>
+<CODE>        if (into.symbol.kind == Kind.INOUTPARAMETER</CODE>
+<CODE>                || into.symbol.kind == Kind.INOUTVARIABLE) {</CODE>
+<CODE>            w.writeLine(&quot;POP @&quot; + into.code);</CODE>
+<CODE>        } else {</CODE>
+<CODE>            w.writeLine(&quot;POP &quot; + into.code);</CODE>
+<CODE>        }</CODE>
+<CODE>    }</CODE>
+
+<CODE>    //  READING</CODE>
+<CODE>    /**</CODE>
+<CODE>     * Read user input into the program.</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param rec The record containing the destination to read into</CODE>
+<CODE>     */</CODE>
+<CODE>    public void genRead(SemanticRecord rec) {</CODE>
+<CODE>        String str = &quot;RD&quot;;</CODE>
+<CODE>        try {</CODE>
+<CODE>            switch (rec.type) {</CODE>
+<CODE>                case FLOAT:</CODE>
+<CODE>                    str += &quot;F&quot;;</CODE>
+<CODE>                    break;</CODE>
+<CODE>                case INTEGER:</CODE>
+<CODE>                    //  don't append</CODE>
+<CODE>                    break;</CODE>
+<CODE>                case STRING:</CODE>
+<CODE>                    str += &quot;S&quot;;</CODE>
+<CODE>                    break;</CODE>
+<CODE>                default:</CODE>
+<CODE>                    Token t = rec.token;</CODE>
+<CODE>                    System.err.println(&quot;Read parameter must be of type &quot;</CODE>
+<CODE>                            + &quot;Float, Integer, or String. Found &quot;</CODE>
+<CODE>                            + t.getContents() + &quot; at line &quot; + t.getLine()</CODE>
+<CODE>                            + &quot; col &quot; + t.getCol());</CODE>
+<CODE>                    System.err.println(&quot;Was expecting a variable name&quot;);</CODE>
+<CODE>                    break;</CODE>
+<CODE>            }</CODE>
+<CODE>            w.writeLine(str + &quot; &quot; + rec.code);</CODE>
+<CODE>        } catch (RuntimeException e) {</CODE>
+<CODE>            Token t = rec.token;</CODE>
+<CODE>            System.err.println(&quot;Read Error: found &quot; + t.getContents()</CODE>
+<CODE>                    + &quot; at line &quot; + t.getLine() + &quot; col &quot; + t.getCol());</CODE>
+<CODE>            System.err.println(&quot;Was expecting a variable name&quot;);</CODE>
+<CODE>        }</CODE>
+<CODE>    }</CODE>
+
+<CODE>    //  WRITING</CODE>
+<CODE>    int numwrites;</CODE>
+
+<CODE>    public void startWrite() {</CODE>
+<CODE>        numwrites = 0;</CODE>
+<CODE>    }</CODE>
+
+<CODE>    public void incWriteCount() {</CODE>
+<CODE>        numwrites++;</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Signal the end of a write to print the contents</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param line Whether to finish the line at this time.</CODE>
+<CODE>     */</CODE>
+<CODE>    public void finishWrite(boolean line) {</CODE>
+<CODE>        if (numwrites &gt; 0) {</CODE>
+<CODE>            int offset = numwrites - 1;</CODE>
+<CODE>            int saved = offset;</CODE>
+<CODE>            if (offset &gt; 0) {</CODE>
+<CODE>                w.writeLine(&quot;SUB SP #&quot; + offset + &quot; SP&quot;);</CODE>
+<CODE>            }</CODE>
+<CODE>            w.writeLine(&quot;WRTS&quot;);</CODE>
+<CODE>            while (offset-- &gt; 0) {</CODE>
+<CODE>                w.writeLine(&quot;ADD SP #2 SP&quot;);</CODE>
+<CODE>                w.writeLine(&quot;WRTS&quot;);</CODE>
+<CODE>            }</CODE>
+<CODE>            if (saved &gt; 0) {</CODE>
+<CODE>                w.writeLine(&quot;SUB SP #&quot; + saved + &quot; SP&quot;);</CODE>
+<CODE>            }</CODE>
+<CODE>        }</CODE>
+<CODE>        if (line) {</CODE>
+<CODE>            w.writeLine(&quot;PUSH #\&quot;\\n\&quot;&quot;);</CODE>
+<CODE>            w.writeLine(&quot;WRTS&quot;);</CODE>
+<CODE>        }</CODE>
+<CODE>    }</CODE>
+
+<CODE>    //  B LEVEL</CODE>
+<CODE>    //  Prepare conditional branching</CODE>
+<CODE>    /**</CODE>
+<CODE>     * Create a new label.</CODE>
+<CODE>     *</CODE>
+<CODE>     * @return The new label value.</CODE>
+<CODE>     */</CODE>
+<CODE>    public int newLabel() {</CODE>
+<CODE>        return LABEL_COUNTER++;</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Put a label into the program.</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param l The label to put into the program.</CODE>
+<CODE>     */</CODE>
+<CODE>    public void putLabel(int l) {</CODE>
+<CODE>        w.writeLine(&quot;L&quot; + l + &quot;:&quot;);</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Put an unconditional branch to a label.</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param l The label to branch to.</CODE>
+<CODE>     */</CODE>
+<CODE>    public void genBranch(int l) {</CODE>
+<CODE>        w.writeLine(&quot;BR L&quot; + l);</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Put a conditional branch to a label.</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param l The label to branch to if the condition is false.</CODE>
+<CODE>     */</CODE>
+<CODE>    public void genBranchFalse_S(int l) {</CODE>
+<CODE>        w.writeLine(&quot;BRFS L&quot; + l);</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Generate the initialize part of a for statement</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param control The variable to iterate over</CODE>
+<CODE>     * @param initial The initial value of that variable</CODE>
+<CODE>     */</CODE>
+<CODE>    public void genForInitialize(SemanticRecord control, SemanticRecord initial) {</CODE>
+<CODE>        //  It should only ever be an integer... right?</CODE>
+<CODE>        w.writeLine(&quot;PUSH &quot; + initial.code);</CODE>
+<CODE>        //  Cast it anyway? lol</CODE>
+<CODE>        if (initial.type == Type.INTEGER) {</CODE>
+<CODE>            w.writeLine(&quot;POP &quot; + control.code);</CODE>
+<CODE>        } else if (initial.type == Type.FLOAT) {</CODE>
+<CODE>            w.writeLine(&quot;CASTSI&quot;);</CODE>
+<CODE>            w.writeLine(&quot;POP &quot; + control.code);</CODE>
+<CODE>        } else {</CODE>
+<CODE>            error(&quot;Cannot construct a non-numeric iterator&quot;);</CODE>
+<CODE>        }</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Generate the alter part of a for statement</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param control The variable to iterate over</CODE>
+<CODE>     * @param increment The iterate direction (up = true, down = false)</CODE>
+<CODE>     */</CODE>
+<CODE>    public void genForAlter(SemanticRecord control, boolean increment) {</CODE>
+<CODE>        //  to</CODE>
+<CODE>        if (increment) {</CODE>
+<CODE>            //  increment</CODE>
+<CODE>            w.writeLine(&quot;ADD &quot; + control.code + &quot; #1 &quot; + control.code);</CODE>
+<CODE>        } //  downto</CODE>
+<CODE>        else {</CODE>
+<CODE>            //  decrement</CODE>
+<CODE>            w.writeLine(&quot;SUB &quot; + control.code + &quot; #1 &quot; + control.code);</CODE>
+<CODE>        }</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Generate the test part of a for statement</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param control The control variable to iterate over</CODE>
+<CODE>     * @param increment Whether to iterate up rather than down</CODE>
+<CODE>     * @param end The expected end value of the for loop</CODE>
+<CODE>     */</CODE>
+<CODE>    public void genForTest(SemanticRecord control, boolean increment,</CODE>
+<CODE>            SemanticRecord end) {</CODE>
+<CODE>        //  Push parameters</CODE>
+<CODE>        w.writeLine(&quot;PUSH &quot; + control.code);</CODE>
+<CODE>        w.writeLine(&quot;PUSH &quot; + end.code);</CODE>
+<CODE>        //  Test &lt;= or &gt;= depends on whether to use increment or decrement</CODE>
+<CODE>        if (increment) {</CODE>
+<CODE>            w.writeLine(&quot;CMPLES&quot;);</CODE>
+<CODE>        } else {</CODE>
+<CODE>            w.writeLine(&quot;CMPGES&quot;);</CODE>
+<CODE>        }</CODE>
+<CODE>    }</CODE>
+
+<CODE>    //  A LEVEL :3</CODE>
+<CODE>    //  FUNCTIONS AND PROCEDURES CALLS</CODE>
+<CODE>    /**</CODE>
+<CODE>     * Begins the logic at the start of a procedure or function call.</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param callLocation The location called to</CODE>
+<CODE>     */</CODE>
+<CODE>    public void onStartFormalCall(Symbol callLocation) {</CODE>
+
+<CODE>        ArrayList&lt;Parameter&gt; params = callLocation.params;</CODE>
+<CODE>        int nestingL = sh.nestinglevel;</CODE>
+
+<CODE>        //  Generate the label to the destination</CODE>
+<CODE>        w.writeLine(&quot;L&quot; + LABEL_COUNTER + &quot;:&quot;);</CODE>
+<CODE>        callLocations.put(callLocation.name, LABEL_COUNTER++);</CODE>
+
+<CODE>        //store register</CODE>
+<CODE>        genStoreRegisters(nestingL);</CODE>
+
+<CODE>        //pad for return value</CODE>
+<CODE>        padForVariable();</CODE>
+
+<CODE>        //initialize variable stack locations to be 0</CODE>
+<CODE>        for (int i = 0; i &lt; params.size(); i++) {</CODE>
+<CODE>            w.writeLine(&quot;PUSH #0&quot;);</CODE>
+<CODE>        }</CODE>
+<CODE>        int offset = -4 - params.size();</CODE>
+<CODE>        for (int i = 0; i &lt; params.size(); i++) {</CODE>
+<CODE>            w.writeLine(&quot;MOV &quot; + (offset - params.size() + i) + &quot;(SP) &quot;</CODE>
+<CODE>                    + sh.getEntry(params.get(i).name).offset + &quot;(D&quot; + nestingL + &quot;)&quot;);</CODE>
+<CODE>        }</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Removes the local variables from the current scope.</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param locals The list of local variables</CODE>
+<CODE>     */</CODE>
+<CODE>    public void removeLocals(ArrayList&lt;Symbol&gt; locals) {</CODE>
+<CODE>        if (locals != null &amp;&amp; locals.size() &gt; 0) {</CODE>
+<CODE>            w.writeLine(&quot;SUB SP #&quot; + locals.size() + &quot; SP&quot;);</CODE>
+<CODE>        }</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Produces a return statement to the appropriate location</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param callLocation The location called to</CODE>
+<CODE>     */</CODE>
+<CODE>    public void onEndFormalCall(Symbol callLocation) {</CODE>
+
+<CODE>        //store return value</CODE>
+<CODE>        w.writeLine(&quot;MOV D&quot; + (callLocation.nestinglevel + 1) + &quot; SP&quot;);</CODE>
+<CODE>        w.writeLine(&quot;MOV 0(SP) &quot; + -(callLocation.params.size() + 3) + &quot;(SP)&quot;);</CODE>
+<CODE>        w.writeLine(&quot;POP D&quot; + (callLocation.nestinglevel + 1));</CODE>
+<CODE>        //  return</CODE>
+<CODE>        w.writeLine(&quot;RET&quot;);</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Prepares a call with the parameters provided and then makes a call to the</CODE>
+<CODE>     * procedure or function.</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param callLocation The destination to call to</CODE>
+<CODE>     * @param actual The list of actual parameters provided</CODE>
+<CODE>     */</CODE>
+<CODE>    public void onStartActualCall(Symbol callLocation,</CODE>
+<CODE>            ArrayList&lt;SemanticRecord&gt; actual) {</CODE>
+<CODE>        ArrayList&lt;Parameter&gt; formal = callLocation.params;</CODE>
+<CODE>        //  Error handling</CODE>
+<CODE>        if (formal.size() != actual.size()) {</CODE>
+<CODE>            error(&quot;Call Error: Incorrect number of parameters provided for call&quot;</CODE>
+<CODE>                    + &quot; to &quot; + callLocation.name + &quot;. Provided: &quot; + actual.size()</CODE>
+<CODE>                    + &quot;. Wanted: &quot; + formal.size());</CODE>
+<CODE>            return;</CODE>
+<CODE>        }</CODE>
+
+<CODE>        //  Needs to be iterative not iteratorative</CODE>
+<CODE>        for (int i = 0; i &lt; formal.size(); i++) {</CODE>
+<CODE>            Parameter f = formal.get(i);</CODE>
+<CODE>            SemanticRecord a = actual.get(i);</CODE>
+<CODE>            if (f.type != a.type) {</CODE>
+<CODE>                error(&quot;Call Error: Parameter provided is incorrect type.&quot;);</CODE>
+<CODE>                return;</CODE>
+<CODE>            }</CODE>
+<CODE>            if (f.kind == Kind.INOUTPARAMETER) {</CODE>
+<CODE>                if (a.symbol.kind != Kind.INOUTVARIABLE) {</CODE>
+<CODE>                    w.writeLine(&quot;PUSH D&quot; + a.symbol.nestinglevel);</CODE>
+<CODE>                    w.writeLine(&quot;PUSH #&quot; + a.symbol.offset);</CODE>
+<CODE>                    w.writeLine(&quot;ADDS&quot;);</CODE>
+<CODE>                    w.writeLine(&quot;POP -&quot; + (formal.size() - i) + &quot;(SP)&quot;);</CODE>
+<CODE>                }</CODE>
+<CODE>                if (a.symbol.kind == Kind.INOUTVARIABLE) {</CODE>
+<CODE>                    w.writeLine(&quot;PUSH &quot; + a.code);</CODE>
+<CODE>                    w.writeLine(&quot;POP -&quot; + (formal.size() - i) + &quot;(SP)&quot;);</CODE>
+<CODE>                }</CODE>
+<CODE>            }</CODE>
+<CODE>        }</CODE>
+<CODE>        padForVariable(); //for return value</CODE>
+<CODE>        w.writeLine(</CODE>
+<CODE>                &quot;CALL L&quot; + callLocations.get(callLocation.name));</CODE>
+<CODE>        if (formal.size()</CODE>
+<CODE>                &gt; 0) {</CODE>
+<CODE>            w.writeLine(&quot;SUB SP #&quot; + formal.size() + &quot; SP&quot;); //clean up stack</CODE>
+<CODE>        }</CODE>
+<CODE>    }</CODE>
+
+<CODE>    /**</CODE>
+<CODE>     * Provides padding on the stack to store a variable.</CODE>
+<CODE>     */</CODE>
+<CODE>    public void padForVariable() {</CODE>
+<CODE>        //  It's one statement, but the method name helps provide usage</CODE>
+<CODE>        w.writeLine(&quot;PUSH #0&quot;); //initialize variable to 0</CODE>
+<CODE>    }</CODE>
+
+<CODE>    public SemanticAnalyzer(String filename, SymbolTableHandler sh) {</CODE>
+<CODE>        w = new Writer(filename);</CODE>
+<CODE>        this.sh = sh;</CODE>
+<CODE>        callLocations = new HashMap&lt;&gt;();</CODE>
+<CODE>    }</CODE>
+<CODE>}</CODE>
+
+<CODE>package semanticanalyzer;</CODE>
+<CODE>import compiler.Token;</CODE>
+<CODE>import symboltable.Symbol;</CODE>
+<CODE>import util.Type;</CODE>
+
+<CODE>public class SemanticRecord {</CODE>
+<CODE>    </CODE>
+
+<CODE>    public Token token;</CODE>
+<CODE>    public Symbol symbol;</CODE>
+<CODE>    public String code;</CODE>
+<CODE>    </CODE>
+<CODE>    //  Can be found from symbol, but not all records have symbols</CODE>
+<CODE>    public Type type;</CODE>
+<CODE>    </CODE>
+<CODE>    // why is this needed?</CODE>
+<CODE>    public String opp;</CODE>
+<CODE>    public String register;</CODE>
+<CODE>    </CODE>
+<CODE>    /**</CODE>
+<CODE>     * Generate everything in one initialize</CODE>
+<CODE>     * @param token</CODE>
+<CODE>     * @param symbol</CODE>
+<CODE>     * @param code</CODE>
+<CODE>     * @param opp</CODE>
+<CODE>     * @param register</CODE>
+<CODE>     * @param type </CODE>
+<CODE>     */</CODE>
+<CODE>    public SemanticRecord(Token token, Symbol symbol, String code, String opp,</CODE>
+<CODE>            String register, Type type) {</CODE>
+<CODE>        this.token = token;</CODE>
+<CODE>        this.symbol = symbol;</CODE>
+<CODE>        this.code = code;</CODE>
+<CODE>        this.opp = opp;</CODE>
+<CODE>        this.register = register;</CODE>
+<CODE>        this.type = type;</CODE>
+<CODE>    }</CODE>
+<CODE>    </CODE>
+<CODE>    /**</CODE>
+<CODE>     * Allow the record to generate its own contents</CODE>
+<CODE>     * @param token</CODE>
+<CODE>     * @param symbol </CODE>
+<CODE>     */</CODE>
+<CODE>    public SemanticRecord(Token token, Symbol symbol) {</CODE>
+<CODE>        this.token = token;</CODE>
+<CODE>        this.symbol = symbol;</CODE>
+<CODE>        if (symbol == null) {</CODE>
+<CODE>            type = Type.NOTYPE;</CODE>
+<CODE>        }</CODE>
+<CODE>        else {</CODE>
+<CODE>            type = symbol.type;</CODE>
+<CODE>        }</CODE>
+<CODE>        switch(token.getTerminal()) {</CODE>
+<CODE>            case IDENTIFIER:</CODE>
+<CODE>                code = symbol.offset + &quot;(D&quot; + symbol.nestinglevel + &quot;)&quot;;</CODE>
+<CODE>                break;</CODE>
+<CODE>            case INTEGER_LIT:</CODE>
+<CODE>                code = &quot;#&quot; + token.getContents();</CODE>
+<CODE>                type = Type.INTEGER;</CODE>
+<CODE>                break;</CODE>
+<CODE>            case FLOAT_LIT:</CODE>
+<CODE>                code = &quot;#&quot; + token.getContents();</CODE>
+<CODE>                type = Type.FLOAT;</CODE>
+<CODE>                break;</CODE>
+<CODE>            case STRING_LIT:</CODE>
+<CODE>                code = &quot;#&quot; + token.getContents().replace('\'', '&quot;');</CODE>
+<CODE>                type = Type.STRING;</CODE>
+<CODE>                break;</CODE>
+<CODE>            case TRUE:</CODE>
+<CODE>                code = &quot;#1&quot;;</CODE>
+<CODE>                type = Type.BOOLEAN;</CODE>
+<CODE>                break;</CODE>
+<CODE>            case FALSE:</CODE>
+<CODE>                code = &quot;#0&quot;;</CODE>
+<CODE>                type = Type.BOOLEAN;</CODE>
+<CODE>                break;</CODE>
+<CODE>            default:</CODE>
+<CODE>                code = &quot;&quot;;</CODE>
+<CODE>                break;</CODE>
+<CODE>        }</CODE>
+<CODE>        </CODE>
+<CODE>        opp = &quot;&quot;;</CODE>
+<CODE>        register = &quot;&quot;;</CODE>
+<CODE>    }</CODE>
+
+
+<CODE>    @Override</CODE>
+<CODE>    public String toString() {</CODE>
+<CODE>        return &quot;Semantic Record:&quot; +</CODE>
+<CODE>                &quot;\nType: &quot; + type +</CODE>
+<CODE>                &quot;\nOpp: &quot; + opp +</CODE>
+<CODE>                &quot;\nRegister: &quot; + register +</CODE>
+<CODE>                &quot;\nToken: &quot; + token.toString();</CODE>
+<CODE>    }</CODE>
+<CODE>}</CODE>
+
+<!-- InstanceEndEditable --></PRE>
+</DIV>
+<P><!-- InstanceEnd --></P>
+</BODY>
+</HTML>

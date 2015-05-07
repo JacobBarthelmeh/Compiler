@@ -1,134 +1,130 @@
-<!DOCTYPE html> 
-<html><!-- InstanceBegin template="/Templates/page.dwt" codeOutsideHTMLIsLocked="false" -->
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-
-<link rel="stylesheet" href="../../../../Stylesheets/prettify.css" />
-<link rel="stylesheet" href="../../../../Stylesheets/pageStylesheet.css" />
-<link rel="stylesheet" href="../../../../Stylesheets/navigationStylesheet.css" />
-<link rel="stylesheet" href="../../../../Stylesheets/allTextStyles.css" />
-<link rel="stylesheet" href="../../../../Stylesheets/colors-blue.css" />
-
-<script type="text/javascript" src="../../../../Scripts/google-code-prettify/run_prettify.js"></script>
-<script type="text/javascript" src="../../../../Scripts/recomputeAttributes.js"></script>
-
-
-<!-- InstanceBeginEditable name="doctitle" -->
-<title>Design Patterns</title>
-<!-- InstanceEndEditable -->
-</head>
-
-<body id="body-style">
-
-<!-- 
-<div id="browser-window-veil">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Design Patterns</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice 4.1.1  (Unix)">
+	<META NAME="CREATED" CONTENT="0;0">
+	<META NAME="CHANGEDBY" CONTENT="jak TheOne">
+	<META NAME="CHANGED" CONTENT="20150506;20074500">
+	<!-- InstanceBegin template="/Templates/page.dwt" codeOutsideHTMLIsLocked="false" -->
+	<SCRIPT SRC="../../../../Scripts/google-code-prettify/run_prettify.js"></SCRIPT>
+	<SCRIPT SRC="../../../../Scripts/recomputeAttributes.js"></SCRIPT>
+	<!-- InstanceBeginEditable name="doctitle" -->
+	<!-- InstanceEndEditable -->
+	<!-- <div id="browser-window-veil">
 </div>
 -->
+	<STYLE TYPE="text/css">
+	<!--
+		H2.ctl { font-family: "Arial Unicode MS" }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<DIV ID="page-container" DIR="LTR">
+	<P><BR><BR>
+	</P>
+	<DIV ID="track-icon1" DIR="LTR">
+		<P><IMG SRC="../../../../Media/StyleImages/bobcat-small.png" NAME="graphics1" ALIGN=BOTTOM WIDTH=75 HEIGHT=48 BORDER=0></P>
+	</DIV>
+	<DIV ID="track-icon2" DIR="LTR">
+		<P><BR><BR>
+		</P>
+	</DIV>
+	<DIV ID="track-icon3" DIR="LTR">
+		<P><BR><BR>
+		</P>
+	</DIV>
+	<DIV ID="headMatter" DIR="LTR">
+		<P><A NAME="headTitle1"></A><A NAME="headTitle2"></A><!-- InstanceBeginEditable name="Header" -->Design
+		Pattern<!-- InstanceEndEditable --> 
+		</P>
+	</DIV>
+	<DIV ID="asideLeftTitle" DIR="LTR">
+		<P>Compilers 2015</P>
+	</DIV>
+	<DIV ID="footMatter" DIR="LTR">
+		<P><A NAME="previousPageLink"></A><A NAME="currentPageNumber"></A><A NAME="nextPageLink"></A>
+		<BR><BR>
+		</P>
+	</DIV>
+	<H1><!-- InstanceBeginEditable name="Main" -->Design Pattern</H1>
+	<H2 CLASS="western"><!-- Identify one design pattern that was used in your capstone project and describe exactly where in the code it is located. Highlight the design pattern in yellow. Explain why you used the pattern and didn’t just code directly
+-->Design
+	Patterns in the Compilers Course</H2>
+	<P>The components of the compiler—the scanner, parser, symbol
+	table, and semantic analyzer—were each by way of a specific
+	pattern that students were asked to follow. In some cases, students
+	were allowed to deviate from the patterns. As a result, some
+	students may have chosen and/or used different formal design
+	patterns for portions of the compiler. If so, they appear below.</P>
+	<H2 CLASS="western">Specific Design Patterns</H2>
+	<P>All utility classes are compartmentalized in a util package
+	making it easy to access for the different parts of the compiler.
+	When the Dispatcher is getting characters from the Reader, located
+	in the util package, it operates like a producer-consumer pattern.
+	The buffer of characters is in the Reader file and can potentially
+	be pushed back onto the buffer in some instances in the FSA's. After
+	being pulled from the buffer the Reader adjusts attributes that keep
+	track of column and line numbers.</P>
+	<PRE>
+<CODE>   /**</CODE>
+<CODE>     * Reads the next character and progresses the file pointer</CODE>
+<CODE>     *</CODE>
+<CODE>     * @return The character found</CODE>
+<CODE>     */</CODE>
+<CODE>    public char nextChar() {</CODE>
+<CODE>        try {</CODE>
+<CODE>            col++;</CODE>
+<CODE>            if (reader.ready()) {</CODE>
+<CODE>               .</CODE>
+<CODE>               .</CODE>
+<CODE>               .</CODE>
 
-<div id="page-container">
-
-<header id="header">
-<div id="track-icon1">
-  <img src="../../../../Media/StyleImages/bobcat-small.png" alt="bobcat icon" width="75" height="48"></div>
-<div id="track-icon2">
-</div>
-<div id="track-icon3">
-</div>
-  <div id="headMatter">
-    <span id="headTitle1">
-      <!-- InstanceBeginEditable name="Header" -->
-        Design Pattern
-	  <!-- InstanceEndEditable --> 
-    </span>
-    <span id="headTitle2">
-    </span>
-  </div>
-</header>
-
-<nav id="navigate">
-</nav>
-
-
-<aside id="aside-left">
-<div id="asideLeftTitle">
-Compilers 2014
-</div>
-
-</aside>
-
-<aside id="aside-right">
-</aside>
-
-<footer id="footer">
-  <div id="footMatter">
-    <span id="previousPageLink">
-
-    </span>
-    <span id="currentPageNumber">
-    </span>
-    <span id="nextPageLink">
-
-    </span>
-  </div>
-</footer>
-
-<article id="mainContent">
-<!-- InstanceBeginEditable name="Main" -->
-<h1>Design Pattern</h1>
-<!--
-Identify one design pattern that was used in your capstone project and describe exactly where in the code it is located. Highlight the design pattern in yellow. Explain why you used the pattern and didn’t just code directly
--->
-
-<h2>Design Patterns in the Compilers Course</h2>
-<p>The components of the compiler&#8212;the scanner, parser, symbol table, and semantic analyzer&#8212;were each by way of a specific pattern that students were asked to follow. In some cases, students were allowed to deviate from the patterns. As a result, some students may have chosen and/or used different formal design patterns for portions of the compiler. If so, they appear below.</p>
-<h2>Specific Design Patterns</h2>
-<br><br>
-BELOW IS AN EXAMPLE TAKEN FROM A PREVIOUS PROJECT. REPLACE THIS COMMENT AND THEIR WRITEUP WITH YOUR OWN (FOR EXAMPLE, SOME STUDENTS IN CLASS FOLLOWED WHAT WAS ESSENTIALLY THE PRODUCER-CONSUMER PATTERN FOR THE SCANNER-PARSER INTERFACE).
-<BR><BR>
-<p>
-Our team did implement a couple of design patterns. 
-The compiler interface was created to allow the program to swap out target virtual machines, having to rewrite minimal code in the program. 
-This is the Strategy Pattern and also follows a design principle, <i>when possible program to an interface rather than a concrete class</i>. 
-</p>
-
-<pre class="prettyprint" ><code class="language-java">
-public interface Compiler {
-	
-	void openFile();
-	void readInt(String dst);
-	void readFloat(String dst);
-	
-	<span class="nocode">...</span>
-	
-}
-</code></pre>
-
-<p>
-The Table class follows the Singleton Pattern. 
-The constructor is private and the root table can only be created once. 
-If it has already been created, then the current root is returned by a call to instantiate the class. 
-Tables created at deeper nesting levels have one reference pointing to their parent table. 
-This creates a linked list structure for the symbol table that is also a singleton, as only one list can exist during runtime.
-</p>
-
-<pre class="prettyprint" ><code class="language-java">
-public class Table {
-
-	private Table(Table parent) {
-		this.parent = parent;
-	}
-	
-	public static Table rootInstance() {
-		return root;
-	}
-	
-	<span class="nocode">...</span>
-	
-}
-</code></pre>
-<!-- InstanceEndEditable -->
-
-</article>
-</div>
-</body>
-<!-- InstanceEnd --></html>
+<CODE>    /**</CODE>
+<CODE>     * Unreads a character</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param c</CODE>
+<CODE>     */</CODE>
+<CODE>    public void ungetChar(char c) {</CODE>
+<CODE>        try {</CODE>
+<CODE>            if (c == '\n') {</CODE>
+<CODE>                col = lastlinescolumns;</CODE>
+<CODE>                linenumber--;</CODE>
+<CODE>                .</CODE>
+<CODE>                .</CODE>
+<CODE>                .</CODE></PRE><P>
+	<BR><BR>
+	</P>
+	<P>The SymbolTableHandler and SemanticAnalyzer classes both follow a
+	module design pattern. With the SymbolTableHandler having public
+	initializer functions like startEntry() or startParameter() and
+	finalizer functions like finishEntry() and finishParameter(). Along
+	with having characteristics of a module design the SemanticAnalyzer
+	also follows some of the behavior of a servant design pattern.
+	SemanticRecord classes are passed in when handling arithmetic
+	operations. Being passed off onto the SemanticAnalyzer which then
+	does the work for the Parser. In our program the behavior of these
+	patterns are used but more interfaces could be added to allow for
+	less technical debt and a more robust interaction.</P>
+	<PRE><CODE>    /**</CODE>
+<CODE>     * Generate an arithmetic operation given two operands</CODE>
+<CODE>     *</CODE>
+<CODE>     * @param left The left operand</CODE>
+<CODE>     * @param opp The operator</CODE>
+<CODE>     * @param right The right operand</CODE>
+<CODE>     * @return Whether floating point arithmetic was used</CODE>
+<CODE>     */</CODE>
+<CODE>    public boolean genArithOperator_S(SemanticRecord left, Operator opp,</CODE>
+<CODE>            SemanticRecord right) {</CODE>
+<CODE>        if (handleArithCasts(left, opp, right)) {</CODE>
+<CODE>            w.writeLine(opp.code + &quot;F&quot;);</CODE>
+<CODE>        .</CODE>
+<CODE>        .</CODE>
+<CODE>        .</CODE>
+<CODE>}</CODE><!-- InstanceEndEditable --></PRE>
+</DIV>
+<P><!-- InstanceEnd --></P>
+</BODY>
+</HTML>
